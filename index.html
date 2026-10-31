@@ -2866,8 +2866,14 @@ function thumb(i){const M=MAPS[i],c=document.createElement("canvas");c.width=120
  for(const[px,py,w,t,sd]of LAY[M.l]){x.fillStyle=sd?M.ps[0]:M.ps[1];x.fillRect(60+px,52-py*.8,w,Math.max(2,t*.6))}
  return c.toDataURL()}
 function openStage(){
- if(!sbuilt){sbuilt=1;$ ("sgrid").innerHTML=MAPS.map((m,i)=>`<div class="mc" id="m${i}" data-map-name="${m.n.toLocaleLowerCase()}" data-map-type="${HALLOWEEN_MAPS.includes(i)?"halloween":"normal"}"><img src="${thumb(i)}" alt=""><span>${m.n}</span></div>`).join("")+`<div class="mc" id="m${MAPS.length}" data-map-name="aleatorio" data-map-type="normal"><div class="rnd">?</div><span>ALEATORIO</span></div>`;
-  $("mapSearch").addEventListener("input",filterMaps);$("mapFilter").addEventListener("change",filterMaps);}
+ const grid=$("sgrid");
+ if(!sbuilt||!grid.children.length){
+  grid.innerHTML="";
+  try{grid.innerHTML=MAPS.map((m,i)=>{let image="";try{image=thumb(i)}catch(err){console.warn("GDA: miniatura de mapa no disponible",i,err)}return `<div class="mc" id="m${i}" data-map-name="${String(m.n||("Mapa "+(i+1))).toLocaleLowerCase()}" data-map-type="${HALLOWEEN_MAPS.includes(i)?"halloween":"normal"}"><img src="${image||BLANK}" alt=""><span>${m.n||("Mapa "+(i+1))}</span></div>`}).join("")+`<div class="mc" id="m${MAPS.length}" data-map-name="aleatorio" data-map-type="normal"><div class="rnd">?</div><span>ALEATORIO</span></div>`;
+   sbuilt=grid.children.length>0;
+  }catch(err){console.error("GDA: error al construir selector de mapas",err);sbuilt=0;grid.innerHTML=`<div style="padding:20px;color:white">No se pudieron cargar las tarjetas. Pulsa VOLVER y vuelve a abrir escenarios.</div>`}
+  const search=$("mapSearch"),filter=$("mapFilter");if(search&&!search.dataset.wired){search.dataset.wired="1";search.addEventListener("input",filterMaps)}if(filter&&!filter.dataset.wired){filter.dataset.wired="1";filter.addEventListener("change",filterMaps)}
+ }
  $("stT").textContent="ELIGE EL ESCENARIO · "+MAPS.length+" MAPAS";filterMaps();markS(false)}
 function filterMaps(){const q=($("mapSearch").value||"").trim().toLocaleLowerCase(),type=$("mapFilter").value;let visible=0;
  document.querySelectorAll("#sgrid .mc").forEach(e=>{const show=e.dataset.mapName.includes(q)&&(type==="all"||e.dataset.mapType===type);e.style.display=show?"":"none";if(show)visible++});
