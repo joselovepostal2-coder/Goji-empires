@@ -1765,6 +1765,11 @@ const STORY_CHAPTERS=[
  ,{title:"45 · BATALLA DE TODAS LAS ERAS",era:"CAPÍTULO ESPECIAL · MULTIVERSO",hero:"GODZILLA",enemy:"DESTOROYAH",map:"NEXO DE ERAS: ARENA IMPERIAL",layout:"STORY45",desc:"Un combate final reúne homenajes a las distintas etapas cinematográficas."}
  ,{title:"46 · ALAS DE ECLIPSE",era:"KAIJU UNIVERSE · ECLIPSIS",hero:"GODZILLA",enemy:"MOTHMAN ECLIPSIS",map:"TOKYO: ZONA DEL POLVO ROJO",layout:"STORY44",desc:"Una criatura alada de ojos rojos aparece durante un eclipse y acecha a Godzilla desde el cielo."}
  ,{title:"47 · HUESOS DEL REY",era:"CAPÍTULO ESPECIAL · ESQUELETO",hero:"BURNING GODZILLA",enemy:"GODZILLA ESQUELETO",map:"NEXO DE ERAS: ARENA IMPERIAL",layout:"STORY45",desc:"Tras el colapso nuclear, un esqueleto colosal se levanta para un último duelo."}
+ ,{title:"48 · EL VUELO DE LOS DORATS",era:"CAPÍTULOS ESPECIALES · SHOWA",hero:"GODZILLA",enemy:"DORATS",map:"ISLA DE DORATS: VUELO DE LOS DORATS",layout:"STORY48",desc:"Tres pequeñas criaturas aladas anuncian una nueva amenaza en una isla remota."}
+ ,{title:"49 · EL MISTERIO DE GABARA",era:"CAPÍTULOS ESPECIALES · SHOWA",hero:"GODZILLA",enemy:"GABARA",map:"ISLA DE LOS MONSTRUOS: PANTANO DE GABARA",layout:"STORY49",desc:"Una tormenta eléctrica cubre el pantano mientras una criatura misteriosa desafía a Godzilla."}
+ ,{title:"50 · EL ABISMO DE GEZORA",era:"CAPÍTULOS ESPECIALES · SHOWA",hero:"GODZILLA",enemy:"GEZORA",map:"FOSA OCEÁNICA: RUINAS DE GEZORA",layout:"STORY50",desc:"En unas ruinas sumergidas, Godzilla se enfrenta a un monstruo de las profundidades."}
+ ,{title:"51 · PINZAS DE GANIMES",era:"CAPÍTULOS ESPECIALES · SHOWA",hero:"GODZILLA",enemy:"GANIMES",map:"COSTA DE CRUSTÁCEOS: ARENA DE GANIMES",layout:"STORY51",desc:"Una costa rocosa se convierte en escenario de un choque contra un kaiju acorazado."}
+ ,{title:"52 · CAZADOR DE LA TIERRA HUECA",era:"CAPÍTULOS ESPECIALES · MONSTERVERSE",hero:"GODZILLA",enemy:"SKULLCRAWLER",map:"TIERRA HUECA: CAVERNA SKULLCRAWLER",layout:"STORY52",desc:"Un depredador de la Tierra Hueca acecha entre cavernas y plataformas naturales."}
 
 ];
 const STORY_LAYOUTS={
@@ -1871,7 +1876,7 @@ function startSmash(idx,p2,round,sti){
  $("shK").textContent=mode===2?`P1: ${hn("p1")} · ${hn("p1b")}   |   P2: ${hn("p2")}`:`${hn("p1")} · ${hn("p1b")}  (ligero / pesado / ultimate)`+(OPT.follow?" · mover: cursor":"");
  $("shF").textContent="FIGHT!";retrig();show("play")}
 
-window.gdaGetOnlineMaps=function(){return MAPS.map(m=>m.n)};
+window.gdaGetOnlineMaps=function(){return [...new Set(MAPS.filter(m=>!m.custom).map(m=>m.n))]};
 window.gdaStartOnlineBattle=function(hostKaiju,guestKaiju,mapCode){
  const p1=ROSTER.findIndex(r=>r.n===String(hostKaiju||"").toUpperCase());
  const p2=ROSTER.findIndex(r=>r.n===String(guestKaiju||"").toUpperCase());
@@ -2995,6 +3000,12 @@ show("menu");
 #g68-evo-launch,#g68-online-launch{position:fixed;z-index:9998;right:12px;border:1px solid #5ee7ff;border-radius:12px;color:#fff;padding:10px 13px;font:800 12px Orbitron,system-ui;cursor:pointer;box-shadow:0 0 18px #29c9ff55}
 #g68-evo-launch{top:148px;background:linear-gradient(135deg,#39204e,#70234d)}
 #g68-online-launch{top:196px;background:linear-gradient(135deg,#123f36,#12627b)}
+#g68-dlc-launch{position:fixed;z-index:9998;top:244px;right:12px;border:1px solid #d6a8ff;border-radius:12px;background:linear-gradient(135deg,#35204e,#6c347e);color:#fff;padding:10px 13px;font:800 12px Orbitron,system-ui;cursor:pointer;box-shadow:0 0 18px #b66bff55}
+body.gda-in-combat #g68-dlc-launch{display:none!important}
+#g68-dlc-overlay{position:fixed;z-index:100001;inset:0;background:#050916f7;color:#eaf3ff;display:none;overflow:auto;padding:20px;font:600 16px Rajdhani,system-ui}
+#g68-dlc-overlay .g68-card{max-width:1050px;margin:12px auto}
+.g68-dlc-state{display:inline-block;padding:4px 9px;border:1px solid #c39be7;border-radius:99px;color:#e4c9ff;font-size:11px;font-weight:800;letter-spacing:1px}
+
 /* Mantener limpia la pantalla de combate: accesos extra solo fuera de la pelea. */
 body.gda-in-combat #gda068-launch,body.gda-in-combat #g68-evo-launch,body.gda-in-combat #g68-online-launch{display:none!important}
 #g68-evo-overlay,#g68-online-overlay{position:fixed;z-index:100001;inset:0;background:#050916f5;color:#eaf3ff;display:none;overflow:auto;padding:20px;font:600 16px Rajdhani,system-ui}
@@ -3004,6 +3015,7 @@ body.gda-in-combat #gda068-launch,body.gda-in-combat #g68-evo-launch,body.gda-in
 <button id="gda068-launch" type="button">GDA 0.68 · PROGRESO</button>
 <button id="g68-evo-launch" type="button">🧬 TIENDA DE EVOLUCIONES</button>
 <button id="g68-online-launch" type="button">🌐 PARTIDAS ONLINE</button>
+<button id="g68-dlc-launch" type="button">📦 TIENDA DLC</button>
 <div id="gda068-overlay" role="dialog" aria-modal="true" aria-label="Centro de progreso GDA 0.68">
  <div id="gda068-wrap">
   <div class="g68-row"><div><div class="g68-tag">GOJI EMPIRES · PREPARACIÓN 0.68</div><h1 style="font:900 clamp(24px,4vw,42px) Orbitron;margin:12px 0 4px">CENTRO DE KAIJUS</h1><p class="g68-muted" style="margin-top:0">Personajes, progreso y tienda. Tu partida original permanece intacta.</p></div><button class="g68-btn" id="gda068-close">✕ Cerrar</button></div>
@@ -3030,15 +3042,31 @@ body.gda-in-combat #gda068-launch,body.gda-in-combat #g68-evo-launch,body.gda-in
   <div class="g68-row"><div><span class="g68-tag" id="g68-lobby-role">ANFITRIÓN</span><h2 style="margin:8px 0">Sala de combate</h2><p class="g68-muted">Código de sala: <strong id="g68-lobby-code" style="font:900 24px monospace;color:#5ee7ff;letter-spacing:3px"></strong></p></div><button class="g68-btn" id="g68-lobby-back">← Salir del lobby</button></div>
   <div class="g68-grid">
    <article class="g68-card"><h3>1. Elige tu kaiju</h3><label for="g68-kaiju-select" class="g68-muted">Tu personaje</label><select id="g68-kaiju-select" style="display:block;width:100%;margin-top:8px;background:#091329;color:#fff;border:1px solid #47729b;border-radius:8px;padding:12px;font:700 16px Rajdhani"><option value="GODZILLA">Godzilla</option><option value="KING GHIDORAH">King Ghidorah</option><option value="MECHAGODZILLA MK-1">Mechagodzilla MK-1</option><option value="MOTHRA">Mothra</option><option value="ANGUIRUS">Anguirus</option></select><p id="g68-kaiju-status" class="g68-muted">Kaiju seleccionado: Godzilla</p></article>
-   <article class="g68-card"><h3>2. Elige el mapa</h3><label for="g68-map-select" class="g68-muted">Escenario para el combate</label><select id="g68-map-select" style="display:block;width:100%;margin-top:8px;background:#091329;color:#fff;border:1px solid #47729b;border-radius:8px;padding:12px;font:700 16px Rajdhani"><option value="">Cargando mapas disponibles…</option></select><p id="g68-map-status" class="g68-muted">Mapa seleccionado: Tokio de noche</p></article>
+   <article class="g68-card"><h3>2. Elige el mapa</h3><label for="g68-map-select" class="g68-muted">Escenario para el combate</label><select id="g68-map-select" style="display:block;width:100%;margin-top:8px;background:#091329;color:#fff;border:1px solid #47729b;border-radius:8px;padding:12px;font:700 16px Rajdhani"><option value="">Cargando mapas disponibles…</option></select><p id="g68-map-status" class="g68-muted">Esperando selección del anfitrión…</p></article>
   </div>
   <div class="g68-card" style="background:#071126"><h3>Jugadores</h3><div class="g68-grid"><div><span class="g68-tag">JUGADOR 1 · TÚ</span><h3 id="g68-player1-kaiju">Godzilla</h3><p class="g68-muted">Estado: <strong style="color:#65f0a5">En la sala</strong></p></div><div><span class="g68-tag">JUGADOR 2 · RIVAL</span><h3 id="g68-player2-kaiju">Esperando jugador…</h3><p id="g68-player2-status" class="g68-muted">Comparte el código con tu amigo.</p></div></div></div>
   <p id="g68-lobby-note" class="g68-muted" aria-live="polite">Esperando a que entre el otro jugador…</p><button class="g68-btn" id="g68-ready-btn">✓ Estoy listo</button> <button class="g68-btn" id="g68-copycode-btn">Copiar código</button>
   <p class="g68-muted" style="font-size:13px">Cuando ambos jugadores pulsen Listo, el anfitrión jugará como P1 y el invitado como P2. Los controles se transmitirán por el servidor online.</p>
  </section>
 </div>
+<div id="g68-dlc-overlay" role="dialog" aria-modal="true" aria-label="Tienda de DLC">
+ <div class="g68-shophead">
+  <div><span class="g68-tag">GOJI EMPIRES · EXPANSIONES</span><h1 style="font:900 clamp(24px,5vw,42px) Orbitron;margin:10px 0">TIENDA DE DLC</h1><p class="g68-muted">Expansiones opcionales para ampliar el universo de GDA.</p></div>
+  <button class="g68-btn" id="g68-dlc-close">✕ Cerrar tienda</button>
+ </div>
+ <section class="g68-card">
+  <h2>Catálogo de expansiones</h2>
+  <p class="g68-muted">Esta tienda es un catálogo informativo: todavía no hay DLC de pago ni cobros activados. Los niveles extra actuales del modo Historia forman parte del juego base y no se venden por separado.</p>
+  <div class="g68-grid">
+   <article class="g68-card"><span class="g68-dlc-state">EN DESARROLLO</span><h3>📖 Historias de otras eras</h3><p class="g68-muted">Una futura expansión opcional con campañas secundarias, nuevos desafíos y encuentros especiales.</p><button class="g68-btn" disabled>Próximamente</button></article>
+   <article class="g68-card"><span class="g68-dlc-state">PLANIFICADO</span><h3>🦖 Archivo de titanes</h3><p class="g68-muted">Un paquete futuro centrado en kaijus adicionales, apariencias alternativas y material de colección.</p><button class="g68-btn" disabled>Próximamente</button></article>
+   <article class="g68-card"><span class="g68-dlc-state">PLANIFICADO</span><h3>🌋 Mundos de combate</h3><p class="g68-muted">Una expansión opcional con nuevos escenarios, variaciones ambientales y retos para el combate.</p><button class="g68-btn" disabled>Próximamente</button></article>
+  </div>
+  <p class="g68-muted">Filosofía de Goji Empires: el juego base seguirá completo y los DLC serán extras opcionales, nunca ventajas de pago.</p>
+ </section>
+</div>
 <script>
-(()=>{
+(()=> {
  const $=id=>document.getElementById(id); const KEY='gda068_progress_v1';
  const base={fights:0,unlocked:['GODZILLA','ANGUIRUS'],bought:[],stamina:200,ult:0,room:0};
  let state; try{state={...base,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){state={...base}}
@@ -3068,6 +3096,8 @@ body.gda-in-combat #gda068-launch,body.gda-in-combat #g68-evo-launch,body.gda-in
  $('g68-staminatxt').textContent=`${Math.round(state.stamina)} / 200`; $('g68-staminafill').style.width=(state.stamina/200*100)+'%';$('g68-ulttxt').textContent=`${Math.round(state.ult)} / 400`;$('g68-ultfill').style.width=(state.ult/400*100)+'%'; }
  $('gda068-launch').addEventListener('click',()=>{$('gda068-overlay').style.display='block';render()});$('gda068-close').addEventListener('click',()=>$('gda068-overlay').style.display='none');
  $('g68-evo-launch').addEventListener('click',()=>{$('g68-evo-overlay').style.display='block';render()});$('g68-evo-close').addEventListener('click',()=>$('g68-evo-overlay').style.display='none');
+ $('g68-dlc-launch').addEventListener('click',()=>{$('g68-dlc-overlay').style.display='block'});
+ $('g68-dlc-close').addEventListener('click',()=>$('g68-dlc-overlay').style.display='none');
  $('g68-online-launch').addEventListener('click',()=>{$('g68-online-overlay').style.display='block'});$('g68-online-close').addEventListener('click',()=>$('g68-online-overlay').style.display='none');
  $('g68-record').addEventListener('click',()=>{state.fights++;let msg='Combate registrado.';if(state.fights%5===0){let pool=chars.map(x=>x[0]).filter(n=>!state.unlocked.includes(n));if(pool.length){let pick=pool[Math.floor(Math.random()*pool.length)];state.unlocked.push(pick);msg=`¡Desbloqueaste a ${pick} al completar ${state.fights} combates!`}else msg='¡Completaste cinco combates! Ya tienes todos los personajes del prototipo.'} $('g68-reward').textContent=msg;save();render()});
  $('g68-shop').addEventListener('click',e=>{const b=e.target.closest('[data-buy]');if(!b)return;const n=b.dataset.buy,entry=shop.find(x=>x[0]===n);if(!entry||state.unlocked.includes(n))return;if(!spend(entry[1])){$('g68-shopmsg').textContent='No tienes suficientes Tokens Titán. No se realizó ningún cobro.';render();return}state.unlocked.push(n);state.bought=Array.isArray(state.bought)?state.bought:[];if(!state.bought.includes(n))state.bought.push(n);save();syncPurchasedKaijus();$('g68-shopmsg').textContent=`¡${n} desbloqueado y añadido al plantel de GDA!`;render();if(typeof gdaLockSelectionCards==='function')gdaLockSelectionCards();if(typeof filterKaijuCards==='function')filterKaijuCards()});
@@ -3076,7 +3106,17 @@ body.gda-in-combat #gda068-launch,body.gda-in-combat #g68-evo-launch,body.gda-in
  let lobbyCode='', lobbyReady=false, lobbyRole='host';
  const kaijuNames={'GODZILLA':'Godzilla','ANGUIRUS':'Anguirus','BURNING GODZILLA':'Burning Godzilla','SUPER MECHAGODZILLA':'Super Mechagodzilla','MECHA-KING GHIDORAH':'Mecha-King Ghidorah'};
  const mapNames={};
- function openLobby(role,code){lobbyRole=role;lobbyCode=code;window.gdaLobbyCode=code;$('g68-online-home').style.display='none';$('g68-online-lobby').style.display='block';$('g68-lobby-code').textContent=code;$('g68-lobby-role').textContent=role==='host'?'ANFITRIÓN':'INVITADO';$('g68-lobby-note').textContent=role==='host'?'Sala preparada. Comparte el código y espera al segundo jugador.':'Código aceptado en la vista previa. La conexión real aún no está disponible.';$('g68-player2-status').textContent=role==='host'?'Comparte el código con tu amigo.':'La sala no se ha conectado a un anfitrión real.';$('g68-player2-kaiju').textContent='Esperando jugador…';lobbyReady=false;$('g68-ready-btn').textContent='✓ Estoy listo';}
+ function openLobby(role,code){
+  lobbyRole=role;lobbyCode=code;window.gdaLobbyCode=code;window.gdaRoomMap=null;
+  $('g68-online-home').style.display='none';$('g68-online-lobby').style.display='block';
+  $('g68-lobby-code').textContent=code;$('g68-lobby-role').textContent=role==='host'?'ANFITRIÓN':'INVITADO';
+  $('g68-lobby-note').textContent=role==='host'?'Elige un mapa para esta sala y comparte el código.':'Esperando a que el anfitrión elija el mapa…';
+  $('g68-player2-status').textContent=role==='host'?'Esperando al segundo jugador…':'Esperando al anfitrión…';
+  $('g68-player2-kaiju').textContent='Esperando jugador…';
+  onlineMapSelect.disabled=role!=='host';onlineMapSelect.value='';
+  $('g68-map-status').textContent=role==='host'?'Selecciona un mapa obligatorio.':'Esperando la selección del anfitrión…';
+  lobbyReady=false;$('g68-ready-btn').textContent='✓ Estoy listo';
+ }
  $('g68-room').addEventListener('click',()=>{if(!gdaOnlineSocket||!gdaOnlineSocket.connected){$('g68-onlinemsg').textContent='Conectando al servidor… intenta de nuevo en unos segundos.';return}gdaOnlineSocket.emit('create-room',(result)=>{if(!result||!result.ok){$('g68-onlinemsg').textContent=result?.error||'No se pudo crear la sala.';return}lobbyCode=result.code;window.gdaLobbyCode=lobbyCode;$('g68-joincode').value=lobbyCode;state.room++;save();openLobby('host',lobbyCode);$('g68-lobby-note').textContent='Sala online creada. Comparte el código con tu amigo.';$('g68-player2-status').textContent='Esperando al segundo jugador…';$('g68-onlinemsg').textContent='Sala real creada: '+lobbyCode})});
  $('g68-joinroom').addEventListener('click',()=>{const code=$('g68-joincode').value.trim().toUpperCase();if(code.length<4){$('g68-onlinemsg').textContent='Escribe un código de sala válido.';return}if(!gdaOnlineSocket||!gdaOnlineSocket.connected){$('g68-onlinemsg').textContent='Conectando al servidor… intenta de nuevo en unos segundos.';return}gdaOnlineSocket.emit('join-room',code,(result)=>{if(!result||!result.ok){$('g68-onlinemsg').textContent=result?.error||'No se pudo entrar a la sala.';return}lobbyCode=result.code;window.gdaLobbyCode=lobbyCode;$('g68-joincode').value=lobbyCode;openLobby('guest',lobbyCode);$('g68-lobby-note').textContent='Conectado a la sala online.';$('g68-onlinemsg').textContent='Te uniste a la sala '+lobbyCode})});
  $('g68-kaiju-select').addEventListener('change',()=>{$('g68-kaiju-status').textContent='Kaiju seleccionado: '+(kaijuNames[$('g68-kaiju-select').value]||$('g68-kaiju-select').value);$('g68-player1-kaiju').textContent=kaijuNames[$('g68-kaiju-select').value]||$('g68-kaiju-select').value});
@@ -3084,11 +3124,27 @@ body.gda-in-combat #gda068-launch,body.gda-in-combat #g68-evo-launch,body.gda-in
  const availableOnlineMaps=window.gdaGetOnlineMaps?window.gdaGetOnlineMaps():[];
  if(onlineMapSelect&&availableOnlineMaps.length){
   onlineMapSelect.replaceChildren();
+  const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='— El anfitrión debe elegir un mapa —';placeholder.disabled=true;placeholder.selected=true;
+  onlineMapSelect.appendChild(placeholder);
   availableOnlineMaps.forEach(name=>{const option=document.createElement('option');option.value=name;option.textContent=name;onlineMapSelect.appendChild(option)});
-  $('g68-map-status').textContent='Mapa seleccionado: '+availableOnlineMaps[0];
  }
- onlineMapSelect.addEventListener('change',()=>{$('g68-map-status').textContent='Mapa seleccionado: '+(onlineMapSelect.selectedOptions[0]?.textContent||onlineMapSelect.value)});
- $('g68-ready-btn').addEventListener('click',()=>{if(!gdaOnlineSocket||!gdaOnlineSocket.connected){$('g68-lobby-note').textContent='Conexión perdida. Espera a reconectarte antes de marcar Listo.';return}const selected=$('g68-kaiju-select').value;if(!selected){$('g68-lobby-note').textContent='Selecciona un kaiju primero.';return}lobbyReady=!lobbyReady;$('g68-ready-btn').textContent=lobbyReady?'✓ Listo':'✓ Estoy listo';gdaOnlineSocket.emit('select-kaiju',{kaiju:selected,map:$('g68-map-select').value});gdaOnlineSocket.emit('player-ready',lobbyReady);$('g68-lobby-note').textContent=lobbyReady?'¡Listo! Esperando a que el otro jugador también esté listo…':'Has cancelado tu estado de listo.'});
+ onlineMapSelect.required=true;
+ onlineMapSelect.addEventListener('change',()=>{
+  if(lobbyRole!=='host'||!onlineMapSelect.value)return;
+  if(!gdaOnlineSocket?.connected){$('g68-lobby-note').textContent='No hay conexión con el servidor.';return}
+  $('g68-map-status').textContent='Guardando mapa elegido…';
+  gdaOnlineSocket.emit('set-room-map',onlineMapSelect.value);
+ });
+ $('g68-ready-btn').addEventListener('click',()=>{
+  if(!gdaOnlineSocket||!gdaOnlineSocket.connected){$('g68-lobby-note').textContent='Conexión perdida. Espera a reconectarte antes de marcar Listo.';return}
+  const selected=$('g68-kaiju-select').value;
+  if(!selected){$('g68-lobby-note').textContent='Selecciona un kaiju primero.';return}
+  if(!window.gdaRoomMap){$('g68-lobby-note').textContent=lobbyRole==='host'?'Debes elegir un mapa antes de marcar Listo.':'El anfitrión todavía debe elegir el mapa.';return}
+  lobbyReady=!lobbyReady;$('g68-ready-btn').textContent=lobbyReady?'✓ Listo':'✓ Estoy listo';
+  gdaOnlineSocket.emit('select-kaiju',selected);
+  gdaOnlineSocket.emit('player-ready',lobbyReady);
+  $('g68-lobby-note').textContent=lobbyReady?'¡Listo! Esperando a que el otro jugador también esté listo…':'Has cancelado tu estado de listo.';
+ });
  $('g68-lobby-back').addEventListener('click',()=>{$('g68-online-lobby').style.display='none';$('g68-online-home').style.display='block'});
  $('g68-copycode-btn').addEventListener('click',()=>{const msg=$('g68-lobby-note');if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(lobbyCode).then(()=>msg.textContent='Código copiado: '+lobbyCode).catch(()=>msg.textContent='Tu código es '+lobbyCode+' (cópialo manualmente).')}else{msg.textContent='Tu código es '+lobbyCode+' (cópialo manualmente).'}});
  setInterval(()=>{if(state.ult<400){state.ult=Math.min(400,state.ult+1);save();if($('gda068-overlay').style.display==='block')render()}resources()},1000);
