@@ -3196,6 +3196,90 @@ show("menu");
   setTimeout(()=>{intro.style.display='none';},5850);
  });
 })();
+
+/* ---------- Árbol genealógico de evolución y combinaciones ---------- */
+(function initGeneticTree(){
+ const TREE_KEY="gda_genealogy_tree_v1";
+ const readTree=()=>{try{return JSON.parse(localStorage.getItem(TREE_KEY)||'["root"]')}catch(e){return ["root"]}};
+ let unlocked=new Set(readTree());
+ const branches=[
+  {id:"root",name:"GENOMA TITÁN",parent:null,cost:0,kind:"Núcleo",desc:"Abre las primeras líneas de evolución.",children:["ancient","atomic","bio"]},
+  {id:"ancient",name:"LÍNEA ANCESTRAL",parent:"root",cost:0,kind:"Evolución",desc:"Explora kaijus clásicos y criaturas prehistóricas.",children:["spines","guardian","burrow"]},
+  {id:"atomic",name:"LÍNEA ATÓMICA",parent:"root",cost:0,kind:"Evolución",desc:"Mejora el potencial de energía y aliento.",children:["burning","crystal","singularity"]},
+  {id:"bio",name:"LÍNEA BIOLÓGICA",parent:"root",cost:0,kind:"Evolución",desc:"Desbloquea rutas de mutación y regeneración.",children:["flora","insect","abyss"]},
+  {id:"spines",name:"ARMADURA ESPINOSA",parent:"ancient",cost:100,kind:"Mejora",desc:"Revela recetas de Anguirus y Baragon.",children:["roll","titanback"]},
+  {id:"guardian",name:"GUARDIÁN ALFA",parent:"ancient",cost:120,kind:"Mejora",desc:"Revela combinaciones defensivas.",children:["guardianfusion"]},
+  {id:"burrow",name:"ADAPTACIÓN SUBTERRÁNEA",parent:"ancient",cost:100,kind:"Mejora",desc:"Abre la línea de criaturas excavadoras.",children:["deepcore"]},
+  {id:"burning",name:"NÚCLEO ARDIENTE",parent:"atomic",cost:150,kind:"Mejora",desc:"Abre variantes de calor extremo.",children:["meltdown"]},
+  {id:"crystal",name:"MATRIZ CRISTALINA",parent:"atomic",cost:150,kind:"Mejora",desc:"Revela mezclas de energía y cristales.",children:["spacefusion"]},
+  {id:"singularity",name:"NÚCLEO SINGULAR",parent:"atomic",cost:200,kind:"Mejora",desc:"Abre una rama avanzada de energía.",children:["ultimate"]},
+  {id:"flora",name:"REGENERACIÓN FLORAL",parent:"bio",cost:100,kind:"Mejora",desc:"Revela combinaciones vegetales.",children:["biollantefusion"]},
+  {id:"insect",name:"MUTACIÓN INSECTOIDE",parent:"bio",cost:100,kind:"Mejora",desc:"Abre mezclas de velocidad y vuelo.",children:["swarm"]},
+  {id:"abyss",name:"ADAPTACIÓN ABISAL",parent:"bio",cost:120,kind:"Mejora",desc:"Revela evoluciones marinas.",children:["leviathan"]},
+  {id:"roll",name:"GIRO SÍSMICO",parent:"spines",cost:180,kind:"Habilidad",desc:"La línea de rodadura queda disponible para futuras combinaciones.",children:[]},
+  {id:"titanback",name:"CAPARAZÓN TITÁNICO",parent:"spines",cost:180,kind:"Habilidad",desc:"Revela una mejora defensiva adicional.",children:[]},
+  {id:"guardianfusion",name:"FUSIÓN GUARDIANA",parent:"guardian",cost:220,kind:"Combinación",desc:"Receta: Godzilla + King Caesar.",children:[]},
+  {id:"deepcore",name:"NÚCLEO PROFUNDO",parent:"burrow",cost:180,kind:"Combinación",desc:"Receta: Baragon + Megalon.",children:[]},
+  {id:"meltdown",name:"REACTOR DE MELTDOWN",parent:"burning",cost:250,kind:"Combinación",desc:"Receta: Burning Godzilla + Godzilla.",children:[]},
+  {id:"spacefusion",name:"FUSIÓN CÓSMICA",parent:"crystal",cost:250,kind:"Combinación",desc:"Receta: SpaceGodzilla + King Ghidorah.",children:[]},
+  {id:"ultimate",name:"GENOMA DEFINITIVO",parent:"singularity",cost:350,kind:"Élite",desc:"Revela la última rama de evolución.",children:["apex"]},
+  {id:"biollantefusion",name:"HÍBRIDO FLORAL",parent:"flora",cost:200,kind:"Combinación",desc:"Receta: Biollante + Hedorah.",children:[]},
+  {id:"swarm",name:"ENJAMBRE TITÁNICO",parent:"insect",cost:200,kind:"Combinación",desc:"Receta: Megaguirus + Kamacuras.",children:[]},
+  {id:"leviathan",name:"SEÑOR DEL ABISMO",parent:"abyss",cost:220,kind:"Combinación",desc:"Receta: Manda + Titanosaurus.",children:[]},
+  {id:"apex",name:"ÁRBOL APEX",parent:"ultimate",cost:500,kind:"Élite",desc:"La ruta final queda descubierta: mezcla avanzada de tres linajes.",children:[]}
+ ];
+ const style=document.createElement("style");
+ style.textContent=`
+ #gdaGeneLaunch{position:fixed;right:14px;bottom:86px;z-index:9998;border:1px solid #65e8ff;border-radius:12px;background:linear-gradient(135deg,#12304b,#231644);color:#f3fbff;padding:12px 15px;font:800 12px Orbitron,Arial;box-shadow:0 0 20px #21c7ff44;cursor:pointer}
+ #gdaGenePanel{position:fixed;inset:0;z-index:10000;background:#030612ed;display:none;overflow:auto;padding:18px;color:#edf6ff;font-family:Rajdhani,Arial}
+ #gdaGenePanel.open{display:block} #gdaGenePanel *{box-sizing:border-box}
+ .gdaGeneWrap{max-width:1100px;margin:0 auto;border:1px solid #395b86;border-radius:18px;padding:18px;background:radial-gradient(ellipse at top,#17284b,#080d1c 68%)}
+ .gdaGeneHead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+ .gdaGeneHead h2{font:900 clamp(19px,3vw,28px) Orbitron,Arial;color:#6feaff;margin:0}
+ .gdaGeneBalance{color:#ffdc6b;font-weight:800}.gdaGeneIntro{color:#aabce0}
+ .gdaGeneGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:16px}
+ .gdaGeneNode{border:1px solid #33476d;border-radius:12px;padding:12px;background:#101a31;display:flex;flex-direction:column;gap:8px;min-height:158px}
+ .gdaGeneNode.ready{border-color:#4bd8ff;box-shadow:inset 0 0 20px #26b9ff0b}.gdaGeneNode.done{border-color:#58d69a;background:#102a2a}.gdaGeneNode.hidden{opacity:.62}
+ .gdaGeneNode h3{font:800 13px Orbitron,Arial;margin:0;color:#e5f7ff}.gdaGeneNode p{margin:0;color:#b7c6e3;font-size:14px}
+ .gdaGeneMeta{font-size:11px;color:#8ca8d8;text-transform:uppercase;letter-spacing:.08em}
+ .gdaGeneAction{margin-top:auto;border:1px solid #52cfff;border-radius:8px;padding:9px;background:#12344b;color:white;font-weight:800;cursor:pointer}
+ .gdaGeneAction:disabled{opacity:.45;cursor:not-allowed}.gdaGeneClose{border:1px solid #8d9fc7;background:#141d33;color:white;border-radius:9px;padding:9px 12px;font-weight:800;cursor:pointer}
+ .gdaGeneNote{font-size:13px;color:#8fa7d6;margin-top:12px}
+ @media(max-width:600px){#gdaGenePanel{padding:8px}.gdaGeneWrap{padding:12px}.gdaGeneGrid{grid-template-columns:1fr}}
+ `;
+ document.head.appendChild(style);
+ const launch=document.createElement("button");launch.id="gdaGeneLaunch";launch.type="button";launch.textContent="🧬 ÁRBOL GENEALÓGICO";
+ const panel=document.createElement("section");panel.id="gdaGenePanel";panel.setAttribute("aria-label","Árbol genealógico de mejoras");
+ panel.innerHTML='<div class="gdaGeneWrap"><div class="gdaGeneHead"><h2>🧬 ÁRBOL GENEALÓGICO TITÁN</h2><div><span class="gdaGeneBalance" id="gdaGeneBalance"></span> <button class="gdaGeneClose" id="gdaGeneClose">✕ CERRAR</button></div></div><p class="gdaGeneIntro">Desbloquea una mejora para descubrir nuevas ramas, habilidades y recetas de combinaciones. Tu progreso se guarda en este navegador.</p><div class="gdaGeneGrid" id="gdaGeneGrid"></div><p class="gdaGeneNote">Las recetas son objetivos de combinación; esta pantalla no cambia el sistema Online ni modifica el equilibrio de las partidas.</p></div>';
+ (document.body||document.documentElement).appendChild(launch);(document.body||document.documentElement).appendChild(panel);
+ function draw(){
+  unlocked=new Set(readTree());
+  const grid=panel.querySelector("#gdaGeneGrid");
+  panel.querySelector("#gdaGeneBalance").textContent="TOKENS TITÁN: "+(typeof TITAN_TOKENS!=="undefined"?TITAN_TOKENS:0);
+  grid.innerHTML="";
+  branches.forEach(node=>{
+   const done=unlocked.has(node.id), parentOpen=!node.parent||unlocked.has(node.parent);
+   const card=document.createElement("article");card.className="gdaGeneNode "+(done?"done":parentOpen?"ready":"hidden");
+   const title=document.createElement("h3");title.textContent=(done?"✓ ":"🔒 ")+node.name;
+   const meta=document.createElement("div");meta.className="gdaGeneMeta";meta.textContent=node.kind+" · "+(done?"DESBLOQUEADO":parentOpen?"DISPONIBLE":"RAMA OCULTA");
+   const desc=document.createElement("p");desc.textContent=parentOpen||done?node.desc:"Desbloquea la mejora anterior para revelar esta opción.";
+   const action=document.createElement("button");action.className="gdaGeneAction";action.type="button";
+   if(done){action.textContent=node.children.length?"VER RAMAS DESBLOQUEADAS":"MEJORA ACTIVADA";action.disabled=true}
+   else if(!parentOpen){action.textContent="RAMA BLOQUEADA";action.disabled=true}
+   else{action.textContent="DESBLOQUEAR · "+node.cost+" TOKENS";action.disabled=(node.cost>0&&(typeof TITAN_TOKENS==="undefined"||TITAN_TOKENS<node.cost));action.addEventListener("click",()=>{
+    if(node.cost>0){if(typeof TITAN_TOKENS==="undefined"||TITAN_TOKENS<node.cost)return;TITAN_TOKENS-=node.cost;if(typeof saveTitanTokens==="function")saveTitanTokens()}
+    unlocked.add(node.id);try{localStorage.setItem(TREE_KEY,JSON.stringify([...unlocked]))}catch(e){}
+    draw();
+   })}
+   card.append(title,meta,desc,action);grid.appendChild(card);
+  });
+ }
+ launch.addEventListener("click",()=>{panel.classList.add("open");draw()});
+ panel.querySelector("#gdaGeneClose").addEventListener("click",()=>panel.classList.remove("open"));
+ panel.addEventListener("click",e=>{if(e.target===panel)panel.classList.remove("open")});
+ document.addEventListener("keydown",e=>{if(e.key==="Escape")panel.classList.remove("open")});
+})();
+
 </script>
 
 <!-- GDA 0.68 feature hub: safe additive layer; original game kept intact -->
