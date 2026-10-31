@@ -3015,7 +3015,7 @@ function finishOwnedSkinChoice(useSkin){
  if(useSkin&&skinChoiceChosen!=null)applyHalloweenSkin(skinChoiceChosen,skinChoiceTarget);
  if(skinChoiceAfterFirstPlayer){show("select");openSelect();return}
  const a=pick1<0?skinChoiceTarget:pick1,b=mode===2?skinChoiceTarget:null;
- if(mode===0){startSmash(a,null,0,null)}else{pend={idx:a,p2:b};si2=0;show("stage")}
+ pend={idx:a,p2:b};si2=0;show("stage");
 }
 $("skinChoiceContinue").addEventListener("click",()=>finishOwnedSkinChoice(true));
 $("skinChoiceNone").addEventListener("click",()=>finishOwnedSkinChoice(false));
