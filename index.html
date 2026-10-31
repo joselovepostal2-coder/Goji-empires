@@ -2197,7 +2197,7 @@ function act(f,o,dt){const a=f.act;a.t+=dt;
  if(a.ghidorahKick){
   const target=a.target||o;f.vx=f.face*105;f.vy=12;
   if(!a.hit&&a.t>=.16){a.hit=1;const close=target&&target.dead<=0&&Math.abs(target.x-f.x)<f.hw+target.hw+48&&Math.abs(target.y-f.y)<f.h*.95;
-   if(close){hurt(f,target,65,72,.65,24,f.face);target.stun=Math.max(target.stun,5);target.vx=f.face*30;toastCombat('¡PATADA DE GHIDORAH! 65 DAÑO · ATURDIDO 5 S','#ffe66d');}
+   if(close){hurt(f,target,35,72,.65,24,f.face);target.stun=Math.max(target.stun,1);target.vx=f.face*30;toastCombat('¡PATADA DE GHIDORAH! 35 DAÑO · ATURDIDO 1 S','#ffe66d');}
    else toastCombat('¡PATADA AÉREA! ACÉRCATE AL RIVAL','#ffe66d');
    G.sm.rings.push({x:f.x+f.face*28,y:f.y+f.h*.5,R:44,t:0,c:0xffd84a});G.sm.shake=11;
   }
