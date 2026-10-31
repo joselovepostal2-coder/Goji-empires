@@ -3353,6 +3353,13 @@ body.gda-in-combat #gda068-launch,body.gda-in-combat #g68-evo-launch,body.gda-in
   const chapterIndex=Number(onlineStoryChapterSelect.value);
   if(modeValue==='story'&&!Number.isInteger(chapterIndex)){ $('g68-lobby-note').textContent='Selecciona un capítulo de Historia.';return}
   gdaOnlineSocket.emit('set-room-mode',{mode:modeValue,storyChapterIndex:Number.isInteger(chapterIndex)?chapterIndex:0});
+  if(modeValue==='tower'&&onlineMapSelect){
+   onlineMapSelect.value='TORRE DE ACERO';
+   if(onlineMapSelect.value==='TORRE DE ACERO'){
+    $('g68-map-status').textContent='Mapa automático del modo Torre: TORRE DE ACERO.';
+    gdaOnlineSocket.emit('set-room-map','TORRE DE ACERO');
+   }
+  }
  }
  onlineModeSelect.addEventListener('change',()=>{syncOnlineModeControls(onlineModeSelect.value);sendOnlineRoomMode()});
  onlineStoryChapterSelect.addEventListener('change',sendOnlineRoomMode);
