@@ -3221,5 +3221,18 @@ $('gnetGo').onclick=()=>{if(st==='on'||st==='conn'){if(sock){sock.disconnect()}s
 $('gnetSend').onclick=()=>{const ev=$('gnetEv').value.trim();if(!sock||!ev)return;let pl;const t=$('gnetPl').value.trim();try{pl=t?JSON.parse(t):undefined}catch(e){log('JSON inválido');return}pl===undefined?sock.emit(ev):sock.emit(ev,pl)};
 for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e.stopPropagation();if(t==='keydown'&&e.key==='Escape')close()});
 })();
-</script></body>
+</script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const gdaOnlineSocket = io();
+
+  gdaOnlineSocket.on("connect", () => {
+    console.log("GDA Online conectado al servidor:", gdaOnlineSocket.id);
+  });
+
+  gdaOnlineSocket.on("connect_error", (error) => {
+    console.error("Error de conexión GDA Online:", error.message);
+  });
+</script>
+<body>
 </html>
