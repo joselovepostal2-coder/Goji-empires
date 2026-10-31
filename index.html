@@ -1714,7 +1714,7 @@ function inp(f){
   const fresh=performance.now()-(window.__gdaRemoteInputAt||0)<600;
   return fresh&&window.__gdaRemoteInput?{...window.__gdaRemoteInput}:blank;
  }
- const L=online?(id===2?[CTL.p2]:[CTL.p1,CTL.p1b]):id===2?[CTL.p2]:two?[CTL.p1,CTL.p1b,CTL.p2],
+ const L=online?(id===2?[CTL.p2]:[CTL.p1,CTL.p1b]):id===2?[CTL.p2]:two?[CTL.p1,CTL.p1b]:[CTL.p1,CTL.p1b,CTL.p2],
   d=k=>L.some(p=>K[p[k]])||(id===1&&K["T_"+k]),j=k=>L.some(p=>JP[p[k]])||(id===1&&JP["T_"+k]);
  let dir=(d("right")?1:0)-(d("left")?1:0);
  if(!dir&&id===1&&OPT.follow&&performance.now()-lastM<2500){const hw=Math.tan(cam.fov*Math.PI/360)*CAMZ*cam.aspect,wx=cam.position.x+MX*hw;if(Math.abs(wx-f.x)>4)dir=wx>f.x?1:-1}
