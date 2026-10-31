@@ -1696,22 +1696,30 @@ let SB={l:-44,r:44};
 let MX=0,lastM=-1e9,sawTouch=false,bindT=0;const wt={};
 function inp(f){
  const two=G.sm.two,id=f.id,online=!!window.__gdaOnlineActive&&two,localSlot=Number(window.__gdaOnlineLocalSlot)||1;
+ const onlineCoop=!!window.__gdaOnlineActive&&(window.__gdaOnlineMode==="story"||window.__gdaOnlineMode==="waves");
+ const blank={dir:0,jump:false,down:false,a:false,h:false,u:false,g:false,aHeld:false,gHeld:false};
+ if(onlineCoop&&id===1){
+  const L=localSlot===2?[CTL.p2]:[CTL.p1,CTL.p1b],
+   d=k=>L.some(p=>K[p[k]])||(localSlot===1&&K["T_"+k]),
+   j=k=>L.some(p=>JP[p[k]])||(localSlot===1&&JP["T_"+k]);
+  let dir=(d("right")?1:0)-(d("left")?1:0);
+  if(!dir&&localSlot===1&&OPT.follow&&performance.now()-lastM<2500){const hw=Math.tan(cam.fov*Math.PI/360)*CAMZ*cam.aspect,wx=cam.position.x+MX*hw;if(Math.abs(wx-f.x)>4)dir=wx>f.x?1:-1}
+  const local={dir,jump:j("jump"),down:d("down"),a:j("light"),h:j("heavy"),u:j("ult"),g:j("grab"),aHeld:d("light"),gHeld:d("grab")};
+  const now=performance.now();
+  if(now-(window.__gdaLastOnlineInput||0)>40&&window.gdaOnlineSocket?.connected){window.gdaOnlineSocket.emit("game-state",local);window.__gdaLastOnlineInput=now}
+  const remote=now-(window.__gdaRemoteInputAt||0)<600&&window.__gdaRemoteInput?window.__gdaRemoteInput:blank;
+  return {dir:cl((local.dir||0)+(remote.dir||0),-1,1),jump:!!(local.jump||remote.jump),down:!!(local.down||remote.down),a:!!(local.a||remote.a),h:!!(local.h||remote.h),u:!!(local.u||remote.u),g:!!(local.g||remote.g),aHeld:!!(local.aHeld||remote.aHeld),gHeld:!!(local.gHeld||remote.gHeld)};
+ }
  if(online&&id!==localSlot){
   const fresh=performance.now()-(window.__gdaRemoteInputAt||0)<600;
-  return fresh&&window.__gdaRemoteInput?{...window.__gdaRemoteInput}:{dir:0,jump:false,down:false,a:false,h:false,u:false,g:false,aHeld:false,gHeld:false};
+  return fresh&&window.__gdaRemoteInput?{...window.__gdaRemoteInput}:blank;
  }
- const L=online?(id===2?[CTL.p2]:[CTL.p1,CTL.p1b]):id===2?[CTL.p2]:two?[CTL.p1,CTL.p1b]:[CTL.p1,CTL.p1b,CTL.p2],
- d=k=>L.some(p=>K[p[k]])||(id===1&&K["T_"+k]),j=k=>L.some(p=>JP[p[k]])||(id===1&&JP["T_"+k]);
+ const L=online?(id===2?[CTL.p2]:[CTL.p1,CTL.p1b]):id===2?[CTL.p2]:two?[CTL.p1,CTL.p1b,CTL.p2],
+  d=k=>L.some(p=>K[p[k]])||(id===1&&K["T_"+k]),j=k=>L.some(p=>JP[p[k]])||(id===1&&JP["T_"+k]);
  let dir=(d("right")?1:0)-(d("left")?1:0);
  if(!dir&&id===1&&OPT.follow&&performance.now()-lastM<2500){const hw=Math.tan(cam.fov*Math.PI/360)*CAMZ*cam.aspect,wx=cam.position.x+MX*hw;if(Math.abs(wx-f.x)>4)dir=wx>f.x?1:-1}
  const input={dir,jump:j("jump"),down:d("down"),a:j("light"),h:j("heavy"),u:j("ult"),g:j("grab"),aHeld:d("light"),gHeld:d("grab")};
- if(online&&id===localSlot){
-  const now=performance.now();
-  if(now-(window.__gdaLastOnlineInput||0)>40&&window.gdaOnlineSocket?.connected){
-   window.gdaOnlineSocket.emit("game-state",input);
-   window.__gdaLastOnlineInput=now;
-  }
- }
+ if(online&&id===localSlot){const now=performance.now();if(now-(window.__gdaLastOnlineInput||0)>40&&window.gdaOnlineSocket?.connected){window.gdaOnlineSocket.emit("game-state",input);window.__gdaLastOnlineInput=now}}
  return input
 }
 
@@ -1844,7 +1852,7 @@ function startSmash(idx,p2,round,sti){
  unlockAchievement(0); if(mode===0)unlockAchievement(28);if(mode===2)unlockAchievement(27);if(mode===6)unlockAchievement(29);if(cpuLevel>=7&&mode===1)unlockAchievement(35);if(cpuLevel===9&&mode===1)unlockAchievement(36);if(cpuLevel===5&&mode===1)unlockAchievement(37);
  let storyChapter=null;
  if(mode===6&&!window.__waveNum)window.__waveNum=1;
- if(mode===0&&selectedStoryChapter>=0&&selectedStoryChapter<STORY_CHAPTERS.length){storyChapter=STORY_CHAPTERS[selectedStoryChapter];sti=STORY_MAPS[selectedStoryChapter];const enemy=ROSTER.findIndex(r=>r.n===storyChapter.enemy);if(enemy>=0&&idx!==enemy)p2=enemy;}
+ if(mode===0&&selectedStoryChapter>=0&&selectedStoryChapter<STORY_CHAPTERS.length){storyChapter=STORY_CHAPTERS[selectedStoryChapter];if(!(window.__gdaOnlineActive&&window.__gdaOnlineMode==="story"))sti=STORY_MAPS[selectedStoryChapter];const enemy=ROSTER.findIndex(r=>r.n===storyChapter.enemy);if(enemy>=0&&idx!==enemy)p2=enemy;}
  const st=sti==null?Math.floor(Math.random()*MAPS.length):sti,M=applyWeather(MAPS[st],$("weatherPick")?.value||"auto");
  PLAT=LAY[M.l].map(([x,y,w,t,s])=>({x,y,w,t,solid:s}));
  // MONTE FUJI: combate SOBRE la montaña, no frente a ella. La superficie sube hacia la cumbre.
@@ -1881,15 +1889,31 @@ window.gdaGetOnlineStoryChapters=function(){
  return STORY_CHAPTERS.map((chapter,index)=>({index,title:chapter.title,era:chapter.era,enemy:chapter.enemy,map:chapter.map}))
   .filter(chapter=>ROSTER.some(kaiju=>kaiju.n===chapter.enemy));
 };
-window.gdaStartOnlineBattle=function(hostKaiju,guestKaiju,mapCode){
+window.gdaStartOnlineBattle=function(hostKaiju,guestKaiju,mapCode,onlineMode="normal",chapterIndex=0){
  const p1=ROSTER.findIndex(r=>r.n===String(hostKaiju||"").toUpperCase());
  const p2=ROSTER.findIndex(r=>r.n===String(guestKaiju||"").toUpperCase());
  if(p1<0||p2<0)return{ok:false,error:"Uno de los kaijus elegidos no existe en el roster de combate."};
  const stage=MAPS.findIndex(m=>m.n===String(mapCode||""));
  if(stage<0)return{ok:false,error:"El mapa seleccionado no pertenece a los escenarios disponibles de GDA."};
- mode=2;freeVersus="person";pick1=-1;selectedStoryChapter=-1;
- window.__gdaOnlineActive=true;
- startSmash(p1,p2,0,stage);
+ window.__gdaOnlineActive=true;window.__gdaOnlineMode=onlineMode;window.__gdaOnlineChapterIndex=Number(chapterIndex)||0;
+ window.__gdaRemoteInput={dir:0,jump:false,down:false,a:false,h:false,u:false,g:false,aHeld:false,gHeld:false};
+ window.__gdaRemoteInputAt=0;window.__gdaLastOnlineInput=0;
+ pick1=-1;freeVersus="person";
+ if(onlineMode==="waves"){
+  mode=6;waveStyle="coop";waveWins=0;waveTarget=5;window.__waveNum=1;selectedStoryChapter=-1;
+  startSmash(p1,null,0,stage);
+ }else if(onlineMode==="story"){
+  const chapters=window.gdaGetOnlineStoryChapters?window.gdaGetOnlineStoryChapters():[];
+  const selected=chapters.find(c=>c.index===Number(chapterIndex));
+  if(!selected)return{ok:false,error:"El capítulo elegido no está disponible en este plantel."};
+  const enemy=ROSTER.findIndex(r=>r.n===selected.enemy);
+  if(enemy<0)return{ok:false,error:"El rival de ese capítulo no está disponible."};
+  mode=0;selectedStoryChapter=Number(chapterIndex);
+  startSmash(p1,enemy,0,stage);
+ }else{
+  mode=2;selectedStoryChapter=-1;
+  startSmash(p1,p2,0,stage);
+ }
  return{ok:true};
 };
 
