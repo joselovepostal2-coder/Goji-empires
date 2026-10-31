@@ -2177,8 +2177,13 @@ function act(f,o,dt){const a=f.act;a.t+=dt;
   const flyDown=keyHeld("KeyS","s")||keyHeld("KeyS","S")||!!K.ArrowDown||!!fi.down;
   const horizontal=(flyRight?1:0)-(flyLeft?1:0);
   // Control horizontal directo y estable durante el vuelo; no depende del movimiento terrestre.
-  if(horizontal){f.face=horizontal;f.vx=horizontal*Math.max(28,(Number(st.spd)||24)*2.6);}
-  else {f.vx*=Math.max(0,1-2.5*dt);if(Math.abs(f.vx)<1)f.vx=0;}
+  if(horizontal){
+   f.face=horizontal;
+   // Mover la posición directamente durante el vuelo para evitar que la física terrestre
+   // o el frenado de otro bloque anulen el desplazamiento lateral.
+   f.x+=horizontal*Math.max(34,(Number(st.spd)||24)*3.2)*dt;
+   f.vx=0;
+  }else{f.vx=0;}
   // Contrarresta la gravedad aplicada por el motor para que el vuelo se mantenga estable.
   if(flyUp&&!flyDown)f.vy=42-GRAV*dt;
   else if(flyDown&&!flyUp)f.vy=-32-GRAV*dt;
