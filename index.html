@@ -3139,7 +3139,7 @@ body.gda-in-combat #gda068-launch,body.gda-in-combat #g68-evo-launch,body.gda-in
    <article class="g68-card"><h3>2. Elige el mapa</h3><label for="g68-map-select" class="g68-muted">Escenario para el combate</label><select id="g68-map-select" style="display:block;width:100%;margin-top:8px;background:#091329;color:#fff;border:1px solid #47729b;border-radius:8px;padding:12px;font:700 16px Rajdhani"><option value="">Cargando mapas disponibles…</option></select><p id="g68-map-status" class="g68-muted">Esperando selección del anfitrión…</p></article>
   </div>
   <div class="g68-grid">
-   <article class="g68-card"><h3>3. Modo de juego</h3><label for="g68-mode-select" class="g68-muted">El anfitrión elige el modo</label><select id="g68-mode-select" style="display:block;width:100%;margin-top:8px;background:#091329;color:#fff;border:1px solid #47729b;border-radius:8px;padding:12px;font:700 16px Rajdhani"><option value="normal">Combate normal · PvP</option><option value="story">Modo Historia · cooperativo</option><option value="waves">Modo Oleadas · cooperativo</option></select><p class="g68-muted">En Historia ambos colaboran con el kaiju del anfitrión. En Oleadas, cada jugador controla su propio kaiju aliado.</p></article>
+   <article class="g68-card"><h3>3. Modo de juego</h3><label for="g68-mode-select" class="g68-muted">El anfitrión elige el modo</label><select id="g68-mode-select" style="display:block;width:100%;margin-top:8px;background:#091329;color:#fff;border:1px solid #47729b;border-radius:8px;padding:12px;font:700 16px Rajdhani"><option value="normal">Combate normal · PvP</option><option value="tournament">Torneo de Titanes · mejor de 3</option><option value="story">Modo Historia · cooperativo</option><option value="waves">Modo Oleadas · cooperativo</option><option value="tower">Ascenso a la Torre · 10 plantas</option><option value="hardcore">Hardcore · 2 vs 20</option><option value="raid">Boss Raid · 2 contra 1 jefe</option><option value="survival">Supervivencia · sin límite</option></select><p class="g68-muted" id="g68-mode-description">En Historia ambos colaboran con el kaiju del anfitrión. En los modos cooperativos cada jugador controla su propio kaiju aliado.</p></article>
    <article class="g68-card" id="g68-story-chapter-wrap" style="display:none"><h3>4. Capítulo de Historia</h3><label for="g68-story-chapter" class="g68-muted">Elige una misión disponible</label><select id="g68-story-chapter" style="display:block;width:100%;margin-top:8px;background:#091329;color:#fff;border:1px solid #47729b;border-radius:8px;padding:12px;font:700 16px Rajdhani"><option value="">Cargando capítulos…</option></select><p class="g68-muted">Solo aparecen capítulos con rivales incluidos en el plantel.</p></article>
   </div>
   <div class="g68-card" style="background:#071126"><h3>Jugadores</h3><div class="g68-grid"><div><span class="g68-tag">JUGADOR 1 · TÚ</span><h3 id="g68-player1-kaiju">Godzilla</h3><p class="g68-muted">Estado: <strong style="color:#65f0a5">En la sala</strong></p></div><div><span class="g68-tag">JUGADOR 2 · RIVAL</span><h3 id="g68-player2-kaiju">Esperando jugador…</h3><p id="g68-player2-status" class="g68-muted">Comparte el código con tu amigo.</p></div></div></div>
@@ -3217,8 +3217,23 @@ body.gda-in-combat #gda068-launch,body.gda-in-combat #g68-evo-launch,body.gda-in
   if(onlineStoryChapterSelect.options.length)onlineStoryChapterSelect.value=onlineStoryChapterSelect.options[0].value;
  }
  function syncOnlineModeControls(modeValue){
-  if(onlineModeSelect)onlineModeSelect.value=modeValue||'normal';
-  if(onlineStoryWrap)onlineStoryWrap.style.display=(modeValue||'normal')==='story'?'block':'none';
+  const value=modeValue||'normal';
+  if(onlineModeSelect)onlineModeSelect.value=value;
+  if(onlineStoryWrap)onlineStoryWrap.style.display=value==='story'?'block':'none';
+  const description=document.getElementById('g68-mode-description');
+  if(description){
+   const descriptions={
+    normal:"Combate PvP: anfitrión contra invitado.",
+    tournament:"Torneo PvP al mejor de tres combates: gana quien consiga dos victorias.",
+    story:"Historia cooperativa: ambos jugadores controlan juntos al kaiju del anfitrión.",
+    waves:"Oleadas cooperativas: dos kaijus aliados contra grupos de cinco enemigos.",
+    tower:"Ascenso a la Torre: diez plantas verticales, enemigos en cada planta y jefes en las plantas 5 y 10. Usa el escenario Torre de Acero.",
+    hardcore:"Hardcore: dos jugadores, una vida cada uno y veinte enemigos en cuatro grupos de cinco.",
+    raid:"Boss Raid: dos kaijus contra un jefe con ocho vidas.",
+    survival:"Supervivencia: grupos interminables de cinco enemigos y recompensa por cada grupo superado."
+   };
+   description.textContent=descriptions[value]||descriptions.normal;
+  }
  }
  function sendOnlineRoomMode(){
   if(lobbyRole!=='host'||!gdaOnlineSocket?.connected)return;
@@ -3522,7 +3537,7 @@ for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e
     window.__gdaRemoteInputAt = performance.now();
   });
 
-  function launchOnlineRoomMatch(room) {
+  function launchOnlineRoomMatch(room,isRematch=false) {
     if (!room || room.code !== window.gdaLobbyCode) return;
     const players = Array.isArray(room.players) ? room.players : [];
     const host = players[0], guest = players[1];
@@ -3541,7 +3556,7 @@ for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e
     if (overlay) overlay.style.display = "none";
     if (resultPanel) resultPanel.style.display = "none";
     const result = window.gdaStartOnlineBattle
-      ? window.gdaStartOnlineBattle(host.kaiju, guest.kaiju, room.map, room.mode || "normal", room.storyChapterIndex || 0)
+      ? window.gdaStartOnlineBattle(host.kaiju, guest.kaiju, room.map, room.mode || "normal", room.storyChapterIndex || 0, isRematch)
       : {ok:false,error:"No se encontró el iniciador del combate online."};
     if (!result.ok) {
       window.__gdaOnlineActive = false;
@@ -3551,8 +3566,8 @@ for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e
     }
   }
 
-  gdaOnlineSocket.on("match-start", launchOnlineRoomMatch);
-  gdaOnlineSocket.on("match-rematch", launchOnlineRoomMatch);
+  gdaOnlineSocket.on("match-start", room=>launchOnlineRoomMatch(room,false));
+  gdaOnlineSocket.on("match-rematch", room=>launchOnlineRoomMatch(room,true));
 
   let onlineResultPanel=null, onlineResultNote=null, onlineRematchButton=null, onlineLobbyButton=null;
   function ensureOnlineResultPanel() {
@@ -3578,7 +3593,27 @@ for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e
     if (!window.__gdaOnlineActive) return;
     ensureOnlineResultPanel();
     onlineRematchButton.disabled=false;onlineLobbyButton.disabled=false;
-    onlineResultNote.textContent="Elige revancha o cambia de kaiju y mapa. Tu rival debe elegir lo mismo.";
+    const om=window.__gdaOnlineMode;
+    if(om==="tower"){
+      onlineRematchButton.textContent=window.__gdaOnlineRunComplete?"↻ NUEVA TORRE":"⬆ SIGUIENTE PLANTA";
+      onlineResultNote.textContent=window.__gdaOnlineRunComplete?"¡Conquistaste las diez plantas! Puedes iniciar otra torre o cambiar la selección.":"Planta superada. Los dos jugadores deben votar para subir a la siguiente.";
+    }else if(om==="hardcore"){
+      onlineRematchButton.textContent=window.__gdaOnlineRunComplete?"↻ REINTENTAR HARDCORE":"SIGUIENTE GRUPO";
+      onlineResultNote.textContent=window.__gdaOnlineRunComplete?"La expedición terminó. Puedes comenzar un nuevo intento.":"Grupo superado. Ambos deben votar para continuar con los siguientes cinco enemigos.";
+    }else if(om==="raid"){
+      onlineRematchButton.textContent="↻ NUEVO BOSS RAID";
+      onlineResultNote.textContent=window.__gdaOnlineRunComplete?"Jefe derrotado. ¡Victoria del equipo!":"El jefe sigue en pie. Ambos deben votar para reintentar.";
+    }else if(om==="survival"){
+      onlineRematchButton.textContent=window.__gdaOnlineRunComplete?"↻ NUEVO INTENTO":"SIGUIENTE OLEADA";
+      onlineResultNote.textContent=window.__gdaOnlineRunComplete?"La supervivencia terminó. Puedes volver a intentarlo.":"Grupo superado. Ambos deben votar para continuar la supervivencia.";
+    }else if(om==="tournament"){
+      const score=window.__gdaOnlineTournamentScore||[0,0];
+      onlineRematchButton.textContent=window.__gdaOnlineRunComplete?"↻ NUEVO TORNEO":"SIGUIENTE COMBATE";
+      onlineResultNote.textContent=window.__gdaOnlineRunComplete?`Torneo terminado: P1 ${score[0]} — ${score[1]} P2. El ganador consiguió dos victorias.`:`Serie al mejor de tres: P1 ${score[0]} — ${score[1]} P2. El siguiente combate puede decidir el torneo.`;
+    }else{
+      onlineRematchButton.textContent="↻ REVANCHA";
+      onlineResultNote.textContent="Elige revancha o cambia de kaiju y mapa. Tu rival debe elegir lo mismo.";
+    }
     onlineResultPanel.style.display="flex";
   });
   gdaOnlineSocket.on("post-action-waiting",action=>{
@@ -3591,7 +3626,7 @@ for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e
   });
   gdaOnlineSocket.on("return-to-lobby",room=>{
     if(!room||room.code!==window.gdaLobbyCode)return;
-    window.__gdaOnlineActive=false;window.__gdaOnlineMode="normal";
+    window.__gdaOnlineActive=false;window.__gdaOnlineMode="normal";window.__gdaOnlineRunComplete=false;
     if(onlineResultPanel)onlineResultPanel.style.display="none";
     const overlay=document.getElementById("g68-online-overlay");
     if(overlay)overlay.style.display="block";
