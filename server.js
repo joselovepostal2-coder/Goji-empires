@@ -24,6 +24,7 @@ function getRoomInfo(code) {
 
   return {
     code,
+    map: room.map || "TOKYO",
     players: [...room.players.values()].map(p => ({
       id: p.id,
       kaiju: p.kaiju,
@@ -71,7 +72,9 @@ io.on("connection", socket => {
 
     const room = {
       players: new Map(),
-      started: false
+      started: false,
+      hostId: socket.id,
+      map: "TOKYO"
     };
 
     room.players.set(socket.id, {
@@ -123,13 +126,24 @@ io.on("connection", socket => {
     updateRoom(code);
   });
 
-  socket.on("select-kaiju", kaiju => {
+  socket.on("select-kaiju", selection => {
     const code = playerRooms.get(socket.id);
-    const player = rooms.get(code)?.players.get(socket.id);
-    if (!player || typeof kaiju !== "string") return;
+    const room = rooms.get(code);
+    const player = room?.players.get(socket.id);
+    const payload = typeof selection === "string"
+      ? { kaiju: selection }
+      : (selection && typeof selection === "object" ? selection : {});
+    if (!player || typeof payload.kaiju !== "string") return;
 
-    player.kaiju = kaiju.slice(0, 60);
+    player.kaiju = payload.kaiju.slice(0, 60);
     player.ready = false;
+
+    // El mapa de la sala lo decide el anfitrión.
+    if (socket.id === room.hostId &&
+        ["TOKYO", "CITY", "ISLAND", "DOCKS"].includes(payload.map)) {
+      room.map = payload.map;
+    }
+
     updateRoom(code);
   });
 
