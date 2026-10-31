@@ -2523,7 +2523,24 @@ function smashTick(dt){const S=G.sm;dt=Math.min(dt,.033);
  for(const f of S.F){if(f.squashTimer>0){f.squashTimer-=dt;if(f.squashTimer<=0)f.mesh.scale.set(1,1,1)}}
  const[a,b]=S.F;
  // render: sprites en billboard sobre el eje Y, sombra sobre la plataforma de abajo, rayo desde la boca del sprite
- for(const f of S.F){const m=f.mesh;m.visible=f.dead<=0;m.position.set(f.x,f.y,0);if(f.damageMarks)for(const mark of f.damageMarks){mark.mesh.visible=f.dead<=0;mark.mesh.position.set(f.x,f.y,2.4+f.damageMarks.indexOf(mark)*.005);mark.mesh.scale.x=(f.face<0?-1:1);}
+ for(const f of S.F){const m=f.mesh;m.visible=f.dead<=0;m.position.set(f.x,f.y,0);
+  if(S.mode===6&&f.waveEnemy){
+   if(!f.waveDamageTag){
+    const cv=document.createElement("canvas");cv.width=128;cv.height=48;
+    const ctx=cv.getContext("2d"),tex=new THREE.CanvasTexture(cv);
+    const tag=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false}));
+    tag.scale.set(15,5.6,1);G.scene.add(tag);f.waveDamageTag={canvas:cv,ctx,texture:tex,sprite:tag,value:-1};
+   }
+   const tag=f.waveDamageTag,pct=Math.floor(f.pct);
+   if(tag.value!==pct){
+    tag.ctx.clearRect(0,0,128,48);tag.ctx.fillStyle="rgba(5,10,24,.88)";
+    tag.ctx.fillRect(4,4,120,40);tag.ctx.strokeStyle="#ffb84d";tag.ctx.lineWidth=3;tag.ctx.strokeRect(4,4,120,40);
+    tag.ctx.fillStyle="#fff2c7";tag.ctx.font="bold 27px Arial";tag.ctx.textAlign="center";tag.ctx.textBaseline="middle";
+    tag.ctx.fillText(pct+"%",64,25);tag.texture.needsUpdate=true;tag.value=pct;
+   }
+   tag.sprite.position.set(f.x,f.y+f.h+8,2.2);tag.sprite.visible=f.dead<=0&&!f.waveDead;
+  }
+  if(f.damageMarks)for(const mark of f.damageMarks){mark.mesh.visible=f.dead<=0;mark.mesh.position.set(f.x,f.y,2.4+f.damageMarks.indexOf(mark)*.005);mark.mesh.scale.x=(f.face<0?-1:1);}
   // Fénix evolucionado: agrandar visualmente el kaiju y darle un brillo dorado.
   const phoenixBig=!!(f.phoenixEvolved&&String(f.r?.n||f.A?.n||'').toUpperCase().includes('FÉNIX'));
   const bodyScale=phoenixBig?1.65:1;
