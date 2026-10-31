@@ -1884,11 +1884,20 @@ function startSmash(idx,p2,round,sti){
  if(ri==null){const pool=ROSTER.map((r,i)=>i).filter(i=>mode!==0||S.round<2||ROSTER[i].cat==="Jefes");ri=pool[Math.floor(Math.random()*pool.length)];if(ri===idx)ri=(ri+1)%ROSTER.length}
  S.p2=ri;
  if(mode===6){
-  const pool=ROSTER.map((r,i)=>i).filter(i=>i!==idx&&i!==ri);
+  const onlineCoopWaves=!!window.__gdaOnlineActive&&window.__gdaOnlineMode==="waves";
+  const span=Math.max(1,SB.r-SB.l),pos=t=>cl(SB.l+span*t,SB.l+4,SB.r-4);
+  const pool=ROSTER.map((r,i)=>i).filter(i=>i!==idx&&(onlineCoopWaves?i!==ri:true));
   const picks=[];while(picks.length<5&&picks.length<pool.length){const j=(Math.random()*pool.length)|0;if(!picks.includes(pool[j]))picks.push(pool[j]);}
-  const allies=[mkF(idx,1,-34,0),mkF(ri,2,-16,0)];
-  allies.forEach(f=>{f.wavePlayer=true;f.stocks=3;});
-  S.F=[...allies,...picks.map((enemy,j)=>{const f=mkF(enemy,3+j,14+j*14,1);f.stocks=1;f.waveEnemy=true;f.face=-1;return f;})];S.waveEnemiesTotal=picks.length;S.waveEnemiesRemaining=picks.length;
+  if(onlineCoopWaves){
+   const allies=[mkF(idx,1,pos(.07),0),mkF(ri,2,pos(.93),0)];
+   allies[0].face=1;allies[1].face=-1;
+   allies.forEach(f=>{f.wavePlayer=true;f.stocks=3;});
+   S.F=[...allies,...picks.map((enemy,j)=>{const f=mkF(enemy,3+j,pos(.22+j*.14),1);f.stocks=1;f.waveEnemy=true;f.face=f.x<(SB.l+SB.r)/2?-1:1;return f;})];
+  }else{
+   const hero=mkF(idx,1,pos(.08),0);hero.face=1;
+   S.F=[hero,...picks.map((enemy,j)=>{const f=mkF(enemy,3+j,pos(.28+j*.11),1);f.stocks=1;f.waveEnemy=true;f.face=-1;return f;})];
+  }
+  S.waveEnemiesTotal=picks.length;S.waveEnemiesRemaining=picks.length;
  }else S.F=[mkF(idx,1,-22,0),mkF(ri,2,22,mode!==2)];
  S.F.forEach(f=>sc.add(f.mesh,f.sh));
  G={scene:sc,sm:S,p:S.F[0]};
@@ -2172,12 +2181,17 @@ function act(f,o,dt){const a=f.act;a.t+=dt;
  }if(a.m)f.vx*=Math.max(0,1-6*dt);
  if(a.m){const m=a.m;
   if(!a.hit&&a.t>=m.su&&a.t<m.su+m.ac){const b={x:f.face>0?f.x+f.hw:f.x-f.hw-m.rw,y:f.y+f.h*m.y0,w:m.rw,h:f.h*m.hh};
-   if(ov(b,bxOf(o))){
+   let hitTarget=o;
+   if(S.mode===6){
+    const candidates=f.waveEnemy?S.F.filter(q=>(q.wavePlayer||q===S.F[0])&&q.dead<=0&&q.stocks>0):S.F.filter(q=>q.waveEnemy&&!q.waveDead&&q.dead<=0);
+    hitTarget=candidates.filter(q=>ov(b,bxOf(q))).sort((x,y)=>Math.abs(x.x-f.x)-Math.abs(y.x-f.x))[0]||null;
+   }else if(!ov(b,bxOf(o)))hitTarget=null;
+   if(hitTarget){
     a.hit=1;
     // Cadena de golpes: encadenar impactos dentro de 1,15 s aumenta el daño hasta un 48%.
     f.combo=f.comboTimer>0?(f.combo||0)+1:1;f.comboTimer=1.15;
     const mult=1+Math.min(.48,(f.combo-1)*.12);
-    hurt(f,o,m.dmg*mult,m.base+(f.combo-1)*3,m.gr,m.ang,f.face);
+    hurt(f,hitTarget,m.dmg*mult,m.base+(f.combo-1)*3,m.gr,m.ang,f.face);
     if(f.combo>=2)toastCombat(`¡COMBO x${f.combo}!`,f.combo>=4?"#ffca55":"#8df7ff");
     else toastCombat(m===MV.heavy?"¡GOLPE PESADO!":"¡IMPACTO!",m===MV.heavy?"#ff9b55":"#ffffff");
    }}
@@ -2438,20 +2452,29 @@ function smStep(dt){const S=G.sm,[a,b]=S.F;const aimHud=$("doratsAimHud");if(aim
  if(S.state==="play"){S.time-=dt;if(S.time<=0)finish(S.mode===6?1:(a.stocks>b.stocks?0:b.stocks>a.stocks?1:a.pct<b.pct?0:b.pct<a.pct?1:-1))}
  for(let fi=0;fi<S.F.length;fi++){const f=S.F[fi];if(f.waveDead)continue;let o;
   if(S.mode===6){
-   const allies=S.F.filter(q=>q===a||q.wavePlayer),enemies=S.F.filter(q=>q.waveEnemy&&!q.waveDead&&q.dead<=0);
-   if(f.waveEnemy)o=allies.filter(q=>q.dead<=0&&q.stocks>0).sort((x,y)=>Math.abs(x.x-f.x)-Math.abs(y.x-f.x))[0]||allies[0]||a;
-   else if(f.wavePlayer||f===a)o=enemies.sort((x,y)=>Math.abs(x.x-f.x)-Math.abs(y.x-f.x))[0]||enemies[0]||f;
+   const allies=S.F.filter(q=>(q===a||q.wavePlayer)&&q.dead<=0&&q.stocks>0);
+   const enemies=S.F.filter(q=>q.waveEnemy&&!q.waveDead&&q.dead<=0);
+   const chooseTarget=(actor,list)=>{
+    if(!list.length)return null;
+    const face=actor.face||1,front=list.filter(q=>(q.x-actor.x)*face>=-actor.hw);
+    const candidates=front.length?front:list;
+    return candidates.sort((x,y)=>(Math.abs(x.x-actor.x)+Math.abs(x.y-actor.y)*.35)-(Math.abs(y.x-actor.x)+Math.abs(y.y-actor.y)*.35))[0];
+   };
+   if(f.waveEnemy)o=chooseTarget(f,allies)||allies[0]||a;
+   else if(f.wavePlayer||f===a)o=chooseTarget(f,enemies)||enemies[0]||f;
    else o=a;
   }else o=f===a?b:a;
   if(!o)continue;
   if(f.dead>0){f.dead-=dt;if(f.dead<=0){Object.assign(f,{x:0,y:55,vx:0,vy:0,pct:0,inv:2.5,jumps:1,stun:0})}continue}
   fighter(f,o,dt)}
- for(const p of S.pr){p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;let o=p.from===a?b:a;if(S.mode===6){
-  const fromAlly=!!(p.from===a||p.from.wavePlayer);
-  if(fromAlly){let best=Infinity;o=null;for(const q of S.F){if(q.waveEnemy&&!q.waveDead&&q.dead<=0){const d=Math.abs(q.x-p.x);if(d<best){best=d;o=q}}}}
-  else{let best=Infinity;o=null;for(const q of S.F){if((q.wavePlayer||q===a)&&q.dead<=0&&q.stocks>0){const d=Math.abs(q.x-p.x);if(d<best){best=d;o=q}}}}
- }
-  if(o&&ov({x:p.x-p.r,y:p.y-p.r,w:2*p.r,h:2*p.r},bxOf(o))){hurt(p.from,o,p.dmg,45,.7,30,Math.sign(p.vx)||1);p.life=0}
+ for(const p of S.pr){p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;let o=p.from===a?b:a;
+  const projectileBox={x:p.x-p.r,y:p.y-p.r,w:2*p.r,h:2*p.r};
+  if(S.mode===6){
+   const fromAlly=!!(p.from===a||p.from.wavePlayer);
+   const targets=fromAlly?S.F.filter(q=>q.waveEnemy&&!q.waveDead&&q.dead<=0):S.F.filter(q=>(q.wavePlayer||q===a)&&q.dead<=0&&q.stocks>0);
+   o=targets.filter(q=>ov(projectileBox,bxOf(q))).sort((x,y)=>Math.abs(x.x-p.x)-Math.abs(y.x-p.x))[0]||null;
+  }else if(o&&!ov(projectileBox,bxOf(o)))o=null;
+  if(o){hurt(p.from,o,p.dmg,45,.7,30,Math.sign(p.vx)||1);p.life=0}
   if(p.life<=0)G.scene.remove(p.m)}
  S.pr=S.pr.filter(p=>p.life>0)}
 function smashTick(dt){const S=G.sm;dt=Math.min(dt,.033);
