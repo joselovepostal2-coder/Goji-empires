@@ -1697,7 +1697,21 @@ let MX=0,lastM=-1e9,sawTouch=false,bindT=0;const wt={};
 function inp(f){
  const two=G.sm.two,id=f.id,online=!!window.__gdaOnlineActive&&two,localSlot=Number(window.__gdaOnlineLocalSlot)||1;
  const onlineCoop=!!window.__gdaOnlineActive&&(window.__gdaOnlineMode==="story"||window.__gdaOnlineMode==="waves");
+ const onlineWave=!!window.__gdaOnlineActive&&window.__gdaOnlineMode==="waves";
  const blank={dir:0,jump:false,down:false,a:false,h:false,u:false,g:false,aHeld:false,gHeld:false};
+ if(onlineWave&&(id===1||id===2)){
+  if(id!==localSlot){
+   const fresh=performance.now()-(window.__gdaRemoteInputAt||0)<600;
+   return fresh&&window.__gdaRemoteInput?{...window.__gdaRemoteInput}:blank;
+  }
+  const L=id===2?[CTL.p2]:[CTL.p1,CTL.p1b],
+   d=k=>L.some(p=>K[p[k]])||(id===1&&K["T_"+k]),
+   j=k=>L.some(p=>JP[p[k]])||(id===1&&JP["T_"+k]);
+  const input={dir:cl((d("right")?1:0)-(d("left")?1:0),-1,1),jump:j("jump"),down:d("down"),a:j("light"),h:j("heavy"),u:j("ult"),g:j("grab"),aHeld:d("light"),gHeld:d("grab")};
+  const now=performance.now();
+  if(now-(window.__gdaLastOnlineInput||0)>40&&window.gdaOnlineSocket?.connected){window.gdaOnlineSocket.emit("game-state",input);window.__gdaLastOnlineInput=now}
+  return input;
+ }
  if(onlineCoop&&id===1){
   const L=localSlot===2?[CTL.p2]:[CTL.p1,CTL.p1b],
    d=k=>L.some(p=>K[p[k]])||(localSlot===1&&K["T_"+k]),
@@ -1870,18 +1884,20 @@ function startSmash(idx,p2,round,sti){
  if(ri==null){const pool=ROSTER.map((r,i)=>i).filter(i=>mode!==0||S.round<2||ROSTER[i].cat==="Jefes");ri=pool[Math.floor(Math.random()*pool.length)];if(ri===idx)ri=(ri+1)%ROSTER.length}
  S.p2=ri;
  if(mode===6){
-  const pool=ROSTER.map((r,i)=>i).filter(i=>i!==idx);
+  const pool=ROSTER.map((r,i)=>i).filter(i=>i!==idx&&i!==ri);
   const picks=[];while(picks.length<5&&picks.length<pool.length){const j=(Math.random()*pool.length)|0;if(!picks.includes(pool[j]))picks.push(pool[j]);}
-  S.F=[mkF(idx,1,-28,0),...picks.map((enemy,j)=>{const f=mkF(enemy,2,18+j*4,1);f.stocks=1;f.waveEnemy=true;f.id=2;f.face=-1;return f;})];S.waveEnemiesTotal=picks.length;S.waveEnemiesRemaining=picks.length;
+  const allies=[mkF(idx,1,-34,0),mkF(ri,2,-16,0)];
+  allies.forEach(f=>{f.wavePlayer=true;f.stocks=3;});
+  S.F=[...allies,...picks.map((enemy,j)=>{const f=mkF(enemy,3+j,14+j*14,1);f.stocks=1;f.waveEnemy=true;f.face=-1;return f;})];S.waveEnemiesTotal=picks.length;S.waveEnemiesRemaining=picks.length;
  }else S.F=[mkF(idx,1,-22,0),mkF(ri,2,22,mode!==2)];
  S.F.forEach(f=>sc.add(f.mesh,f.sh));
  G={scene:sc,sm:S,p:S.F[0]};
  cam.position.set(0,13,CAMZ);cam.rotation.set(0,0,0);
  for(const k in JP)JP[k]=0;
- S.F.forEach(f=>{$("shI"+f.id).src=artURL(f.idx);$("shN"+f.id).textContent=(f.ai?"CPU ":`P${f.id} `)+f.r.n;$("shN"+f.id).style.color=f.r.css;$("shN"+f.id).closest(".pn").style.setProperty("--c",f.r.css);f.ls=-1});
+ S.F.forEach(f=>{if(f.waveEnemy)return;$("shI"+f.id).src=artURL(f.idx);$("shN"+f.id).textContent=(f.ai?"CPU ":`P${f.id} `)+f.r.n;$("shN"+f.id).style.color=f.r.css;$("shN"+f.id).closest(".pn").style.setProperty("--c",f.r.css);f.ls=-1});
  $("shStage").textContent=(mode===0?`HISTORIA ${S.round+1}/3 · `:mode===5?"🎃 HALLOWEEN · ":mode===6?`OLEADA ${window.__waveNum||1} · 5 ENEMIGOS · `:"")+M.n;
  const hn=p=>["light","heavy","ult","grab"].map(k=>kn(CTL[p][k])).join(" / ");
- $("shK").textContent=mode===2?`P1: ${hn("p1")} · ${hn("p1b")}   |   P2: ${hn("p2")}`:`${hn("p1")} · ${hn("p1b")}  (ligero / pesado / ultimate)`+(OPT.follow?" · mover: cursor":"");
+ $("shK").textContent=window.__gdaOnlineActive&&window.__gdaOnlineMode==="waves"?`P1: ${hn("p1")} · P2: ${hn("p2")}`:mode===2?`P1: ${hn("p1")} · ${hn("p1b")}   |   P2: ${hn("p2")}`:`${hn("p1")} · ${hn("p1b")}  (ligero / pesado / ultimate)`+(OPT.follow?" · mover: cursor":"");
  $("shF").textContent="FIGHT!";retrig();show("play")}
 
 window.gdaGetOnlineMaps=function(){return [...new Set(MAPS.filter(m=>!m.custom).map(m=>m.n))]};
@@ -1901,7 +1917,7 @@ window.gdaStartOnlineBattle=function(hostKaiju,guestKaiju,mapCode,onlineMode="no
  pick1=-1;freeVersus="person";
  if(onlineMode==="waves"){
   mode=6;waveStyle="coop";waveWins=0;waveTarget=5;window.__waveNum=1;selectedStoryChapter=-1;
-  startSmash(p1,null,0,stage);
+  startSmash(p1,p2,0,stage);
  }else if(onlineMode==="story"){
   const chapters=window.gdaGetOnlineStoryChapters?window.gdaGetOnlineStoryChapters():[];
   const selected=chapters.find(c=>c.index===Number(chapterIndex));
@@ -2274,7 +2290,7 @@ function act(f,o,dt){const a=f.act;a.t+=dt;
  }else{if(a.t>=.2&&!a.fx){a.fx=1;f.shield=3;f.boost=3;if(s.rollGuard){f.guardUntil=S.t+3;toastCombat("\u00a1CAPARAZ\u00d3N DEFENSIVO! RODADA ESPINOSA POTENCIADA","#d8d0b0")}}if(a.t>=.4)f.act=null}}
 function ko(f){const S=G.sm;f.stocks--;f.dead=1.4;f.act=null;f.beam=null;S.shake=8;
  if(S.mode===6&&f.waveEnemy&&f.stocks<=0){f.waveDead=true;f.dead=999;f.mesh.visible=false;f.sh.visible=false;S.waveEnemiesRemaining=Math.max(0,(S.waveEnemiesRemaining||1)-1);toastCombat(`¡ENEMIGO DERROTADO! QUEDAN ${S.waveEnemiesRemaining}`,'#ffd24a');if(S.waveEnemiesRemaining===0){waveWins=waveTarget-1;finish(0)}return;}
- if(f.stocks<=0)finish(f===S.F[0]?1:0)}
+ if(f.stocks<=0)finish(S.mode===6?(f.wavePlayer?1:0):(f===S.F[0]?1:0))}
 function finish(w){const S=G.sm;if(S.state==="over")return;S.state="over";S.win=w;
  let earned=w<0?15:(w===0?25:10),waveCompleted=false;
  if(S.mode===6){
@@ -2421,12 +2437,20 @@ function smStep(dt){const S=G.sm,[a,b]=S.F;const aimHud=$("doratsAimHud");if(aim
  if(S.state==="intro"){S.intro-=dt;if(S.intro<=0){S.state="play";$("shF").textContent=""}}
  if(S.state==="play"){S.time-=dt;if(S.time<=0)finish(S.mode===6?1:(a.stocks>b.stocks?0:b.stocks>a.stocks?1:a.pct<b.pct?0:b.pct<a.pct?1:-1))}
  for(let fi=0;fi<S.F.length;fi++){const f=S.F[fi];if(f.waveDead)continue;let o;
-  if(S.mode===6)o=f===a?S.F.find(q=>q.waveEnemy&&!q.waveDead&&q.dead<=0)||S.F[1]:a;
-  else o=f===a?b:a;
+  if(S.mode===6){
+   const allies=S.F.filter(q=>q===a||q.wavePlayer),enemies=S.F.filter(q=>q.waveEnemy&&!q.waveDead&&q.dead<=0);
+   if(f.waveEnemy)o=allies.filter(q=>q.dead<=0&&q.stocks>0).sort((x,y)=>Math.abs(x.x-f.x)-Math.abs(y.x-f.x))[0]||allies[0]||a;
+   else if(f.wavePlayer||f===a)o=enemies.sort((x,y)=>Math.abs(x.x-f.x)-Math.abs(y.x-f.x))[0]||enemies[0]||f;
+   else o=a;
+  }else o=f===a?b:a;
   if(!o)continue;
   if(f.dead>0){f.dead-=dt;if(f.dead<=0){Object.assign(f,{x:0,y:55,vx:0,vy:0,pct:0,inv:2.5,jumps:1,stun:0})}continue}
   fighter(f,o,dt)}
- for(const p of S.pr){p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;let o=p.from===a?b:a;if(S.mode===6){if(p.from===a){let best=Infinity;o=null;for(const q of S.F){if(q.waveEnemy&&!q.waveDead&&q.dead<=0){const d=Math.abs(q.x-p.x);if(d<best){best=d;o=q}}}}else o=a;}
+ for(const p of S.pr){p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;let o=p.from===a?b:a;if(S.mode===6){
+  const fromAlly=!!(p.from===a||p.from.wavePlayer);
+  if(fromAlly){let best=Infinity;o=null;for(const q of S.F){if(q.waveEnemy&&!q.waveDead&&q.dead<=0){const d=Math.abs(q.x-p.x);if(d<best){best=d;o=q}}}}
+  else{let best=Infinity;o=null;for(const q of S.F){if((q.wavePlayer||q===a)&&q.dead<=0&&q.stocks>0){const d=Math.abs(q.x-p.x);if(d<best){best=d;o=q}}}}
+ }
   if(o&&ov({x:p.x-p.r,y:p.y-p.r,w:2*p.r,h:2*p.r},bxOf(o))){hurt(p.from,o,p.dmg,45,.7,30,Math.sign(p.vx)||1);p.life=0}
   if(p.life<=0)G.scene.remove(p.m)}
  S.pr=S.pr.filter(p=>p.life>0)}
@@ -2508,7 +2532,7 @@ function smashTick(dt){const S=G.sm;dt=Math.min(dt,.033);
  cam.position.x+=(tx-cam.position.x)*k+(Math.random()-.5)*S.shake*.1;cam.position.y+=(ty+13-cam.position.y)*k;cam.position.z=CAMZ;cam.rotation.set(0,0,0);
  S.shake=Math.max(0,S.shake-dt*20);
  // HUD
- for(const f of S.F){const c=Math.max(0,120-f.pct*.6);
+ for(const f of S.F){if(f.waveEnemy)continue;const c=Math.max(0,120-f.pct*.6);
   $("shP"+f.id).textContent=Math.round(f.pct)+"%";$("shP"+f.id).style.color=`hsl(${c},90%,62%)`;const bar=$("shB"+f.id);bar.style.width=Math.min(100,f.pct/1.5)+"%";bar.style.background=`hsl(${c},90%,50%)`;
   if(f.ls!==f.stocks){f.ls=f.stocks;$("shS"+f.id).innerHTML=`<img src="${artURL(f.idx)}" alt="">`.repeat(Math.max(0,f.stocks))}
   $("shU"+f.id).style.width=(Math.max(0,Math.min(200,f.meter))/2)+"%";$("shU"+f.id).parentNode.classList.toggle("rdy",f.meter>=200);if(f.id===1&&!f.ai)TU.classList.toggle("rdy",f.meter>=200)}
@@ -3075,12 +3099,12 @@ body.gda-in-combat #gda068-launch,body.gda-in-combat #g68-evo-launch,body.gda-in
    <article class="g68-card"><h3>2. Elige el mapa</h3><label for="g68-map-select" class="g68-muted">Escenario para el combate</label><select id="g68-map-select" style="display:block;width:100%;margin-top:8px;background:#091329;color:#fff;border:1px solid #47729b;border-radius:8px;padding:12px;font:700 16px Rajdhani"><option value="">Cargando mapas disponibles…</option></select><p id="g68-map-status" class="g68-muted">Esperando selección del anfitrión…</p></article>
   </div>
   <div class="g68-grid">
-   <article class="g68-card"><h3>3. Modo de juego</h3><label for="g68-mode-select" class="g68-muted">El anfitrión elige el modo</label><select id="g68-mode-select" style="display:block;width:100%;margin-top:8px;background:#091329;color:#fff;border:1px solid #47729b;border-radius:8px;padding:12px;font:700 16px Rajdhani"><option value="normal">Combate normal · PvP</option><option value="story">Modo Historia · cooperativo</option><option value="waves">Modo Oleadas · cooperativo</option></select><p class="g68-muted">En Historia y Oleadas, ambos jugadores colaboran controlando al mismo kaiju del equipo.</p></article>
+   <article class="g68-card"><h3>3. Modo de juego</h3><label for="g68-mode-select" class="g68-muted">El anfitrión elige el modo</label><select id="g68-mode-select" style="display:block;width:100%;margin-top:8px;background:#091329;color:#fff;border:1px solid #47729b;border-radius:8px;padding:12px;font:700 16px Rajdhani"><option value="normal">Combate normal · PvP</option><option value="story">Modo Historia · cooperativo</option><option value="waves">Modo Oleadas · cooperativo</option></select><p class="g68-muted">En Historia ambos colaboran con el kaiju del anfitrión. En Oleadas, cada jugador controla su propio kaiju aliado.</p></article>
    <article class="g68-card" id="g68-story-chapter-wrap" style="display:none"><h3>4. Capítulo de Historia</h3><label for="g68-story-chapter" class="g68-muted">Elige una misión disponible</label><select id="g68-story-chapter" style="display:block;width:100%;margin-top:8px;background:#091329;color:#fff;border:1px solid #47729b;border-radius:8px;padding:12px;font:700 16px Rajdhani"><option value="">Cargando capítulos…</option></select><p class="g68-muted">Solo aparecen capítulos con rivales incluidos en el plantel.</p></article>
   </div>
   <div class="g68-card" style="background:#071126"><h3>Jugadores</h3><div class="g68-grid"><div><span class="g68-tag">JUGADOR 1 · TÚ</span><h3 id="g68-player1-kaiju">Godzilla</h3><p class="g68-muted">Estado: <strong style="color:#65f0a5">En la sala</strong></p></div><div><span class="g68-tag">JUGADOR 2 · RIVAL</span><h3 id="g68-player2-kaiju">Esperando jugador…</h3><p id="g68-player2-status" class="g68-muted">Comparte el código con tu amigo.</p></div></div></div>
   <p id="g68-lobby-note" class="g68-muted" aria-live="polite">Esperando a que entre el otro jugador…</p><button class="g68-btn" id="g68-ready-btn">✓ Estoy listo</button> <button class="g68-btn" id="g68-copycode-btn">Copiar código</button>
-  <p class="g68-muted" style="font-size:13px">Combate normal: anfitrión como P1 e invitado como P2. En Historia y Oleadas, el kaiju elegido por el anfitrión se controla en equipo: ambos jugadores envían sus movimientos y ataques. Al terminar, los dos deben elegir Revancha o Cambiar kaiju y mapa.</p>
+  <p class="g68-muted" style="font-size:13px">Combate normal: anfitrión como P1 e invitado como P2. En Historia, ambos colaboran controlando el kaiju del anfitrión. En Oleadas, cada jugador usa su propio kaiju y ambos combaten juntos contra cinco enemigos. Al terminar, los dos deben elegir Revancha o Cambiar kaiju y mapa.</p>
  </section>
 </div>
 <div id="g68-dlc-overlay" role="dialog" aria-modal="true" aria-label="Tienda de DLC">
