@@ -3402,6 +3402,9 @@ for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e
 
     const mapSelect = document.getElementById("g68-map-select");
     const mapStatus = document.getElementById("g68-map-status");
+    const modeSelect = document.getElementById("g68-mode-select");
+    const chapterSelect = document.getElementById("g68-story-chapter");
+    const chapterWrap = document.getElementById("g68-story-chapter-wrap");
     if (mapSelect) {
       mapSelect.disabled = !window.gdaIsRoomHost;
       mapSelect.value = room.map || "";
@@ -3411,6 +3414,15 @@ for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e
         ? "Mapa elegido por el anfitrión: " + room.map
         : (window.gdaIsRoomHost ? "Elige un mapa obligatorio para esta sala." : "Esperando a que el anfitrión elija el mapa…");
     }
+    if (modeSelect) {
+      modeSelect.disabled = !window.gdaIsRoomHost;
+      modeSelect.value = room.mode || "normal";
+    }
+    if (chapterSelect) {
+      chapterSelect.disabled = !window.gdaIsRoomHost;
+      if (Number.isInteger(room.storyChapterIndex)) chapterSelect.value = String(room.storyChapterIndex);
+    }
+    if (chapterWrap) chapterWrap.style.display = (room.mode || "normal") === "story" ? "block" : "none";
 
     if (own && own.kaiju) {
       const ownEl = document.getElementById("g68-player1-kaiju");
@@ -3445,13 +3457,13 @@ for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e
     window.__gdaRemoteInputAt = performance.now();
   });
 
-  gdaOnlineSocket.on("match-start", (room) => {
+  function launchOnlineRoomMatch(room) {
     if (!room || room.code !== window.gdaLobbyCode) return;
     const players = Array.isArray(room.players) ? room.players : [];
     const host = players[0], guest = players[1];
-    if (!host || !guest) {
+    if (!host || !guest || !room.map) {
       const note = document.getElementById("g68-lobby-note");
-      if (note) note.textContent = "No se pudo iniciar: faltan jugadores en la sala.";
+      if (note) note.textContent = "No se pudo iniciar: faltan jugadores o mapa.";
       return;
     }
     window.__gdaOnlineLocalSlot = host.id === gdaOnlineSocket.id ? 1 : 2;
@@ -3460,9 +3472,11 @@ for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e
     window.__gdaLastOnlineInput = 0;
     window.__gdaOnlineActive = true;
     const overlay = document.getElementById("g68-online-overlay");
+    const resultPanel = document.getElementById("g68-online-result");
     if (overlay) overlay.style.display = "none";
+    if (resultPanel) resultPanel.style.display = "none";
     const result = window.gdaStartOnlineBattle
-      ? window.gdaStartOnlineBattle(host.kaiju, guest.kaiju, room.map)
+      ? window.gdaStartOnlineBattle(host.kaiju, guest.kaiju, room.map, room.mode || "normal", room.storyChapterIndex || 0)
       : {ok:false,error:"No se encontró el iniciador del combate online."};
     if (!result.ok) {
       window.__gdaOnlineActive = false;
@@ -3470,6 +3484,54 @@ for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e
       const note = document.getElementById("g68-lobby-note");
       if (note) note.textContent = "No se pudo iniciar el combate: " + result.error;
     }
+  }
+
+  gdaOnlineSocket.on("match-start", launchOnlineRoomMatch);
+  gdaOnlineSocket.on("match-rematch", launchOnlineRoomMatch);
+
+  let onlineResultPanel=null, onlineResultNote=null, onlineRematchButton=null, onlineLobbyButton=null;
+  function ensureOnlineResultPanel() {
+    if (onlineResultPanel) return;
+    onlineResultPanel=document.createElement("section");
+    onlineResultPanel.id="g68-online-result";
+    onlineResultPanel.style.cssText="display:none;position:fixed;inset:0;z-index:100010;background:#030713eF;color:#fff;align-items:center;justify-content:center;padding:18px;font-family:Arial,sans-serif";
+    onlineResultPanel.innerHTML='<div style="width:min(560px,100%);background:linear-gradient(145deg,#12264a,#21163e);border:1px solid #5ee7ff;border-radius:18px;padding:24px;box-shadow:0 18px 60px #000a;text-align:center"><div style="font-size:12px;letter-spacing:3px;color:#67eaff;font-weight:900">GOJI EMPIRES · ONLINE</div><h2 style="font-size:clamp(24px,5vw,38px);margin:12px 0">FIN DE LA PARTIDA</h2><p style="color:#b8cbe9">Los dos jugadores deben elegir la misma opción.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px"><button id="g68-online-rematch" style="padding:14px 10px;border-radius:10px;border:1px solid #63e7ff;background:#12445c;color:#fff;font-weight:900;cursor:pointer">↻ REVANCHA</button><button id="g68-online-change" style="padding:14px 10px;border-radius:10px;border:1px solid #c19aff;background:#382457;color:#fff;font-weight:900;cursor:pointer">🦖 CAMBIAR KAIJU Y MAPA</button></div><p id="g68-online-result-note" style="color:#a9c0e5;margin-top:16px" aria-live="polite"></p></div>';
+    document.body.appendChild(onlineResultPanel);
+    onlineResultNote=onlineResultPanel.querySelector("#g68-online-result-note");
+    onlineRematchButton=onlineResultPanel.querySelector("#g68-online-rematch");
+    onlineLobbyButton=onlineResultPanel.querySelector("#g68-online-change");
+    onlineRematchButton.addEventListener("click",()=>chooseOnlinePostAction("rematch"));
+    onlineLobbyButton.addEventListener("click",()=>chooseOnlinePostAction("lobby"));
+  }
+  function chooseOnlinePostAction(action) {
+    ensureOnlineResultPanel();
+    onlineRematchButton.disabled=true;onlineLobbyButton.disabled=true;
+    onlineResultNote.textContent=action==="rematch"?"Has elegido revancha. Esperando a tu rival…":"Has elegido cambiar kaiju y mapa. Esperando a tu rival…";
+    gdaOnlineSocket.emit("online-post-action",action);
+  }
+  document.addEventListener("gda-online-match-finished",()=>{
+    if (!window.__gdaOnlineActive) return;
+    ensureOnlineResultPanel();
+    onlineRematchButton.disabled=false;onlineLobbyButton.disabled=false;
+    onlineResultNote.textContent="Elige revancha o cambia de kaiju y mapa. Tu rival debe elegir lo mismo.";
+    onlineResultPanel.style.display="flex";
+  });
+  gdaOnlineSocket.on("post-action-waiting",action=>{
+    if(onlineResultNote)onlineResultNote.textContent=action==="rematch"?"Revancha seleccionada. Esperando al otro jugador…":"Cambio de selección elegido. Esperando al otro jugador…";
+  });
+  gdaOnlineSocket.on("post-action-conflict",()=>{
+    ensureOnlineResultPanel();
+    onlineRematchButton.disabled=false;onlineLobbyButton.disabled=false;
+    onlineResultNote.textContent="Elegisteis opciones distintas. Los dos deben elegir Revancha o Cambiar kaiju y mapa.";
+  });
+  gdaOnlineSocket.on("return-to-lobby",room=>{
+    if(!room||room.code!==window.gdaLobbyCode)return;
+    window.__gdaOnlineActive=false;window.__gdaOnlineMode="normal";
+    if(onlineResultPanel)onlineResultPanel.style.display="none";
+    const overlay=document.getElementById("g68-online-overlay");
+    if(overlay)overlay.style.display="block";
+    const host=Array.isArray(room.players)&&room.players[0]&&room.players[0].id===gdaOnlineSocket.id;
+    if(window.gdaOpenLobby)window.gdaOpenLobby(host?"host":"guest",room.code);
   });
 
   gdaOnlineSocket.on("disconnect", () => {
