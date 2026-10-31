@@ -26,6 +26,8 @@ function getRoomInfo(code) {
   return {
     code,
     map: room.map,
+    mode: room.mode || "normal",
+    storyChapterIndex: Number.isInteger(room.storyChapterIndex) ? room.storyChapterIndex : 0,
     players: [...room.players.values()].map(p => ({
       id: p.id,
       kaiju: p.kaiju,
@@ -79,7 +81,10 @@ io.on("connection", socket => {
       players: new Map(),
       started: false,
       hostId: socket.id,
-      map: null
+      map: null,
+      mode: "normal",
+      storyChapterIndex: 0,
+      postVotes: new Map()
     };
 
     room.players.set(socket.id, {
@@ -165,6 +170,34 @@ io.on("connection", socket => {
     updateRoom(code);
   });
 
+  socket.on("set-room-mode", settings => {
+    const code = playerRooms.get(socket.id);
+    const room = rooms.get(code);
+    if (!room || socket.id !== room.hostId) {
+      socket.emit("room-action-error", "Solo el anfitrión puede cambiar el modo.");
+      return;
+    }
+    const mode = settings && settings.mode;
+    const chapterIndex = Number(settings && settings.storyChapterIndex);
+    if (!["normal", "story", "waves"].includes(mode)) {
+      socket.emit("room-action-error", "Selecciona un modo de juego válido.");
+      return;
+    }
+    if (mode === "story" && (!Number.isInteger(chapterIndex) || chapterIndex < 0 || chapterIndex >= 52)) {
+      socket.emit("room-action-error", "Selecciona un capítulo de Historia válido.");
+      return;
+    }
+    const nextChapter = mode === "story" ? chapterIndex : room.storyChapterIndex;
+    if (room.mode !== mode || room.storyChapterIndex !== nextChapter) {
+      room.mode = mode;
+      room.storyChapterIndex = nextChapter;
+      room.started = false;
+      room.postVotes.clear();
+      for (const player of room.players.values()) player.ready = false;
+    }
+    updateRoom(code);
+  });
+
   socket.on("player-ready", ready => {
     const code = playerRooms.get(socket.id);
     const room = rooms.get(code);
@@ -174,13 +207,20 @@ io.on("connection", socket => {
       socket.emit("room-action-error", "El anfitrión debe elegir un mapa antes de iniciar.");
       return;
     }
+    if (ready === true && room.mode === "story" &&
+        (!Number.isInteger(room.storyChapterIndex) || room.storyChapterIndex < 0 || room.storyChapterIndex >= 52)) {
+      socket.emit("room-action-error", "El anfitrión debe elegir un capítulo de Historia.");
+      return;
+    }
 
     player.ready = ready === true;
     updateRoom(code);
 
     if (room.players.size === 2 && room.map &&
+        (room.mode !== "story" || Number.isInteger(room.storyChapterIndex)) &&
         [...room.players.values()].every(p => p.ready && p.kaiju)) {
       room.started = true;
+      room.postVotes.clear();
       io.to(code).emit("match-start", getRoomInfo(code));
     }
   });
@@ -194,6 +234,39 @@ io.on("connection", socket => {
       playerId: socket.id,
       state
     });
+  });
+
+  socket.on("online-post-action", action => {
+    const code = playerRooms.get(socket.id);
+    const room = rooms.get(code);
+    if (!room || !room.started || !["rematch", "lobby"].includes(action)) return;
+
+    room.postVotes.set(socket.id, action);
+    if (room.postVotes.size < 2) {
+      socket.emit("post-action-waiting", action);
+      return;
+    }
+
+    const votes = [...room.postVotes.values()];
+    room.postVotes.clear();
+    if (votes[0] !== votes[1]) {
+      io.to(code).emit("post-action-conflict");
+      return;
+    }
+
+    if (action === "rematch") {
+      io.to(code).emit("match-rematch", getRoomInfo(code));
+      return;
+    }
+
+    room.started = false;
+    room.map = null;
+    for (const player of room.players.values()) {
+      player.ready = false;
+      player.kaiju = null;
+    }
+    io.to(code).emit("return-to-lobby", getRoomInfo(code));
+    updateRoom(code);
   });
 
   socket.on("leave-room", () => leaveRoom(socket));
