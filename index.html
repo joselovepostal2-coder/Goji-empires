@@ -1697,7 +1697,7 @@ let MX=0,lastM=-1e9,sawTouch=false,bindT=0;const wt={};
 function inp(f){
  const two=G.sm.two,id=f.id,online=!!window.__gdaOnlineActive&&two,localSlot=Number(window.__gdaOnlineLocalSlot)||1;
  const onlineCoop=!!window.__gdaOnlineActive&&(window.__gdaOnlineMode==="story"||window.__gdaOnlineMode==="waves");
- const onlineWave=!!window.__gdaOnlineActive&&window.__gdaOnlineMode==="waves";
+ const onlineWave=!!window.__gdaOnlineActive&&["waves","tower","hardcore","raid","survival"].includes(window.__gdaOnlineMode);
  const blank={dir:0,jump:false,down:false,a:false,h:false,u:false,g:false,aHeld:false,gHeld:false};
  if(onlineWave&&(id===1||id===2)){
   if(id!==localSlot){
@@ -1794,6 +1794,25 @@ const STORY_CHAPTERS=[
  ,{title:"52 · CAZADOR DE LA TIERRA HUECA",era:"CAPÍTULOS ESPECIALES · MONSTERVERSE",hero:"GODZILLA",enemy:"SKULLCRAWLER",map:"TIERRA HUECA: CAVERNA SKULLCRAWLER",layout:"STORY52",desc:"Un depredador de la Tierra Hueca acecha entre cavernas y plataformas naturales."}
 
 ];
+// Archivo de eras: cada kaiju jugable que aún no tiene capítulo obtiene un encuentro propio.
+const GDA_STORY_ARCHIVE_NAMES=new Set(STORY_CHAPTERS.map(ch=>String(ch.enemy||"").toUpperCase()));
+ROSTER.forEach(r=>{
+ const enemy=String(r.n||"").trim().toUpperCase();
+ if(!enemy||enemy==="???"||enemy==="GODZILLA"||r.custom||!Array.isArray(r.sk)||GDA_STORY_ARCHIVE_NAMES.has(enemy))return;
+ GDA_STORY_ARCHIVE_NAMES.add(enemy);
+ const number=STORY_CHAPTERS.length+1;
+ const eraLabel=typeof eraForKaiju==="function"?eraForKaiju(r):"ARCHIVO DE KAIJUS";
+ STORY_CHAPTERS.push({
+  title:String(number).padStart(3,"0")+" · ARCHIVO: "+enemy,
+  era:"ARCHIVO DE ERAS · "+eraLabel,
+  hero:"GODZILLA",
+  enemy,
+  map:"ARCHIVO DE ERAS: "+enemy,
+  layout:"STORY_AUTO_"+String(number).padStart(3,"0"),
+  desc:"Enfréntate a "+enemy+" en el archivo de esta era y desbloquéalo para tu colección.",
+  autoKaijuArchive:true
+ });
+});
 const STORY_LAYOUTS={
  STORY1:[[-52,0,104,8,1],[-42,18,20,2],[-10,29,22,2],[24,18,20,2],[38,36,18,2]],
  STORY2:[[-70,0,50,8,1],[20,0,50,8,1],[-43,19,24,2],[20,31,25,2],[-8,43,18,2]],
@@ -1822,7 +1841,7 @@ for(let i=13;i<=STORY_CHAPTERS.length;i++){
 
 const STORY_MAPS=STORY_CHAPTERS.map((c,i)=>{const keys=Object.keys(STORY_LAYOUTS),key=c.layout;LAY[key]=STORY_LAYOUTS[key];const palettes=[
  ["#141b32","#72546b","#ffb58a"],["#1b2b42","#637d89","#f5c08a"],["#251c3b","#a56b54","#ffd77a"],["#240e18","#a43d2b","#ff9b4d"],["#101d2d","#526f88","#f2d18d"],["#14251e","#497d4e","#d8e99a"],["#110d2d","#493b86","#d8b6ff"],["#260909","#9e2b32","#ff5a45"],["#0b1e2c","#3c7182","#b9eaff"],["#150b2b","#5c3186","#ff7dc8"],["#071d20","#2d675c","#a9ffcf"],["#130e2b","#583c83","#ffe19a"]][i%12];
- const m=mp(c.map, key,palettes,"#26364b",["#dce8ff","#101628"],palettes[2],["#4b5361","#75808b"],i===3||i===7?"peaks":i===10?"forest":i===6||i===9||i===11?"spires":"city",palettes[1],{stars:i===6||i===9||i===11?1:0,fx:i===3||i===7?["ember"]:i===10?["mote"]:[],flash:i===7?.012:0});MAPS.push(m);return MAPS.length-1;});
+ const m=mp(c.map, key,palettes,"#26364b",["#dce8ff","#101628"],palettes[2],["#4b5361","#75808b"],i===3||i===7?"peaks":i===10?"forest":i===6||i===9||i===11?"spires":"city",palettes[1],{stars:i===6||i===9||i===11?1:0,fx:i===3||i===7?["ember"]:i===10?["mote"]:[],flash:i===7?.012:0});if(c.autoKaijuArchive)m.custom=true;MAPS.push(m);return MAPS.length-1;});
 // ---------- Evento Halloween: 30 arenas temáticas originales ----------
 const HALLOWEEN_MAPS=[];
 (function addHalloweenMaps(){
@@ -1877,6 +1896,10 @@ function startSmash(idx,p2,round,sti){
   {x:-10,y:16,w:20,t:14,solid:1},{x:10,y:16,w:20,t:14,solid:1},
   {x:30,y:10,w:20,t:14,solid:1},{x:50,y:0,w:20,t:14,solid:1},
   {x:70,y:-10,w:20,t:14,solid:1}];
+ if(window.__gdaOnlineActive&&window.__gdaOnlineMode==="tower"){
+  PLAT=Array.from({length:10},(_,i)=>({x:-68,y:i*24,w:136,t:6,solid:1}));
+  BZ.t=250;
+ }else BZ.t=115;
  const so=PLAT.filter(p=>p.solid);SB={l:Math.min(...so.map(p=>p.x))+4,r:Math.max(...so.map(p=>p.x+p.w))-4};
  const sc=new THREE.Scene(),S={F:null,pr:[],rings:[],t:0,hs:0,shake:0,state:"intro",intro:1.6,time:180,idx,st,round:round||0,mode,two:mode===2,flash:0,waveStyle:mode===6?waveStyle:null};
  buildStage(sc,S,M);
@@ -1884,29 +1907,42 @@ function startSmash(idx,p2,round,sti){
  if(ri==null){const pool=ROSTER.map((r,i)=>i).filter(i=>mode!==0||S.round<2||ROSTER[i].cat==="Jefes");ri=pool[Math.floor(Math.random()*pool.length)];if(ri===idx)ri=(ri+1)%ROSTER.length}
  S.p2=ri;
  if(mode===6){
-  const onlineCoopWaves=!!window.__gdaOnlineActive&&window.__gdaOnlineMode==="waves";
+  const onlineMode=window.__gdaOnlineActive?window.__gdaOnlineMode:"";
+  const onlineCoopWaves=["waves","tower","hardcore","raid","survival"].includes(onlineMode);
   const span=Math.max(1,SB.r-SB.l),pos=t=>cl(SB.l+span*t,SB.l+4,SB.r-4);
+  const floor=Number(window.__gdaOnlineTowerFloor)||1;
+  const bossFloor=onlineMode==="raid"||(onlineMode==="tower"&&(floor===5||floor===10));
   const pool=ROSTER.map((r,i)=>i).filter(i=>i!==idx&&(onlineCoopWaves?i!==ri:true));
-  const picks=[];while(picks.length<5&&picks.length<pool.length){const j=(Math.random()*pool.length)|0;if(!picks.includes(pool[j]))picks.push(pool[j]);}
+  let picks=[];
+  if(bossFloor){
+   const bosses=ROSTER.map((r,i)=>i).filter(i=>i!==idx&&i!==ri&&r.cat==="Jefes");
+   if(bosses.length)picks=[bosses[onlineMode==="raid"?0:(floor+1)%bosses.length]];
+  }
+  if(!picks.length){while(picks.length<5&&picks.length<pool.length){const j=(Math.random()*pool.length)|0;if(!picks.includes(pool[j]))picks.push(pool[j]);}}
   if(onlineCoopWaves){
+   const towerY=onlineMode==="tower"?(floor-1)*24:0;
    const allies=[mkF(idx,1,pos(.07),0),mkF(ri,2,pos(.93),0)];
    allies[0].face=1;allies[1].face=-1;
-   allies.forEach(f=>{f.wavePlayer=true;f.stocks=3;});
-   S.F=[...allies,...picks.map((enemy,j)=>{const f=mkF(enemy,3+j,pos(.22+j*.14),1);f.stocks=1;f.waveEnemy=true;f.face=f.x<(SB.l+SB.r)/2?-1:1;return f;})];
+   allies.forEach(f=>{f.wavePlayer=true;f.stocks=onlineMode==="hardcore"?1:3;f.y=towerY+12;});
+   S.F=[...allies,...picks.map((enemy,j)=>{
+    const f=mkF(enemy,3+j,pos(picks.length===1?.5:.22+j*.14),1);
+    f.stocks=onlineMode==="raid"?8:onlineMode==="tower"&&bossFloor?4:1;
+    f.waveEnemy=true;f.face=f.x<(SB.l+SB.r)/2?-1:1;f.y=towerY+12;return f;
+   })];
   }else{
    const hero=mkF(idx,1,pos(.08),0);hero.face=1;
    S.F=[hero,...picks.map((enemy,j)=>{const f=mkF(enemy,3+j,pos(.28+j*.11),1);f.stocks=1;f.waveEnemy=true;f.face=-1;return f;})];
   }
   S.waveEnemiesTotal=picks.length;S.waveEnemiesRemaining=picks.length;
  }else S.F=[mkF(idx,1,-22,0),mkF(ri,2,22,mode!==2)];
- S.F.forEach(f=>sc.add(f.mesh,f.sh));
+ S.F.forEach(f=>{f.spawnX=f.x;f.spawnY=f.y;sc.add(f.mesh,f.sh)});
  G={scene:sc,sm:S,p:S.F[0]};
  cam.position.set(0,13,CAMZ);cam.rotation.set(0,0,0);
  for(const k in JP)JP[k]=0;
  S.F.forEach(f=>{if(f.waveEnemy)return;$("shI"+f.id).src=artURL(f.idx);$("shN"+f.id).textContent=(f.ai?"CPU ":`P${f.id} `)+f.r.n;$("shN"+f.id).style.color=f.r.css;$("shN"+f.id).closest(".pn").style.setProperty("--c",f.r.css);f.ls=-1});
- $("shStage").textContent=(mode===0?`HISTORIA ${S.round+1}/3 · `:mode===5?"🎃 HALLOWEEN · ":mode===6?`OLEADA ${window.__waveNum||1} · 5 ENEMIGOS · `:"")+M.n;
+ $("shStage").textContent=(mode===0?`HISTORIA ${S.round+1}/3 · `:mode===5?"🎃 HALLOWEEN · ":mode===6?(window.__gdaOnlineMode==="tower"?`PLANTA ${window.__gdaOnlineTowerFloor||1}/10 · `:window.__gdaOnlineMode==="hardcore"?`HARDCORE ${window.__gdaOnlineHardcoreRound||1}/4 · `:window.__gdaOnlineMode==="raid"?"BOSS RAID · ":window.__gdaOnlineMode==="survival"?`SUPERVIVENCIA ${window.__gdaOnlineSurvivalRound||1} · `:`OLEADA ${window.__waveNum||1} · 5 ENEMIGOS · `):"")+M.n;
  const hn=p=>["light","heavy","ult","grab"].map(k=>kn(CTL[p][k])).join(" / ");
- $("shK").textContent=window.__gdaOnlineActive&&window.__gdaOnlineMode==="waves"?`P1: ${hn("p1")} · P2: ${hn("p2")}`:mode===2?`P1: ${hn("p1")} · ${hn("p1b")}   |   P2: ${hn("p2")}`:`${hn("p1")} · ${hn("p1b")}  (ligero / pesado / ultimate)`+(OPT.follow?" · mover: cursor":"");
+ $("shK").textContent=window.__gdaOnlineActive&&["waves","tower","hardcore","raid","survival"].includes(window.__gdaOnlineMode)?`P1: ${hn("p1")} · P2: ${hn("p2")}`:mode===2?`P1: ${hn("p1")} · ${hn("p1b")}   |   P2: ${hn("p2")}`:`${hn("p1")} · ${hn("p1b")}  (ligero / pesado / ultimate)`+(OPT.follow?" · mover: cursor":"");
  $("shF").textContent="FIGHT!";retrig();show("play")}
 
 window.gdaGetOnlineMaps=function(){return [...new Set(MAPS.filter(m=>!m.custom).map(m=>m.n))]};
@@ -1914,30 +1950,38 @@ window.gdaGetOnlineStoryChapters=function(){
  return STORY_CHAPTERS.map((chapter,index)=>({index,title:chapter.title,era:chapter.era,enemy:chapter.enemy,map:chapter.map}))
   .filter(chapter=>ROSTER.some(kaiju=>kaiju.n===chapter.enemy));
 };
-window.gdaStartOnlineBattle=function(hostKaiju,guestKaiju,mapCode,onlineMode="normal",chapterIndex=0){
+window.gdaStartOnlineBattle=function(hostKaiju,guestKaiju,mapCode,onlineMode="normal",chapterIndex=0,isRematch=false){
  const p1=ROSTER.findIndex(r=>r.n===String(hostKaiju||"").toUpperCase());
  const p2=ROSTER.findIndex(r=>r.n===String(guestKaiju||"").toUpperCase());
  if(p1<0||p2<0)return{ok:false,error:"Uno de los kaijus elegidos no existe en el roster de combate."};
- const stage=MAPS.findIndex(m=>m.n===String(mapCode||""));
+ let stage=MAPS.findIndex(m=>m.n===String(mapCode||""));
+ if(onlineMode==="tower"){const towerStage=MAPS.findIndex(m=>m.n==="TORRE DE ACERO");if(towerStage>=0)stage=towerStage;}
  if(stage<0)return{ok:false,error:"El mapa seleccionado no pertenece a los escenarios disponibles de GDA."};
+ const previousMode=window.__gdaOnlineMode;
+ const keepRun=!!isRematch&&previousMode===onlineMode&&!window.__gdaOnlineRunComplete;
  window.__gdaOnlineActive=true;window.__gdaOnlineMode=onlineMode;window.__gdaOnlineChapterIndex=Number(chapterIndex)||0;
  window.__gdaRemoteInput={dir:0,jump:false,down:false,a:false,h:false,u:false,g:false,aHeld:false,gHeld:false};
  window.__gdaRemoteInputAt=0;window.__gdaLastOnlineInput=0;
- pick1=-1;freeVersus="person";
- if(onlineMode==="waves"){
-  mode=6;waveStyle="coop";waveWins=0;waveTarget=5;window.__waveNum=1;selectedStoryChapter=-1;
+ pick1=-1;freeVersus="person";selectedStoryChapter=-1;
+ if(!keepRun){
+  window.__gdaOnlineRunComplete=false;
+  window.__gdaOnlineTowerFloor=1;window.__gdaOnlineHardcoreRound=1;window.__gdaOnlineSurvivalRound=1;
+  window.__gdaOnlineTournamentScore=[0,0];window.__gdaOnlineTournamentRound=1;
+  waveWins=0;window.__waveNum=1;
+ }
+ if(onlineMode==="waves"){mode=6;waveStyle="coop";waveTarget=5;startSmash(p1,p2,0,stage);}
+ else if(["tower","hardcore","raid","survival"].includes(onlineMode)){
+  mode=6;waveStyle="coop";waveTarget=onlineMode==="tower"?10:onlineMode==="hardcore"?4:onlineMode==="raid"?1:Number.MAX_SAFE_INTEGER;
   startSmash(p1,p2,0,stage);
  }else if(onlineMode==="story"){
   const chapters=window.gdaGetOnlineStoryChapters?window.gdaGetOnlineStoryChapters():[];
-  const selected=chapters.find(c=>c.index===Number(chapterIndex));
+  const selected=chapters.find(ch=>ch.index===Number(chapterIndex));
   if(!selected)return{ok:false,error:"El capítulo elegido no está disponible en este plantel."};
   const enemy=ROSTER.findIndex(r=>r.n===selected.enemy);
   if(enemy<0)return{ok:false,error:"El rival de ese capítulo no está disponible."};
-  mode=0;selectedStoryChapter=Number(chapterIndex);
-  startSmash(p1,enemy,0,stage);
+  mode=0;selectedStoryChapter=Number(chapterIndex);startSmash(p1,enemy,0,stage);
  }else{
-  mode=2;selectedStoryChapter=-1;
-  startSmash(p1,p2,0,stage);
+  mode=2;startSmash(p1,p2,0,stage);
  }
  return{ok:true};
 };
@@ -2303,19 +2347,43 @@ function act(f,o,dt){const a=f.act;a.t+=dt;
   if(a.t>=.6)f.act=null;
  }else{if(a.t>=.2&&!a.fx){a.fx=1;f.shield=3;f.boost=3;if(s.rollGuard){f.guardUntil=S.t+3;toastCombat("\u00a1CAPARAZ\u00d3N DEFENSIVO! RODADA ESPINOSA POTENCIADA","#d8d0b0")}}if(a.t>=.4)f.act=null}}
 function ko(f){const S=G.sm;f.stocks--;f.dead=1.4;f.act=null;f.beam=null;S.shake=8;
- if(S.mode===6&&f.waveEnemy&&f.stocks<=0){f.waveDead=true;f.dead=999;f.mesh.visible=false;f.sh.visible=false;S.waveEnemiesRemaining=Math.max(0,(S.waveEnemiesRemaining||1)-1);toastCombat(`¡ENEMIGO DERROTADO! QUEDAN ${S.waveEnemiesRemaining}`,'#ffd24a');if(S.waveEnemiesRemaining===0){waveWins=waveTarget-1;finish(0)}return;}
+ if(S.mode===6&&f.waveEnemy&&f.stocks<=0){f.waveDead=true;f.dead=999;f.mesh.visible=false;f.sh.visible=false;S.waveEnemiesRemaining=Math.max(0,(S.waveEnemiesRemaining||1)-1);toastCombat(`¡ENEMIGO DERROTADO! QUEDAN ${S.waveEnemiesRemaining}`,'#ffd24a');if(S.waveEnemiesRemaining===0){if(!["tower","hardcore","raid","survival"].includes(window.__gdaOnlineMode))waveWins=waveTarget-1;finish(0)}return;}
  if(f.stocks<=0)finish(S.mode===6?(f.wavePlayer?1:0):(f===S.F[0]?1:0))}
 function finish(w){const S=G.sm;if(S.state==="over")return;S.state="over";S.win=w;
  let earned=w<0?15:(w===0?25:10),waveCompleted=false;
  if(S.mode===6){
+  const onlineMode=window.__gdaOnlineActive?window.__gdaOnlineMode:"waves";
   if(w===0){
-   waveWins++;
-   if(waveWins>=waveTarget){
-    earned=waveStyle==="coop"?200:500;waveWins=0;waveCompleted=true;
-    window.__waveNum=(window.__waveNum||1)+1;
-    toastCombat(`¡OLEADA COMPLETADA! +${earned} TOKENS`,"#ffd24a");
-   }else{earned=0;toastCombat(`ENEMIGO ${waveWins}/${waveTarget} DERROTADO`,"#ffd24a")}
-  }else{waveWins=0;earned=0;toastCombat("OLEADA INTERRUMPIDA · VUELVES A EMPEZAR LOS 5 RIVALES","#ff8b8b")}
+   if(onlineMode==="tower"){
+    const completed=Number(window.__gdaOnlineTowerFloor)||1;window.__gdaOnlineLastCompletedFloor=completed;
+    if(completed>=10){earned=500;waveCompleted=true;window.__gdaOnlineRunComplete=true;toastCombat("¡TORRE CONQUISTADA! +500 TOKENS","#ffd24a");}
+    else{earned=0;window.__gdaOnlineTowerFloor=completed+1;toastCombat("¡PLANTA "+completed+"/10 SUPERADA!","#ffd24a");}
+   }else if(onlineMode==="hardcore"){
+    const completed=Number(window.__gdaOnlineHardcoreRound)||1;window.__gdaOnlineLastHardcoreRound=completed;
+    if(completed>=4){earned=500;waveCompleted=true;window.__gdaOnlineRunComplete=true;toastCombat("¡HARDCORE COMPLETADO: 20 ENEMIGOS DERROTADOS!","#ffd24a");}
+    else{earned=0;window.__gdaOnlineHardcoreRound=completed+1;toastCombat("¡GRUPO "+completed+"/4 SUPERADO!","#ffd24a");}
+   }else if(onlineMode==="raid"){
+    earned=350;waveCompleted=true;window.__gdaOnlineRunComplete=true;toastCombat("¡BOSS RAID COMPLETADO! +350 TOKENS","#ffd24a");
+   }else if(onlineMode==="survival"){
+    const completed=Number(window.__gdaOnlineSurvivalRound)||1;
+    window.__gdaOnlineLastSurvivalRound=completed;window.__gdaOnlineSurvivalRound=completed+1;
+    earned=60;waveCompleted=true;toastCombat("¡GRUPO "+completed+" SUPERADO! +60 TOKENS","#ffd24a");
+   }else{
+    waveWins++;
+    if(waveWins>=waveTarget){
+     earned=waveStyle==="coop"?200:500;waveWins=0;waveCompleted=true;
+     window.__waveNum=(window.__waveNum||1)+1;
+     toastCombat(`¡OLEADA COMPLETADA! +${earned} TOKENS`,"#ffd24a");
+    }else{earned=0;toastCombat(`ENEMIGO ${waveWins}/${waveTarget} DERROTADO`,"#ffd24a")}
+   }
+  }else{
+   earned=0;
+   if(["tower","hardcore","raid","survival"].includes(onlineMode)){
+    window.__gdaOnlineRunComplete=true;
+    window.__gdaOnlineTowerFloor=1;window.__gdaOnlineHardcoreRound=1;window.__gdaOnlineSurvivalRound=1;
+    toastCombat("EQUIPO DERROTADO · INTÉNTALO DE NUEVO","#ff8b8b");
+   }else{waveWins=0;toastCombat("OLEADA INTERRUMPIDA · VUELVES A EMPEZAR LOS 5 RIVALES","#ff8b8b")}
+  }
  }
  if(earned>0){TITAN_TOKENS+=earned;saveTitanTokens();}
 
@@ -2325,7 +2393,26 @@ function finish(w){const S=G.sm;if(S.state==="over")return;S.state="over";S.win=
   const unlockedName=String(STORY_CHAPTERS[selectedStoryChapter].enemy||"").toUpperCase();
   if(unlockedName)toastCombat("¡KAIJU DESBLOQUEADO: "+unlockedName+"!","#7dffbd");
  }
- $("shF").textContent=S.mode===6?(w===0?(waveCompleted?`¡OLEADA COMPLETADA! +${earned} TOKENS · SALDO: ${TITAN_TOKENS.toLocaleString("es-CL")} · ENTER: SIGUIENTE OLEADA`:`¡RIVAL DERROTADO! ${waveWins}/${waveTarget} · SIN RECOMPENSA HASTA DERROTAR A LOS 5 · ENTER: SIGUIENTE RIVAL`):"OLEADA FALLIDA · PROGRESO REINICIADO · ENTER: REINTENTAR"):w<0?"EMPATE · ENTER: revancha":story&&S.round<2?"¡VICTORIA! · ENTER: siguiente combate":story?"¡HISTORIA COMPLETADA! · ENTER: reiniciar":S.mode===0?"DERROTA · ENTER: reintentar":`¡GANA P${w+1}! · ENTER: revancha`;
+ let endText="";
+ if(S.mode===6&&window.__gdaOnlineActive){
+  const om=window.__gdaOnlineMode;
+  if(om==="tower")endText=w===0?(window.__gdaOnlineRunComplete?`¡TORRE CONQUISTADA! 10/10 PLANTAS · +${earned} TOKENS`:`¡PLANTA ${window.__gdaOnlineLastCompletedFloor||1}/10 SUPERADA! · ENTER: SIGUIENTE PLANTA`):"ASCENSO INTERRUMPIDO · ENTER: REINTENTAR";
+  else if(om==="hardcore")endText=w===0?(window.__gdaOnlineRunComplete?`¡HARDCORE COMPLETADO! 20 ENEMIGOS · +${earned} TOKENS`:`GRUPO ${window.__gdaOnlineLastHardcoreRound||1}/4 SUPERADO · ENTER: SIGUIENTE GRUPO`):"HARDCORE FALLIDO · UNA SOLA VIDA";
+  else if(om==="raid")endText=w===0?"¡JEFE DERROTADO! · BOSS RAID COMPLETADO":"BOSS RAID FALLIDO";
+  else if(om==="survival")endText=w===0?`GRUPO ${window.__gdaOnlineLastSurvivalRound||1} SUPERADO · +${earned} TOKENS · ENTER: SIGUIENTE OLEADA`:"SUPERVIVENCIA TERMINADA";
+  else endText=w===0?(waveCompleted?`¡OLEADA COMPLETADA! +${earned} TOKENS · ENTER: SIGUIENTE OLEADA`:`RIVALES DERROTADOS · ENTER: CONTINUAR`):"OLEADA FALLIDA · ENTER: REINTENTAR";
+ }else if(S.mode===6)endText=w===0?(waveCompleted?`¡OLEADA COMPLETADA! +${earned} TOKENS · SALDO: ${TITAN_TOKENS.toLocaleString("es-CL")} · ENTER: SIGUIENTE OLEADA`:`¡RIVAL DERROTADO! ${waveWins}/${waveTarget} · ENTER: SIGUIENTE RIVAL`):"OLEADA FALLIDA · ENTER: REINTENTAR";
+ else if(S.mode===2&&window.__gdaOnlineActive&&window.__gdaOnlineMode==="tournament"){
+  const score=window.__gdaOnlineTournamentScore||[0,0];
+  endText=window.__gdaOnlineRunComplete?`¡TORNEO TERMINADO! P1 ${score[0]} — ${score[1]} P2`:`TORNEO · P1 ${score[0]} — ${score[1]} P2 · ENTER: SIGUIENTE COMBATE`;
+ }else endText=w<0?"EMPATE · ENTER: revancha":story&&S.round<2?"¡VICTORIA! · ENTER: siguiente combate":story?"¡HISTORIA COMPLETADA! · ENTER: reiniciar":S.mode===0?"DERROTA · ENTER: reintentar":`¡GANA P${w+1}! · ENTER: revancha`;
+ $("shF").textContent=endText;
+ if(window.__gdaOnlineActive&&S.mode===2&&window.__gdaOnlineMode==="tournament"&&(w===0||w===1)){
+  const score=window.__gdaOnlineTournamentScore||(window.__gdaOnlineTournamentScore=[0,0]);
+  score[w]=Number(score[w]||0)+1;
+  if(score[w]>=2)window.__gdaOnlineRunComplete=true;
+  else window.__gdaOnlineTournamentRound=(Number(window.__gdaOnlineTournamentRound)||1)+1;
+ }
  if(window.__gdaOnlineActive)window.dispatchEvent(new Event("gda-online-match-finished"));
 }
 function fighter(f,o,dt){const st=f.st,S=G.sm;
@@ -2465,7 +2552,7 @@ function smStep(dt){const S=G.sm,[a,b]=S.F;const aimHud=$("doratsAimHud");if(aim
    else o=a;
   }else o=f===a?b:a;
   if(!o)continue;
-  if(f.dead>0){f.dead-=dt;if(f.dead<=0){Object.assign(f,{x:0,y:55,vx:0,vy:0,pct:0,inv:2.5,jumps:1,stun:0})}continue}
+  if(f.dead>0){f.dead-=dt;if(f.dead<=0){Object.assign(f,{x:Number.isFinite(f.spawnX)?f.spawnX:0,y:Number.isFinite(f.spawnY)?f.spawnY:55,vx:0,vy:0,pct:0,inv:2.5,jumps:1,stun:0})}continue}
   fighter(f,o,dt)}
  for(const p of S.pr){p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;let o=p.from===a?b:a;
   const projectileBox={x:p.x-p.r,y:p.y-p.r,w:2*p.r,h:2*p.r};
@@ -2568,7 +2655,7 @@ function smashTick(dt){const S=G.sm;dt=Math.min(dt,.033);
  S.flash-=dt;if(Math.random()<S.fr)S.flash=.12;S.amb.intensity=S.flash>0?2.2:S.ab;
  // cámara FIJA en un plano frontal estricto: z constante y SIN rotación; solo se desplaza en X/Y para seguir la acción
  const liveF=S.F.filter(f=>!f.waveDead&&f.dead<=0),centerX=S.mode===6?(liveF.reduce((sum,f)=>sum+f.x,0)/Math.max(1,liveF.length)):(a.x+b.x)/2,centerY=S.mode===6?(liveF.reduce((sum,f)=>sum+f.y,0)/Math.max(1,liveF.length)):(a.y+b.y)/2;
- const tx=cl(centerX,-30,30),ty=cl(centerY,4,30),k=1-Math.exp(-dt*4);
+ const tx=cl(centerX,-30,30),ty=cl(centerY,4,window.__gdaOnlineActive&&window.__gdaOnlineMode==="tower"?238:30),k=1-Math.exp(-dt*4);
  cam.position.x+=(tx-cam.position.x)*k+(Math.random()-.5)*S.shake*.1;cam.position.y+=(ty+13-cam.position.y)*k;cam.position.z=CAMZ;cam.rotation.set(0,0,0);
  S.shake=Math.max(0,S.shake-dt*20);
  // HUD
@@ -2663,7 +2750,7 @@ function eraForKaiju(r){
  if(/DORATS|SHOWA|MINILLA|VARAN|GABARA|GEZORA|GANIMES|KAMOEBAS|SANDA|GAIRA|EBIRAH|MEGALON|GOROSAURUS|ANGUIRUS|MOGUERA SHOWA|KING KONG 1962/.test(n))return "SHOWA";
  if(/HEISEI|BIOLLANTE|BATTRA|DESTOROYAH|SPACE.?GODZILLA|GODZILLA JUNIOR|RODAN HEISEI|MECHA.?KING GHIDORAH|MOGUERA TERRA/.test(n))return "HEISEI";
  if(/MILLENNIUM|2000|2002|2003|2004|FINAL WARS|KIRYU|MEGAGUIRUS|ORGA|ZILLA|GIGAN REFORZADO/.test(n))return "MILLENNIUM";
- if(/MONSTERVERSE|LEGENDARY|MUTO|KONG|SKULLCRAWLER|BEHEMOTH|METHUSELAH|SCYLLA|TIAMAT|SHIMO|CAMAZOTZ|AMHULUK|DOUG|FROG TITAN/.test(n))return "MONSTERVERSE";
+ if(/MONSTERVERSE|LEGENDARY|LEGENDARIO|MUTO|KONG|SKULLCRAWLER|BEHEMOTH|METHUSELAH|SCYLLA|TIAMAT|SHIMO|CAMAZOTZ|AMHULUK|DOUG|FROG TITAN/.test(n))return "MONSTERVERSE";
  if(/SHIN GODZILLA|MINUS ONE|GODZILLA EARTH|GODZILLA FILIUS|AQUATILIS|TERRESTRIS|THERMONUCLEAR|GIGAN REX|GODZILLA 2023|GODZILLA EARTH JUVENIL/.test(n))return "REIWA";
  return "SHOWA";
 }
