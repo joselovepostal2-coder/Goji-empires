@@ -179,11 +179,11 @@ io.on("connection", socket => {
     }
     const mode = settings && settings.mode;
     const chapterIndex = Number(settings && settings.storyChapterIndex);
-    if (!["normal", "story", "waves"].includes(mode)) {
+    if (!["normal", "tournament", "story", "waves", "tower", "hardcore", "raid", "survival"].includes(mode)) {
       socket.emit("room-action-error", "Selecciona un modo de juego válido.");
       return;
     }
-    if (mode === "story" && (!Number.isInteger(chapterIndex) || chapterIndex < 0 || chapterIndex >= 52)) {
+    if (mode === "story" && (!Number.isInteger(chapterIndex) || chapterIndex < 0 || chapterIndex >= 1000)) {
       socket.emit("room-action-error", "Selecciona un capítulo de Historia válido.");
       return;
     }
@@ -208,7 +208,7 @@ io.on("connection", socket => {
       return;
     }
     if (ready === true && room.mode === "story" &&
-        (!Number.isInteger(room.storyChapterIndex) || room.storyChapterIndex < 0 || room.storyChapterIndex >= 52)) {
+        (!Number.isInteger(room.storyChapterIndex) || room.storyChapterIndex < 0 || room.storyChapterIndex >= 1000)) {
       socket.emit("room-action-error", "El anfitrión debe elegir un capítulo de Historia.");
       return;
     }
