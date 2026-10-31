@@ -1562,6 +1562,28 @@ function buildStage(sc,S,M){
   const edge=new THREE.Mesh(new THREE.BoxGeometry(p.w,.28,.18),new THREE.MeshBasicMaterial({color:p.solid?M.ps[1]:M.c2||0x8ab7c8}));
   edge.position.set(p.x+p.w/2,p.y-.12,2.12);sc.add(edge);
   const lh=p.solid?16:6;for(let i=0;i<=3;i++){const b=new THREE.Mesh(new THREE.BoxGeometry(1.2,lh,1.2),MT(0x2a2a30));b.position.set(p.x+2+i*(p.w-4)/3,p.y-p.t-lh/2,(i%2?1:-1)*1.2);sc.add(b)}}
+ // Fachada decorativa de la TORRE DE ACERO: los pisos se ven al fondo mientras el equipo asciende.
+ if(window.__gdaOnlineActive&&window.__gdaOnlineMode==="tower"){
+  const towerDark=MT(0x152737),towerSteel=MT(0x38566a);
+  const towerGlass=new THREE.MeshBasicMaterial({color:0x287b9c,transparent:true,opacity:.42});
+  for(let floor=0;floor<10;floor++){
+   const y=floor*32;
+   const slab=new THREE.Mesh(new THREE.BoxGeometry(158,2.2,10),towerDark);
+   slab.position.set(0,y-7,-12);sc.add(slab);
+   const rim=new THREE.Mesh(new THREE.BoxGeometry(158,.8,1),new THREE.MeshBasicMaterial({color:0x58c9e8}));
+   rim.position.set(0,y-5.7,-6.7);sc.add(rim);
+   for(const x of [-48,-16,16,48]){
+    const win=new THREE.Mesh(new THREE.BoxGeometry(11,13,.6),towerGlass);
+    win.position.set(x,y+7,-11);sc.add(win);
+   }
+  }
+  for(const x of [-77,77]){
+   const column=new THREE.Mesh(new THREE.BoxGeometry(5,310,8),towerSteel);
+   column.position.set(x,140,-12);sc.add(column);
+  }
+  const crown=new THREE.Mesh(new THREE.BoxGeometry(164,7,13),MT(0x213b4d));
+  crown.position.set(0,308,-12);sc.add(crown);
+ }
  // Tren gigante del escenario especial: locomotora y vagones geométricos.
  if(M.train){
   S.train={x:-92,y:5,vx:13,thrown:false,mesh:new THREE.Group()};
@@ -1896,9 +1918,12 @@ function startSmash(idx,p2,round,sti){
   {x:-10,y:16,w:20,t:14,solid:1},{x:10,y:16,w:20,t:14,solid:1},
   {x:30,y:10,w:20,t:14,solid:1},{x:50,y:0,w:20,t:14,solid:1},
   {x:70,y:-10,w:20,t:14,solid:1}];
+ const towerFloor=Math.max(1,Math.min(10,Number(window.__gdaOnlineTowerFloor)||1));
+ const towerY=(towerFloor-1)*32;
  if(window.__gdaOnlineActive&&window.__gdaOnlineMode==="tower"){
-  PLAT=Array.from({length:10},(_,i)=>({x:-68,y:i*24,w:136,t:6,solid:1}));
-  BZ.t=250;
+  // Solo el piso actual es sólido: el equipo asciende automáticamente al superar cada planta.
+  PLAT=[{x:-68,y:towerY,w:136,t:8,solid:1}];
+  BZ.t=towerY+82;
  }else BZ.t=115;
  const so=PLAT.filter(p=>p.solid);SB={l:Math.min(...so.map(p=>p.x))+4,r:Math.max(...so.map(p=>p.x+p.w))-4};
  const sc=new THREE.Scene(),S={F:null,pr:[],rings:[],t:0,hs:0,shake:0,state:"intro",intro:1.6,time:180,idx,st,round:round||0,mode,two:mode===2,flash:0,waveStyle:mode===6?waveStyle:null};
@@ -1920,7 +1945,7 @@ function startSmash(idx,p2,round,sti){
   }
   if(!picks.length){while(picks.length<5&&picks.length<pool.length){const j=(Math.random()*pool.length)|0;if(!picks.includes(pool[j]))picks.push(pool[j]);}}
   if(onlineCoopWaves){
-   const towerY=onlineMode==="tower"?(floor-1)*24:0;
+   const towerY=onlineMode==="tower"?(floor-1)*32:0;
    const allies=[mkF(idx,1,pos(.07),0),mkF(ri,2,pos(.93),0)];
    allies[0].face=1;allies[1].face=-1;
    allies.forEach(f=>{f.wavePlayer=true;f.stocks=onlineMode==="hardcore"?1:3;f.y=towerY+12;});
@@ -2655,7 +2680,7 @@ function smashTick(dt){const S=G.sm;dt=Math.min(dt,.033);
  S.flash-=dt;if(Math.random()<S.fr)S.flash=.12;S.amb.intensity=S.flash>0?2.2:S.ab;
  // cámara FIJA en un plano frontal estricto: z constante y SIN rotación; solo se desplaza en X/Y para seguir la acción
  const liveF=S.F.filter(f=>!f.waveDead&&f.dead<=0),centerX=S.mode===6?(liveF.reduce((sum,f)=>sum+f.x,0)/Math.max(1,liveF.length)):(a.x+b.x)/2,centerY=S.mode===6?(liveF.reduce((sum,f)=>sum+f.y,0)/Math.max(1,liveF.length)):(a.y+b.y)/2;
- const tx=cl(centerX,-30,30),ty=cl(centerY,4,window.__gdaOnlineActive&&window.__gdaOnlineMode==="tower"?238:30),k=1-Math.exp(-dt*4);
+ const tx=cl(centerX,-30,30),ty=cl(centerY,4,window.__gdaOnlineActive&&window.__gdaOnlineMode==="tower"?330:30),k=1-Math.exp(-dt*4);
  cam.position.x+=(tx-cam.position.x)*k+(Math.random()-.5)*S.shake*.1;cam.position.y+=(ty+13-cam.position.y)*k;cam.position.z=CAMZ;cam.rotation.set(0,0,0);
  S.shake=Math.max(0,S.shake-dt*20);
  // HUD
