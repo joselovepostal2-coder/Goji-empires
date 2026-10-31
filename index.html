@@ -3260,11 +3260,32 @@ show("menu");
   branches.forEach(node=>{
    const done=unlocked.has(node.id), parentOpen=!node.parent||unlocked.has(node.parent);
    const card=document.createElement("article");card.className="gdaGeneNode "+(done?"done":parentOpen?"ready":"hidden");
-   const title=document.createElement("h3");title.textContent=(done?"✓ ":"🔒 ")+node.name;
+   const title=document.createElement("h3");title.textContent=done?"✓ "+node.name:(parentOpen?"🔒 "+node.name:"🔒 RAMA OCULTA");
    const meta=document.createElement("div");meta.className="gdaGeneMeta";meta.textContent=node.kind+" · "+(done?"DESBLOQUEADO":parentOpen?"DISPONIBLE":"RAMA OCULTA");
    const desc=document.createElement("p");desc.textContent=parentOpen||done?node.desc:"Desbloquea la mejora anterior para revelar esta opción.";
    const action=document.createElement("button");action.className="gdaGeneAction";action.type="button";
-   if(done){action.textContent=node.children.length?"VER RAMAS DESBLOQUEADAS":"MEJORA ACTIVADA";action.disabled=true}
+   if(done && node.kind==="Combinación"){
+    action.textContent="ABRIR RECETA EN EL COMBINADOR";action.disabled=false;
+    action.addEventListener("click",()=>{
+     const recipes={
+      guardianfusion:["GODZILLA","KING CAESAR","GODZILLA"],
+      deepcore:["BARAGON","MEGALON","MEGALON"],
+      meltdown:["BURNING GODZILLA","GODZILLA","BURNING GODZILLA"],
+      spacefusion:["SPACEGODZILLA","KING GHIDORAH","MECHA-KING GHIDORAH"],
+      biollantefusion:["BIOLLANTE","HEDORAH","ORGA"],
+      swarm:["MEGAGUIRUS","KAMACURAS","GIGAN"],
+      leviathan:["MANDA","TITANOSAURUS","SHIMO"]
+     };
+     const recipe=recipes[node.id];if(!recipe)return;
+     const tab=document.querySelector('[data-edtab="char"]');if(tab)tab.click();
+     const ids=["comboHeadSource","comboBodySource","comboArmsSource"];
+     ids.forEach((id,i)=>{const sel=document.getElementById(id);if(!sel)return;const opts=Array.from(sel.options);const match=opts.find(o=>o.text.toUpperCase().includes(recipe[i]));if(match)sel.value=match.value;});
+     const name=document.getElementById("comboName");if(name)name.value=node.name;
+     const preview=document.getElementById("previewCombo");if(preview)preview.click();
+     panel.classList.remove("open");
+    });
+   }
+   else if(done){action.textContent=node.children.length?"VER RAMAS DESBLOQUEADAS":"MEJORA ACTIVADA";action.disabled=true}
    else if(!parentOpen){action.textContent="RAMA BLOQUEADA";action.disabled=true}
    else{action.textContent="DESBLOQUEAR · "+node.cost+" TOKENS";action.disabled=(node.cost>0&&(typeof TITAN_TOKENS==="undefined"||TITAN_TOKENS<node.cost));action.addEventListener("click",()=>{
     if(node.cost>0){if(typeof TITAN_TOKENS==="undefined"||TITAN_TOKENS<node.cost)return;TITAN_TOKENS-=node.cost;if(typeof saveTitanTokens==="function")saveTitanTokens()}
