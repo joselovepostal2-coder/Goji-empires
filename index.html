@@ -3142,18 +3142,44 @@ body.gda-in-combat #gda068-launch,body.gda-in-combat #g68-evo-launch,body.gda-in
  let lobbyCode='', lobbyReady=false, lobbyRole='host';
  const kaijuNames={'GODZILLA':'Godzilla','ANGUIRUS':'Anguirus','BURNING GODZILLA':'Burning Godzilla','SUPER MECHAGODZILLA':'Super Mechagodzilla','MECHA-KING GHIDORAH':'Mecha-King Ghidorah'};
  const mapNames={};
+ const onlineModeSelect=$('g68-mode-select');
+ const onlineStoryChapterSelect=$('g68-story-chapter');
+ const onlineStoryWrap=$('g68-story-chapter-wrap');
+ const onlineStoryChapters=window.gdaGetOnlineStoryChapters?window.gdaGetOnlineStoryChapters():[];
+ if(onlineStoryChapterSelect){
+  onlineStoryChapterSelect.replaceChildren();
+  onlineStoryChapters.forEach(chapter=>{const option=document.createElement('option');option.value=String(chapter.index);option.textContent=chapter.title+' · '+chapter.enemy;onlineStoryChapterSelect.appendChild(option)});
+  if(onlineStoryChapterSelect.options.length)onlineStoryChapterSelect.value=onlineStoryChapterSelect.options[0].value;
+ }
+ function syncOnlineModeControls(modeValue){
+  if(onlineModeSelect)onlineModeSelect.value=modeValue||'normal';
+  if(onlineStoryWrap)onlineStoryWrap.style.display=(modeValue||'normal')==='story'?'block':'none';
+ }
+ function sendOnlineRoomMode(){
+  if(lobbyRole!=='host'||!gdaOnlineSocket?.connected)return;
+  const modeValue=onlineModeSelect.value;
+  const chapterIndex=Number(onlineStoryChapterSelect.value);
+  if(modeValue==='story'&&!Number.isInteger(chapterIndex)){ $('g68-lobby-note').textContent='Selecciona un capítulo de Historia.';return}
+  gdaOnlineSocket.emit('set-room-mode',{mode:modeValue,storyChapterIndex:Number.isInteger(chapterIndex)?chapterIndex:0});
+ }
+ onlineModeSelect.addEventListener('change',()=>{syncOnlineModeControls(onlineModeSelect.value);sendOnlineRoomMode()});
+ onlineStoryChapterSelect.addEventListener('change',sendOnlineRoomMode);
  function openLobby(role,code){
   lobbyRole=role;lobbyCode=code;window.gdaLobbyCode=code;window.gdaRoomMap=null;
   $('g68-online-home').style.display='none';$('g68-online-lobby').style.display='block';
   $('g68-lobby-code').textContent=code;$('g68-lobby-role').textContent=role==='host'?'ANFITRIÓN':'INVITADO';
-  $('g68-lobby-note').textContent=role==='host'?'Elige un mapa para esta sala y comparte el código.':'Esperando a que el anfitrión elija el mapa…';
+  $('g68-lobby-note').textContent=role==='host'?'Elige modo y mapa para esta sala, y comparte el código.':'Esperando la configuración del anfitrión…';
   $('g68-player2-status').textContent=role==='host'?'Esperando al segundo jugador…':'Esperando al anfitrión…';
   $('g68-player2-kaiju').textContent='Esperando jugador…';
   onlineMapSelect.disabled=role!=='host';onlineMapSelect.value='';
+  onlineModeSelect.disabled=role!=='host';onlineStoryChapterSelect.disabled=role!=='host';
+  syncOnlineModeControls('normal');
+  if(onlineStoryChapterSelect.options.length)onlineStoryChapterSelect.selectedIndex=0;
   $('g68-map-status').textContent=role==='host'?'Selecciona un mapa obligatorio.':'Esperando la selección del anfitrión…';
   lobbyReady=false;$('g68-ready-btn').textContent='✓ Estoy listo';
   window.gdaSetLobbyReady=(value)=>{lobbyReady=!!value;$('g68-ready-btn').textContent=lobbyReady?'✓ Listo':'✓ Estoy listo'};
  }
+ window.gdaOpenLobby=openLobby;
  $('g68-room').addEventListener('click',()=>{if(!gdaOnlineSocket||!gdaOnlineSocket.connected){$('g68-onlinemsg').textContent='Conectando al servidor… intenta de nuevo en unos segundos.';return}gdaOnlineSocket.emit('create-room',(result)=>{if(!result||!result.ok){$('g68-onlinemsg').textContent=result?.error||'No se pudo crear la sala.';return}lobbyCode=result.code;window.gdaLobbyCode=lobbyCode;$('g68-joincode').value=lobbyCode;state.room++;save();openLobby('host',lobbyCode);$('g68-lobby-note').textContent='Sala online creada. Comparte el código con tu amigo.';$('g68-player2-status').textContent='Esperando al segundo jugador…';$('g68-onlinemsg').textContent='Sala real creada: '+lobbyCode})});
  $('g68-joinroom').addEventListener('click',()=>{const code=$('g68-joincode').value.trim().toUpperCase();if(code.length<4){$('g68-onlinemsg').textContent='Escribe un código de sala válido.';return}if(!gdaOnlineSocket||!gdaOnlineSocket.connected){$('g68-onlinemsg').textContent='Conectando al servidor… intenta de nuevo en unos segundos.';return}gdaOnlineSocket.emit('join-room',code,(result)=>{if(!result||!result.ok){$('g68-onlinemsg').textContent=result?.error||'No se pudo entrar a la sala.';return}lobbyCode=result.code;window.gdaLobbyCode=lobbyCode;$('g68-joincode').value=lobbyCode;openLobby('guest',lobbyCode);$('g68-lobby-note').textContent='Conectado a la sala online.';$('g68-onlinemsg').textContent='Te uniste a la sala '+lobbyCode})});
  $('g68-kaiju-select').addEventListener('change',()=>{$('g68-kaiju-status').textContent='Kaiju seleccionado: '+(kaijuNames[$('g68-kaiju-select').value]||$('g68-kaiju-select').value);$('g68-player1-kaiju').textContent=kaijuNames[$('g68-kaiju-select').value]||$('g68-kaiju-select').value});
@@ -3177,6 +3203,7 @@ body.gda-in-combat #gda068-launch,body.gda-in-combat #g68-evo-launch,body.gda-in
   const selected=$('g68-kaiju-select').value;
   if(!selected){$('g68-lobby-note').textContent='Selecciona un kaiju primero.';return}
   if(!window.gdaRoomMap){$('g68-lobby-note').textContent=lobbyRole==='host'?'Debes elegir un mapa antes de marcar Listo.':'El anfitrión todavía debe elegir el mapa.';return}
+  if(onlineModeSelect.value==='story'&&!onlineStoryChapterSelect.value){$('g68-lobby-note').textContent='El anfitrión debe elegir un capítulo de Historia.';return}
   lobbyReady=!lobbyReady;$('g68-ready-btn').textContent=lobbyReady?'✓ Listo':'✓ Estoy listo';
   gdaOnlineSocket.emit('select-kaiju',selected);
   gdaOnlineSocket.emit('player-ready',lobbyReady);
