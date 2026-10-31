@@ -2295,8 +2295,9 @@ function finish(w){const S=G.sm;if(S.state==="over")return;S.state="over";S.win=
   const unlockedName=String(STORY_CHAPTERS[selectedStoryChapter].enemy||"").toUpperCase();
   if(unlockedName)toastCombat("¡KAIJU DESBLOQUEADO: "+unlockedName+"!","#7dffbd");
  }
- $("shF").textContent=S.mode===6?(w===0?(waveCompleted?`¡OLEADA COMPLETADA! +${earned} TOKENS · SALDO: ${TITAN_TOKENS.toLocaleString("es-CL")} · ENTER: SIGUIENTE OLEADA`:`¡RIVAL DERROTADO! ${waveWins}/${waveTarget} · SIN RECOMPENSA HASTA DERROTAR A LOS 5 · ENTER: SIGUIENTE RIVAL`):"OLEADA FALLIDA · PROGRESO REINICIADO · ENTER: REINTENTAR"):w<0?"EMPATE · ENTER: revancha":story&&S.round<2?"¡VICTORIA! · ENTER: siguiente combate":story?"¡HISTORIA COMPLETADA! · ENTER: reiniciar":S.mode===0?"DERROTA · ENTER: reintentar":`¡GANA P${w+1}! · ENTER: revancha`}
+ $("shF").textContent=S.mode===6?(w===0?(waveCompleted?`¡OLEADA COMPLETADA! +${earned} TOKENS · SALDO: ${TITAN_TOKENS.toLocaleString("es-CL")} · ENTER: SIGUIENTE OLEADA`:`¡RIVAL DERROTADO! ${waveWins}/${waveTarget} · SIN RECOMPENSA HASTA DERROTAR A LOS 5 · ENTER: SIGUIENTE RIVAL`):"OLEADA FALLIDA · PROGRESO REINICIADO · ENTER: REINTENTAR"):w<0?"EMPATE · ENTER: revancha":story&&S.round<2?"¡VICTORIA! · ENTER: siguiente combate":story?"¡HISTORIA COMPLETADA! · ENTER: reiniciar":S.mode===0?"DERROTA · ENTER: reintentar":`¡GANA P${w+1}! · ENTER: revancha`;
  if(window.__gdaOnlineActive)window.dispatchEvent(new Event("gda-online-match-finished"));
+}
 function fighter(f,o,dt){const st=f.st,S=G.sm;
  const i=S.state!=="play"?{}:f.ai?ai(f,o):inp(f);
  // Modo agresivo activado con Y: dura 10 s y consume la barra Ultimate al activarse.
