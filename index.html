@@ -3287,15 +3287,25 @@ function gdaUnlockStoryEnemy(chapter){
  if(!ROSTER.some(r=>String(r.n).toUpperCase()===enemy))return;
  const names=gdaUnlockedNames(); if(!names.includes(enemy)){names.push(enemy);try{localStorage.setItem(GDA_UNLOCK_KEY,JSON.stringify(names));}catch(e){}}if(enemy===GDA_PUMPKIN_BOSS_NAME)unlockAchievement(54);if(ROSTER.every(r=>names.includes(String(r.n).toUpperCase())))unlockAchievement(51);
 }
+function gdaGrantPumpkinReward(){
+ const recoveryKey="gda_halloween_pumpkin_recovery_v1";
+ let recovered=false;try{recovered=localStorage.getItem(recoveryKey)==="1"}catch(e){}
+ const names=gdaUnlockedNames();
+ if(!names.includes(GDA_PUMPKIN_BOSS_NAME)){names.push(GDA_PUMPKIN_BOSS_NAME);try{localStorage.setItem(GDA_UNLOCK_KEY,JSON.stringify(names))}catch(e){}}
+ if(!recovered){try{localStorage.setItem(recoveryKey,"1")}catch(e){}}
+ try{unlockAchievement(54)}catch(e){}
+}
 function claimHalloween12amRewards(){
  const key="gda_halloween_12am_claim_v1",repairKey="gda_halloween_12am_recovery_v1",status=document.getElementById("halloween12amStatus"),button=document.getElementById("claimHalloween12am");
  let claimed=false,repaired=false;try{claimed=localStorage.getItem(key)==="1";repaired=localStorage.getItem(repairKey)==="1"}catch(e){}
+ // Migración independiente: conceder la Calabaza también a quienes ya reclamaron los regalos.
+ gdaGrantPumpkinReward();
  // Migración de recompensas reclamadas en versiones anteriores: restaurar una sola vez.
- if(claimed&&repaired){if(status)status.textContent="RECOMPENSA DE LAS 12 AM YA RECLAMADA Y VERIFICADA.";if(button){button.disabled=true;button.textContent="✓ REGALOS RECLAMADOS"}return}
+ if(claimed&&repaired){if(status)status.textContent="RECOMPENSA DE LAS 12 AM VERIFICADA · CALABAZA GIGANTE ARÁCNIDA DESBLOQUEADA.";if(button){button.disabled=true;button.textContent="✓ REGALOS RECLAMADOS"}return}
  try{if(typeof activateHalloweenShopRefresh==="function")activateHalloweenShopRefresh()}catch(e){}
  TITAN_TOKENS+=10000;saveTitanTokens();
  const owned=HALLOWEEN_SKINS.map(k=>Number(k.id));try{localStorage.setItem("gda_halloween_skins_v1",JSON.stringify(owned))}catch(e){}
- const unlocked=gdaUnlockedNames();NEWK2.slice(0,25).forEach(k=>{const name=String(k.n||"").toUpperCase();if(ROSTER.some(r=>String(r.n).toUpperCase()===name)&&!unlocked.includes(name))unlocked.push(name)});
+ const unlocked=gdaUnlockedNames();NEWK2.slice(0,25).forEach(k=>{const name=String(k.n||"").toUpperCase();if(ROSTER.some(r=>String(r.n).toUpperCase()===name)&&!unlocked.includes(name))unlocked.push(name)});if(!unlocked.includes(GDA_PUMPKIN_BOSS_NAME))unlocked.push(GDA_PUMPKIN_BOSS_NAME);
  try{localStorage.setItem(GDA_UNLOCK_KEY,JSON.stringify(unlocked));localStorage.setItem(key,"1");localStorage.setItem(repairKey,"1")}catch(e){}
  try{unlockAchievement(7)}catch(e){}
  if(status)status.textContent=claimed?"¡RECOMPENSA RESTAURADA! +10.000 TOKENS · 25 KAIJUS · TODAS LAS SKINS.":"¡LISTO! +10.000 TOKENS · 25 KAIJUS · TODAS LAS SKINS. Recompensa guardada.";
