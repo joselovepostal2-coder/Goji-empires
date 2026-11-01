@@ -3287,23 +3287,23 @@ function gdaUnlockStoryEnemy(chapter){
  const names=gdaUnlockedNames(); if(!names.includes(enemy)){names.push(enemy);try{localStorage.setItem(GDA_UNLOCK_KEY,JSON.stringify(names));}catch(e){}}if(ROSTER.every(r=>names.includes(String(r.n).toUpperCase())))unlockAchievement(51);
 }
 function claimHalloween12amRewards(){
- const key="gda_halloween_12am_claim_v1",status=document.getElementById("halloween12amStatus"),button=document.getElementById("claimHalloween12am");
- let claimed=false;try{claimed=localStorage.getItem(key)==="1"}catch(e){}
- if(claimed){if(status)status.textContent="REGALOS YA RECLAMADOS EN ESTE NAVEGADOR.";if(button){button.disabled=true;button.textContent="✓ REGALOS RECLAMADOS"}return}
+ const key="gda_halloween_12am_claim_v1",repairKey="gda_halloween_12am_recovery_v1",status=document.getElementById("halloween12amStatus"),button=document.getElementById("claimHalloween12am");
+ let claimed=false,repaired=false;try{claimed=localStorage.getItem(key)==="1";repaired=localStorage.getItem(repairKey)==="1"}catch(e){}
+ // Migración de recompensas reclamadas en versiones anteriores: restaurar una sola vez.
+ if(claimed&&repaired){if(status)status.textContent="RECOMPENSA DE LAS 12 AM YA RECLAMADA Y VERIFICADA.";if(button){button.disabled=true;button.textContent="✓ REGALOS RECLAMADOS"}return}
  try{if(typeof activateHalloweenShopRefresh==="function")activateHalloweenShopRefresh()}catch(e){}
  TITAN_TOKENS+=10000;saveTitanTokens();
  const owned=HALLOWEEN_SKINS.map(k=>Number(k.id));try{localStorage.setItem("gda_halloween_skins_v1",JSON.stringify(owned))}catch(e){}
  const unlocked=gdaUnlockedNames();NEWK2.slice(0,25).forEach(k=>{const name=String(k.n||"").toUpperCase();if(ROSTER.some(r=>String(r.n).toUpperCase()===name)&&!unlocked.includes(name))unlocked.push(name)});
- try{localStorage.setItem(GDA_UNLOCK_KEY,JSON.stringify(unlocked))}catch(e){}
- try{localStorage.setItem(key,"1")}catch(e){}
+ try{localStorage.setItem(GDA_UNLOCK_KEY,JSON.stringify(unlocked));localStorage.setItem(key,"1");localStorage.setItem(repairKey,"1")}catch(e){}
  try{unlockAchievement(7)}catch(e){}
- if(status)status.textContent="¡LISTO! +10.000 TOKENS · 25 KAIJUS · TODAS LAS SKINS. Recompensa única; progreso conservado.";
+ if(status)status.textContent=claimed?"¡RECOMPENSA RESTAURADA! +10.000 TOKENS · 25 KAIJUS · TODAS LAS SKINS.":"¡LISTO! +10.000 TOKENS · 25 KAIJUS · TODAS LAS SKINS. Recompensa guardada.";
  if(button){button.disabled=true;button.textContent="✓ REGALOS RECLAMADOS"}
  renderSkinShelf();if(typeof renderHalloweenShop==="function")renderHalloweenShop();
 }
 const pumpkinBossLaunch=document.getElementById("fightGiantPumpkinBoss");if(pumpkinBossLaunch)pumpkinBossLaunch.addEventListener("click",()=>{const bossChapter=STORY_CHAPTERS.findIndex(ch=>String(ch.enemy).toUpperCase()===GDA_PUMPKIN_BOSS_NAME);if(bossChapter<0){alert("El jefe de Halloween todavía no está disponible.");return}selectedStoryChapter=bossChapter;mode=0;pick1=-1;show("select")});
  const claimHalloweenButton=document.getElementById("claimHalloween12am");
-if(claimHalloweenButton){let claimed=false;try{claimed=localStorage.getItem("gda_halloween_12am_claim_v1")==="1"}catch(e){}if(claimed){claimHalloweenButton.disabled=true;claimHalloweenButton.textContent="✓ REGALOS RECLAMADOS";const status=document.getElementById("halloween12amStatus");if(status)status.textContent="YA RECLAMADOS · PROGRESO CONSERVADO"}claimHalloweenButton.addEventListener("click",claimHalloween12amRewards)}
+if(claimHalloweenButton){let claimed=false;try{claimed=localStorage.getItem("gda_halloween_12am_claim_v1")==="1"}catch(e){}if(claimed){claimHalloweenButton.disabled=true;claimHalloweenButton.textContent="✓ REGALOS RECLAMADOS";claimHalloween12amRewards()}claimHalloweenButton.addEventListener("click",claimHalloween12amRewards)}
 document.querySelectorAll("[data-candy-box]").forEach(box=>{const id=String(box.dataset.candyBox),key="gda_halloween_candy_box_"+id;if(localStorage.getItem(key)==="1"){box.disabled=true;box.textContent="✓ CAJA "+id;box.style.opacity=".55"}box.addEventListener("click",()=>{if(localStorage.getItem(key)==="1")return;TITAN_TOKENS+=250;saveTitanTokens();try{localStorage.setItem(key,"1")}catch(e){}box.disabled=true;box.textContent="✓ CAJA "+id;box.style.opacity=".55";const status=document.getElementById("halloween12amStatus");if(status)status.textContent="¡CAJA DE CARAMELOS "+id+" ABIERTA! +250 TOKENS TITÁN.";});});
 function gdaLockSelectionCards(){
  const grid=document.getElementById('grid'); if(!grid)return;
