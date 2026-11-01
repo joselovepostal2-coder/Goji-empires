@@ -2293,8 +2293,8 @@ function renderAchievements(){
   return '<div class="achItem superHard '+(achUnlocked.has(i)?"unlocked":"")+'">'+(achUnlocked.has(i)?"🏆":"🔒")+' '+(i+1)+'. '+a[0]+'<small>💀 SUPERDIFÍCIL · '+a[1]+' · '+globalText+'</small></div>';
  }).join("");
  list.innerHTML='<h3 class="achGroupTitle">🏆 LOGROS NORMALES · 9</h3>'+normal+'<h3 class="achGroupTitle">💀 LOGROS SUPERDIFÍCILES · 46</h3>'+hard;
- document.getElementById("achCount").textContent=achUnlocked.size+"/54";
- document.getElementById("achLaunch").textContent="🏆 LOGROS "+achUnlocked.size+"/54";
+ document.getElementById("achCount").textContent=achUnlocked.size+"/55";
+ document.getElementById("achLaunch").textContent="🏆 LOGROS "+achUnlocked.size+"/55";
 }
 function unlockAchievement(i){
  if(!Number.isInteger(i)||i<0||i>=54||achUnlocked.has(i))return;
