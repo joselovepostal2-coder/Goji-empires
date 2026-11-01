@@ -1243,7 +1243,7 @@ const HALLOWEEN_NIGHT_SKINS=[
  {name:"Tormenta de Murciélagos",pal:["#5b4b8a","#20172f","#c9a6ff"]}
 ];
 let halloweenNightStockAdded=false;
-function halloweenNightRefreshDue(){return Date.now()>=new Date(2026,9,31,1,0,0).getTime()}
+function halloweenNightRefreshDue(){return Date.now()>=new Date(2026,10,1,1,0,0).getTime()}
 function activateHalloweenShopRefresh(){
  if(halloweenNightStockAdded||!halloweenNightRefreshDue())return false;
  HALLOWEEN_NIGHT_SKINS.forEach(s=>HALLOWEEN_SKINS.push({id:HALLOWEEN_SKINS.length,name:s.name,pal:[...s.pal],price:450}));
@@ -1257,7 +1257,7 @@ function activateHalloweenShopRefresh(){
  return true;
 }
 (function scheduleHalloweenShopRefresh(){
- const target=new Date(2026,9,31,1,0,0).getTime(),delay=target-Date.now();
+ const target=new Date(2026,10,1,1,0,0).getTime(),delay=target-Date.now();
  if(delay>0&&delay<2147483000)setTimeout(()=>{if(activateHalloweenShopRefresh()){renderSkinShelf();const shop=document.getElementById("halloweenShop");if(shop&&!shop.classList.contains("hide"))renderHalloweenShop();}},delay);
 })();
 let hShopSelectedSkin=0;
