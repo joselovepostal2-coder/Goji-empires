@@ -1270,9 +1270,15 @@ const MV={light:{dmg:5,base:40,gr:.55,ang:35,su:.07,ac:.10,rc:.14,rw:7,y0:.3,hh:
 const GDA_PUMPKIN_BOSS_NAME="CALABAZA GIGANTE ARÁCNIDA";
 const GDA_PUMPKIN_BOSS_INDEX=ROSTER.length;
 ROSTER.push({n:GDA_PUMPKIN_BOSS_NAME,cat:"Jefes",role:"JEFE DE HALLOWEEN · TRES FASES",css:"#ff8a22",body:0xf58a22,dark:0x4b2018,acc:0x9cff35,ok:1,stat:[5,5,2],sm:{w:190,spd:13,jmp:62,kb:1.45},sk:[
- {n:"PATAS DE LA CRIPTA",t:"pulse",c:0xff8a22,R:48,dmg:32,stun:.7,cd:2.4},
- {n:"TELARAÑA DE ESPINAS",t:"proj",n:5,spread:1.1,sp:28,life:2.5,size:4,dmg:24,c:0x9cff35},
- {n:"TERREMOTO DE CALABAZA",t:"pulse",c:0xff3d30,R:72,dmg:48,stun:1.1,cd:5}
+ {label:"PATAS DE LA CRIPTA",t:"pulse",c:0xff8a22,R:48,dmg:32,stun:.7,cd:2.4},
+ {label:"TELARAÑA DE ESPINAS",t:"proj",n:5,spread:1.1,sp:28,life:2.5,size:4,dmg:24,c:0x9cff35},
+ {label:"TERREMOTO DE CALABAZA",t:"pulse",c:0xff3d30,R:72,dmg:48,stun:1.1,cd:5},
+ {label:"MORDIDA DE LA CALABAZA",t:"dash",c:0xff9c32,dist:42,sp:90,R:10,dmg:36,k:70,kb:18},
+ {label:"SEMILLAS INFERNALES",t:"proj",n:8,spread:1.25,sp:36,life:2.1,size:3,dmg:20,c:0xff7a22},
+ {label:"RAYO DE SAVIA MALDITA",t:"beam",c:0xb7ff35,r:3.6,dmg:55,k:120,kb:18,dur:1.1},
+ {label:"TORBELLINO DE OCHO PATAS",t:"dash",c:0x9cff35,dist:95,sp:100,R:12,dmg:28,k:75,kb:22},
+ {label:"LLUVIA DE TELARAÑAS",t:"proj",n:12,spread:1.9,sp:26,life:2.8,size:2.5,dmg:16,c:0x9cff35},
+ {label:"EXTINCIÓN DE HALLOWEEN",t:"pulse",c:0xff3030,R:100,dmg:65,stun:1.5,cd:7}
 ]});
 ARTS.push({k:"bi",S:47,m:[78,42],pal:["#f58a22","#4b2018","#9cff35"],sw:.9,bossPhase:0});
 const GAME_UPGRADES=(()=>{try{return JSON.parse(localStorage.getItem("gda_upgrades_v1")||"{}")}catch(e){return {}}})();
@@ -2722,7 +2728,7 @@ function act(f,o,dt){const a=f.act,S=G.sm;a.t+=dt;
    {n:"TELARAÑA DE ESPINAS",t:"proj",c:0x9cff35,n:5,spread:1.1,sp:28,life:2.5,size:4,dmg:24},
    {n:"TERREMOTO DE CALABAZA",t:"pulse",c:0xff3d30,R:72,dmg:48,stun:1.1}
   ];
-  const all=kit.length?kit:fallback,attacks=phase===0?all.slice(0,1):phase===1?all.slice(0,2):all.slice();
+  const all=kit.length?kit:fallback,attacks=phase===0?all.slice(0,3):phase===1?all.slice(0,6):all.slice();
   if(!a.pumpkinStarted){a.pumpkinStarted=1;S.shake=phase===2?10:phase===1?7:4;
    toastCombat(phase===2?"¡ULTIMATE FINAL: PLAGA TOTAL! ¡TODOS LOS ATAQUES!":phase===1?"¡ULTIMATE EVOLUCIONADA · FASE 2!":"¡ULTIMATE DE LA CRIPTA · FASE 1!",phase===2?"#ff554b":phase===1?"#9dff4f":"#ffb347");}
   a.nextAttack=a.nextAttack||0;
@@ -2733,7 +2739,7 @@ function act(f,o,dt){const a=f.act,S=G.sm;a.t+=dt;
     const n=Math.max(1,Math.min(18,Number(sk.n)||5)),spread=Number(sk.spread)||.8,[sx,sy]=mouth(f);
     for(let k=0;k<n;k++){const u=n<2?0:k/(n-1)-.5,r=Math.max(.8,(Number(sk.size)||3)*SK),m=new THREE.Mesh(new THREE.SphereGeometry(r,7,5),new THREE.MeshBasicMaterial({color:c}));
      G.scene.add(m);S.pr.push({x:sx,y:sy+u*6,vx:f.face*(Number(sk.sp)||28)*.55,vy:u*spread*14,life:Number(sk.life)||2,r,dmg:dmg*.2,from:f,m});}
-    S.rings.push({x:mx+f.face*14,y:my,R:16,t:0,c});toastCombat("¡"+String(sk.nm||sk.n||"TELARAÑA").toUpperCase()+"!",phase===2?"#ff554b":"#9dff4f");
+    S.rings.push({x:mx+f.face*14,y:my,R:16,t:0,c});toastCombat("¡"+String(sk.label||sk.nm||(typeof sk.n==="string"?sk.n:"ATAQUE ARÁCNIDO")).toUpperCase()+"!",phase===2?"#ff554b":"#9dff4f");
    }else if(sk.t==="beam"){
     const len=Math.max(70,(Number(sk.r)||2.5)*SK*38),close=target&&target.dead<=0&&Math.abs(target.y-f.y)<f.h*1.45&&Math.abs(target.x-f.x)<len+target.hw;
     for(let q=1;q<=4;q++)S.rings.push({x:mx+f.face*len*q/4,y:my,R:9+q*3,t:0,c});
