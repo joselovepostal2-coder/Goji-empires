@@ -1846,6 +1846,15 @@ function inp(f){
  return input
 }
 
+// Cronómetro Showa: mide cada combate de la era y conserva el mejor tiempo por capítulo.
+function gdaIsShowaChapter(ch){
+ if(!ch)return false;
+ return /SHOWA|1954|1955|1962|1964|1965|1966|1967|1968|1969|1971|1972|1973|1974|1975/i.test(String(ch.era||"")+" "+String(ch.title||""));
+}
+function gdaFormatTime(ms){
+ const total=Math.max(0,Math.floor(ms/1000));
+ return String(Math.floor(total/60)).padStart(2,"0")+":"+String(total%60).padStart(2,"0");
+}
 // ---------- Campaña cronológica: capítulos con escenarios exclusivos ----------
 const STORY_CHAPTERS=[
  {title:"01 · EL DESPERTAR",era:"1954 · ORIGEN",hero:"GODZILLA",enemy:"ANGUIRUS",map:"TOKYO 1954: ZONA DE EVACUACIÓN",layout:"STORY1",desc:"El monstruo emerge del océano y llega a una ciudad que aún no comprende la amenaza."},
@@ -2047,7 +2056,7 @@ function startSmash(idx,p2,round,sti){
   }
   S.waveEnemiesTotal=picks.length;S.waveEnemiesRemaining=picks.length;
  }else S.F=[mkF(idx,1,-22,0),mkF(ri,2,22,mode!==2)];
- S.F.forEach(f=>{f.spawnX=f.x;f.spawnY=f.y;sc.add(f.mesh,f.sh)});S.__gdaStartedAt=performance.now();S.__gdaInitialStocks={};S.__gdaInitialPct={};S.F.forEach(f=>{if(f.id===1||f.id===2){S.__gdaInitialStocks[f.id]=Number(f.stocks)||0;S.__gdaInitialPct[f.id]=Number(f.pct)||0;}});startStoryAchievementTimers();
+ S.F.forEach(f=>{f.spawnX=f.x;f.spawnY=f.y;sc.add(f.mesh,f.sh)});S.__gdaStartedAt=performance.now();S.__gdaShowaChapter=(mode===0&&storyChapter&&gdaIsShowaChapter(storyChapter))?selectedStoryChapter:-1;S.__gdaShowaStartedAt=S.__gdaShowaChapter>=0?S.__gdaStartedAt:0;S.__gdaInitialStocks={};S.__gdaInitialPct={};S.F.forEach(f=>{if(f.id===1||f.id===2){S.__gdaInitialStocks[f.id]=Number(f.stocks)||0;S.__gdaInitialPct[f.id]=Number(f.pct)||0;}});startStoryAchievementTimers();
  G={scene:sc,sm:S,p:S.F[0]};
  cam.position.set(0,13,CAMZ);cam.rotation.set(0,0,0);
  for(const k in JP)JP[k]=0;
@@ -2817,6 +2826,15 @@ function finish(w){const S=G.sm;if(S.state==="over")return;S.state="over";S.win=
   const score=window.__gdaOnlineTournamentScore||[0,0];
   endText=window.__gdaOnlineRunComplete?`¡TORNEO TERMINADO! P1 ${score[0]} — ${score[1]} P2`:`TORNEO · P1 ${score[0]} — ${score[1]} P2 · ENTER: SIGUIENTE COMBATE`;
  }else endText=w<0?"EMPATE · ENTER: revancha":story&&typeof selectedStoryChapter!=="undefined"&&selectedStoryChapter>=0?(w===0&&selectedStoryChapter<STORY_CHAPTERS.length-1?"¡CAPÍTULO COMPLETADO! · ENTER: SIGUIENTE CAPÍTULO":w===0?"¡CAMPAÑA COMPLETADA! · ENTER: VOLVER A HISTORIA":"DERROTA · ENTER: REINTENTAR"):story&&S.round<2?"¡VICTORIA! · ENTER: siguiente combate":story?"¡HISTORIA COMPLETADA! · ENTER: reiniciar":S.mode===0?"DERROTA · ENTER: reintentar":`¡GANA P${w+1}! · ENTER: revancha`;
+ if(story&&S.__gdaShowaChapter>=0&&S.__gdaShowaStartedAt){
+  const elapsed=Math.max(0,performance.now()-S.__gdaShowaStartedAt),key="gdaShowaBestTimesV1";
+  let bests={};try{bests=JSON.parse(localStorage.getItem(key)||"{}")||{}}catch(_e){bests={}}
+  const chapterKey=String(S.__gdaShowaChapter),previous=Number(bests[chapterKey])||0;
+  if(!previous||elapsed<previous)bests[chapterKey]=elapsed;
+  try{localStorage.setItem(key,JSON.stringify(bests))}catch(_e){}
+  const best=Number(bests[chapterKey])||elapsed;
+  endText+=" · ⏱ SHOWA "+gdaFormatTime(elapsed)+" · RÉCORD "+gdaFormatTime(best);
+ }
  $("shF").textContent=endText;
  if(window.__gdaOnlineActive&&S.mode===2&&window.__gdaOnlineMode==="tournament"&&(w===0||w===1)){
   const score=window.__gdaOnlineTournamentScore||(window.__gdaOnlineTournamentScore=[0,0]);
