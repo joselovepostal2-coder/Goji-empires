@@ -290,6 +290,38 @@ io.on("connection", socket => {
     });
   });
 
+  // El cliente del atacante es la autoridad para aplicar el impacto en PvP.
+  // El servidor valida que el objetivo sea el otro jugador de la misma sala.
+  socket.on("combat-hit", payload => {
+    const code = playerRooms.get(socket.id);
+    const room = rooms.get(code);
+    if (!room?.started || !["normal", "tournament"].includes(room.mode) ||
+        !payload || typeof payload !== "object" || !payload.state ||
+        typeof payload.state !== "object") return;
+
+    const playerIds = [...room.players.keys()];
+    const attackerSlot = playerIds.indexOf(socket.id) + 1;
+    const targetId = Number(payload.targetId);
+    if (playerIds.length !== 2 ||
+        ![1, 2].includes(attackerSlot) ||
+        ![1, 2].includes(targetId) ||
+        targetId === attackerSlot) return;
+
+    const clean = {};
+    for (const key of ["x", "y", "vx", "vy", "pct", "stocks", "stun", "dead", "meter", "face"]) {
+      const value = Number(payload.state[key]);
+      if (Number.isFinite(value)) clean[key] = Math.max(-100000, Math.min(100000, value));
+    }
+    if (!Number.isFinite(clean.pct) || !Number.isFinite(clean.vx) || !Number.isFinite(clean.vy)) return;
+    clean.pct = Math.max(0, clean.pct);
+    clean.stocks = Math.max(0, Math.min(3, Math.round(Number(clean.stocks ?? 3))));
+    socket.to(code).emit("remote-combat-hit", {
+      playerId: socket.id,
+      targetId,
+      state: clean
+    });
+  });
+
   socket.on("combat-state", state => {
     const code = playerRooms.get(socket.id);
     const room = rooms.get(code);
