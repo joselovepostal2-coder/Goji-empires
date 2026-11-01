@@ -371,6 +371,25 @@ h1 small{display:block;margin-top:.25em;font-size:.3em;letter-spacing:.55em;back
  <div class="tb action grab" data-t="grab" style="right:118px;bottom:206px;width:64px;height:64px;font-size:12px;border-color:#ffd24a">AGARRE</div>
 </div>
 
+<script id="geEarlyErrorCapture">
+/* Captura errores que ocurran antes de que se inicialice el motor principal. */
+(function(){
+ window.addEventListener("error",function(event){
+  try{
+   var box=document.getElementById("geEarlyErrorPanel");
+   if(!box){
+    box=document.createElement("pre");box.id="geEarlyErrorPanel";
+    box.style.cssText="position:fixed;z-index:2147483647;left:10px;right:10px;bottom:10px;max-height:35vh;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;padding:14px;background:#3b0808;color:#fff;border:2px solid #ff6969;border-radius:8px;font:12px monospace";
+    (document.body||document.documentElement).appendChild(box);
+   }
+   var target=event.target;
+   var detail=event.message||"Error al cargar un recurso externo";
+   if(target&&target.tagName==="SCRIPT")detail="No se pudo cargar el script: "+(target.src||"(sin URL)");
+   box.textContent="ERROR REAL DE GDA\n"+detail+(event.filename?"\nArchivo: "+event.filename:"")+(event.lineno?"\nLínea: "+event.lineno:"")+(event.colno?"\nColumna: "+event.colno:"")+"\n\nEnvía una captura de este mensaje para corregir la causa exacta.";
+  }catch(_){}
+ },true);
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script>
