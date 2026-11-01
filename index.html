@@ -4259,5 +4259,89 @@ for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e
 })();
 </script>
 
+
+<script id="geModeRecoveryScript">
+/* Recuperación aislada de interfaz: no modifica combate ni sockets online. */
+(function(){
+ "use strict";
+ const modes=[
+  "MODO HISTORIA",
+  "COMBATE LIBRE",
+  "VERSUS · 2 JUGADORES",
+  "CONFIGURAR CONTROLES",
+  "LABORATORIO · CREADORES Y MEJORAS",
+  "🎃 EVENTO HALLOWEEN · 30 MAPAS",
+  "🌊 MODO OLEADAS · SUPERVIVENCIA"
+ ];
+ function recoverMenu(){
+  const list=document.getElementById("mlist");
+  if(!list)return;
+  if(!list.querySelector("li")){
+   list.innerHTML=modes.map((label,i)=>'<li data-i="'+i+'" data-ge-mode="'+i+'" tabindex="0" role="button">'+label+'</li>').join("");
+  }else{
+   list.querySelectorAll("li").forEach((item,i)=>{
+    item.dataset.geMode=String(i);
+    item.tabIndex=0;
+    item.setAttribute("role","button");
+   });
+  }
+  if(!list.dataset.geRecoveryBound){
+   list.dataset.geRecoveryBound="1";
+   const activate=(item,event)=>{
+    if(!item)return;
+    if(event){event.preventDefault();event.stopPropagation();}
+    const index=Number(item.dataset.geMode);
+    if(typeof window.nav!=="function"){
+     let note=document.getElementById("geModeRecoveryNote");
+     if(!note){note=document.createElement("p");note.id="geModeRecoveryNote";note.style.cssText="color:#ffd56f;font:600 13px Arial,sans-serif;max-width:420px";list.insertAdjacentElement("afterend",note);}
+     note.textContent="La interfaz se recuperó, pero el motor de modos no terminó de iniciar. Recarga la página; si persiste, revisaremos el error JavaScript.";
+     return;
+    }
+    const current=[...list.querySelectorAll("li")].findIndex(x=>x.classList.contains("on"));
+    const from=current<0?0:current;
+    const steps=(index-from+modes.length)%modes.length;
+    for(let n=0;n<steps;n++)window.nav("ArrowDown");
+    window.nav("Enter");
+   };
+   list.addEventListener("click",event=>{
+    const item=event.target.closest("li[data-ge-mode]");
+    if(item)activate(item,event);
+   },true);
+   list.addEventListener("keydown",event=>{
+    if((event.key==="Enter"||event.key===" ")&&event.target.matches("li[data-ge-mode]"))activate(event.target,event);
+   },true);
+  }
+ }
+ function recoverAchievements(){
+  const launch=document.getElementById("achLaunch");
+  const panel=document.getElementById("achPanel");
+  if(!launch||!panel)return;
+  if(!launch.dataset.geRecoveryBound){
+   launch.dataset.geRecoveryBound="1";
+   launch.addEventListener("click",()=>{
+    try{if(typeof window.renderAchievements==="function")window.renderAchievements()}catch(error){console.error("GDA: no se pudieron renderizar los logros",error)}
+    panel.style.display="block";
+    panel.classList.remove("hide");
+    panel.setAttribute("aria-modal","true");
+   });
+  }
+  const close=document.getElementById("achClose");
+  if(close&&!close.dataset.geRecoveryBound){
+   close.dataset.geRecoveryBound="1";
+   close.addEventListener("click",()=>{panel.style.display="none";});
+  }
+  try{if(typeof window.renderAchievements==="function")window.renderAchievements()}catch(error){console.error("GDA: error al iniciar logros",error)}
+ }
+ function recover(){
+  try{recoverMenu()}catch(error){console.error("GDA: recuperación del menú fallida",error)}
+  try{recoverAchievements()}catch(error){console.error("GDA: recuperación de logros fallida",error)}
+ }
+ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",recover,{once:true});
+ else recover();
+ window.addEventListener("load",recover,{once:true});
+ setTimeout(recover,1200);
+})();
+</script>
+
 </body>
 </html>
