@@ -7,7 +7,13 @@ const crypto = require("crypto");
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+// El cliente HTML5 puede estar alojado en itch.io o en otro dominio.
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
 
 // Estadísticas agregadas de logros. El servidor guarda solo IDs aleatorios de navegador
 // y los conjuntos de logros desbloqueados; no recibe nombres, correos ni IP desde el cliente.
@@ -88,6 +94,89 @@ function updateRoom(code) {
   const info = getRoomInfo(code);
   if (info) io.to(code).emit("room-updated", info);
 }
+const INPUT_PACKET_INTERVAL_MS = 25;
+const COMBAT_PACKET_INTERVAL_MS = 40;
+const HIT_PACKET_INTERVAL_MS = 8;
+
+function isPlainObject(value) {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
+
+function allowSocketPacket(socket, key, minimumInterval) {
+  if (!socket.data) socket.data = {};
+  if (!socket.data.packetTimes) socket.data.packetTimes = {};
+  const now = Date.now();
+  const last = Number(socket.data.packetTimes[key] || 0);
+  if (now - last < minimumInterval) return false;
+  socket.data.packetTimes[key] = now;
+  return true;
+}
+
+function playerSlot(room, socketId) {
+  return [...room.players.keys()].indexOf(socketId) + 1;
+}
+
+function acceptSequence(room, mapName, socketId, rawSequence) {
+  const sequence = Number(rawSequence);
+  if (!Number.isSafeInteger(sequence) || sequence < 1) return null;
+  const sequences = room[mapName];
+  if (!(sequences instanceof Map)) return null;
+  const previous = Number(sequences.get(socketId) || 0);
+  if (sequence <= previous) return null;
+  sequences.set(socketId, sequence);
+  return sequence;
+}
+
+function clampNumber(value, minimum, maximum) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return null;
+  return Math.max(minimum, Math.min(maximum, number));
+}
+
+function sanitizeInputState(rawState) {
+  if (!isPlainObject(rawState)) return null;
+  const direction = Number(rawState.dir);
+  return {
+    dir: direction < 0 ? -1 : direction > 0 ? 1 : 0,
+    jump: rawState.jump === true,
+    down: rawState.down === true,
+    a: rawState.a === true,
+    h: rawState.h === true,
+    u: rawState.u === true,
+    g: rawState.g === true,
+    aHeld: rawState.aHeld === true,
+    gHeld: rawState.gHeld === true
+  };
+}
+
+function sanitizeCombatState(rawState) {
+  if (!isPlainObject(rawState)) return null;
+
+  const state = {
+    x: clampNumber(rawState.x, -1000, 1000),
+    y: clampNumber(rawState.y, -1000, 1000),
+    vx: clampNumber(rawState.vx, -500, 500),
+    vy: clampNumber(rawState.vy, -500, 500),
+    pct: clampNumber(rawState.pct, 0, 100000),
+    stocks: clampNumber(rawState.stocks, 0, 3),
+    stun: clampNumber(rawState.stun, 0, 30),
+    dead: clampNumber(rawState.dead, 0, 30),
+    meter: clampNumber(rawState.meter, 0, 200),
+    face: clampNumber(rawState.face, -1, 1)
+  };
+
+  if (Object.values(state).some(value => value === null)) return null;
+  state.stocks = Math.round(state.stocks);
+  state.face = state.face < 0 ? -1 : 1;
+  return state;
+}
+
+function resetRoomSequences(room) {
+  room.inputSequences.clear();
+  room.combatSequences.clear();
+  room.hitSequences.clear();
+}
+
 
 function leaveRoom(socket) {
   const code = playerRooms.get(socket.id);
@@ -132,7 +221,10 @@ io.on("connection", socket => {
       map: null,
       mode: "normal",
       storyChapterIndex: 0,
-      postVotes: new Map()
+      postVotes: new Map(),
+      inputSequences: new Map(),
+      combatSequences: new Map(),
+      hitSequences: new Map()
     };
 
     room.players.set(socket.id, {
@@ -269,31 +361,90 @@ io.on("connection", socket => {
         [...room.players.values()].every(p => p.ready && p.kaiju)) {
       room.started = true;
       room.postVotes.clear();
+      resetRoomSequences(room);
       io.to(code).emit("match-start", getRoomInfo(code));
     }
   });
 
-  socket.on("game-state", state => {
+  socket.on("game-state", payload => {
     const code = playerRooms.get(socket.id);
     const room = rooms.get(code);
-    if (!room?.started || !state || typeof state !== "object") return;
+    if (!room?.started || !isPlainObject(payload)) return;
+    if (!allowSocketPacket(socket, "game-state", INPUT_PACKET_INTERVAL_MS)) return;
+
+    const slot = playerSlot(room, socket.id);
+    if (slot !== 1 && slot !== 2) return;
+    if (Number(payload.playerSlot) !== slot) return;
+
+    const sequence = acceptSequence(room, "inputSequences", socket.id, payload.sequence);
+    if (sequence === null) return;
+
+    const cleanInput = sanitizeInputState(payload.state);
+    if (!cleanInput) return;
 
     socket.to(code).emit("remote-game-state", {
       playerId: socket.id,
-      state
+      playerSlot: slot,
+      sequence,
+      state: cleanInput
     });
   });
 
-  socket.on("combat-state", state => {
+  // El cliente dueño de cada kaiju publica sus propios valores de combate.
+  // El servidor comprueba sala, jugador, secuencia y rangos antes de retransmitir.
+  socket.on("combat-state", payload => {
     const code = playerRooms.get(socket.id);
     const room = rooms.get(code);
-    if (!room?.started || !state || typeof state !== "object") return;
-    const clean = {};
-    for (const key of ["x","y","vx","vy","pct","stocks","stun","dead","meter","face"]) {
-      const value = Number(state[key]);
-      if (Number.isFinite(value)) clean[key] = Math.max(-100000, Math.min(100000, value));
-    }
-    socket.to(code).emit("remote-combat-state", { playerId: socket.id, state: clean });
+    if (!room?.started || !isPlainObject(payload)) return;
+    if (!allowSocketPacket(socket, "combat-state", COMBAT_PACKET_INTERVAL_MS)) return;
+
+    const slot = playerSlot(room, socket.id);
+    if ((slot !== 1 && slot !== 2) || Number(payload.playerSlot) !== slot) return;
+
+    const sequence = acceptSequence(room, "combatSequences", socket.id, payload.sequence);
+    if (sequence === null) return;
+
+    const cleanState = sanitizeCombatState(payload.state);
+    if (!cleanState) return;
+
+    socket.to(code).emit("remote-combat-state", {
+      playerId: socket.id,
+      playerSlot: slot,
+      sequence,
+      state: cleanState
+    });
+  });
+
+  // En PvP, el atacante detecta el impacto y envía el estado resultante
+  // del kaiju contrario. El servidor solo lo reenvía al otro integrante.
+  socket.on("combat-hit", payload => {
+    const code = playerRooms.get(socket.id);
+    const room = rooms.get(code);
+    if (!room?.started ||
+        !["normal", "tournament"].includes(room.mode) ||
+        !isPlainObject(payload)) return;
+    if (!allowSocketPacket(socket, "combat-hit", HIT_PACKET_INTERVAL_MS)) return;
+
+    const slot = playerSlot(room, socket.id);
+    const targetSlot = Number(payload.targetId);
+    if ((slot !== 1 && slot !== 2) ||
+        Number(payload.attackerSlot) !== slot ||
+        (targetSlot !== 1 && targetSlot !== 2) ||
+        targetSlot === slot) return;
+
+    const sequence = acceptSequence(room, "hitSequences", socket.id, payload.sequence);
+    if (sequence === null) return;
+
+    const cleanState = sanitizeCombatState(payload.state);
+    if (!cleanState) return;
+
+    socket.to(code).emit("remote-combat-hit", {
+      playerId: socket.id,
+      attackerSlot: slot,
+      targetId: targetSlot,
+      sequence,
+      state: cleanState
+    });
   });
 
   socket.on("online-post-action", action => {
@@ -315,12 +466,14 @@ io.on("connection", socket => {
     }
 
     if (action === "rematch") {
+      resetRoomSequences(room);
       io.to(code).emit("match-rematch", getRoomInfo(code));
       return;
     }
 
     room.started = false;
     room.map = null;
+    resetRoomSequences(room);
     for (const player of room.players.values()) {
       player.ready = false;
       player.kaiju = null;
