@@ -14,7 +14,7 @@ const io = new Server(server);
 app.use(express.json({ limit: "8kb" }));
 const achievementPlayers = new Set();
 const achievementUnlocks = new Map();
-const MAX_ACHIEVEMENT_ID = 300; // 301 logros: índices 0–300
+const MAX_ACHIEVEMENT_ID = 53; // 54 logros: índices 0–53
 function validAchievementClientId(value) {
   return typeof value === "string" && /^[a-z0-9-]{16,80}$/i.test(value);
 }
