@@ -2450,7 +2450,7 @@ function ai(f,o){const dx=o.x-f.x,ad=Math.abs(dx),i={dir:0},skill=cpuLevel/5;f.a
  if(f.meter>=200&&ad<50&&Math.abs(o.y-f.y)<12&&Math.random()<(.25+cpuLevel*.075))i.u=1;
  return i}
 function startAct(f,a){f.act=Object.assign({t:0,hit:0,tick:0,fx:0},a);if(a.m===MV.heavy)unlockAchievement(2);if(a.u){if(isLocalAchievementFighter(f)){achTrack.ultimates++;saveAchievementTrack();if(achTrack.ultimates>=100)unlockAchievement(30)}if(G&&G.sm)G.sm.__gdaUltimateUsed=true;}}
-function act(f,o,dt){const a=f.act;a.t+=dt;
+function act(f,o,dt){const a=f.act,S=G.sm;a.t+=dt;
  // Combo especial de Mechagodzilla: agarre -> misiles -> impacto contra el suelo -> puñetazo cargado (100).
  if(a.mechaCombo){const target=a.target||o;f.vx*=Math.max(0,1-8*dt);
   if(a.t>=.12&&!a.fx1){a.fx1=1;toastCombat("¡MECHAGODZILLA: AGARRE!","#ffb347");G.sm.rings.push({x:f.x+f.face*24,y:f.y+f.h*.55,R:22,t:0,c:0xffb347});
@@ -2649,7 +2649,7 @@ function act(f,o,dt){const a=f.act;a.t+=dt;
     else toastCombat(m===MV.heavy?"¡GOLPE PESADO!":"¡IMPACTO!",m===MV.heavy?"#ff9b55":"#ffffff");
    }}
   if(a.t>=m.su+m.ac+m.rc)f.act=null;return}
- const s=a.u,[mx,my]=mouth(f),S=G.sm;
+ const s=a.u,[mx,my]=mouth(f);
  // Ultimate exclusiva de Godzilla: captura, carga y rayo dirigido a la cabeza.
  if(a.godzillaFinisher){
   const target=a.target||o;
