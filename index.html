@@ -161,7 +161,7 @@ h1 small{display:block;margin-top:.25em;font-size:.3em;letter-spacing:.55em;back
 <div id="adminPanel" class="hide" style="position:fixed;inset:0;z-index:2000;background:rgba(2,4,15,.82);display:flex;align-items:center;justify-content:center;padding:18px">
  <section style="width:min(620px,96vw);max-height:90vh;overflow:auto;background:linear-gradient(145deg,#18264b,#080d20);border:2px solid #ffd24a;border-radius:18px;padding:22px;box-shadow:0 0 36px #ffd24a44;color:#fff;font-family:Orbitron,sans-serif">
   <div style="display:flex;align-items:center;gap:12px"><h2 style="margin:0;flex:1;color:#ffd24a;font-size:clamp(18px,4vw,26px)">👑 PANEL DE ADMINISTRADOR</h2><button id="adminClose" type="button" style="padding:8px 12px;border-radius:8px;background:#293452;color:white;border:1px solid #63739b">CERRAR ✕</button></div>
-  <p style="color:#b9c6e7;font:14px Rajdhani,sans-serif">Panel local de pruebas. Pulsa <b>5</b> para abrir o cerrar.</p>
+  <p style="color:#b9c6e7;font:14px Rajdhani,sans-serif">Panel local de pruebas. Encuentra el secreto diminuto en el Modo Historia para abrir este panel.</p>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
    <button id="adminTokens" type="button" style="padding:14px;border-radius:10px;background:#5a4310;color:#fff;border:1px solid #ffd24a;font-weight:800">💰 DAR 3.000 B TOKENS</button>
    <button id="adminStart" type="button" style="padding:14px;border-radius:10px;background:#3b2372;color:#fff;border:1px solid #c9a8ff;font-weight:800">⚔️ INICIAR COMBATE</button>
@@ -3500,7 +3500,6 @@ addEventListener("keydown",e=>{
   else{toastCombat(`ENERGÍA: ${Math.floor(energy)}/200 · NECESITAS 200 PARA ACTIVAR`, "#ffd24a")}
   return;
  }
- if(e.code==="Digit5"&&!e.repeat){e.preventDefault();toggleAdmin();return}
  if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Space","Tab"].includes(e.code)&&(scr!=="menu"||e.code!=="Tab"))e.preventDefault();
  K[e.code]=1;if(e.repeat)return;JP[e.code]=1;nav(e.code,e)});
 addEventListener("keyup",e=>{K[e.code]=0});
