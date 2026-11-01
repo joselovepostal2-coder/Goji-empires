@@ -3421,13 +3421,40 @@ body.gda-in-combat #gda068-launch,body.gda-in-combat #g68-evo-launch,body.gda-in
  $('g68-joinroom').addEventListener('click',()=>{const code=$('g68-joincode').value.trim().toUpperCase();if(code.length<4){$('g68-onlinemsg').textContent='Escribe un código de sala válido.';return}if(!gdaOnlineSocket||!gdaOnlineSocket.connected){$('g68-onlinemsg').textContent='Conectando al servidor… intenta de nuevo en unos segundos.';return}gdaOnlineSocket.emit('join-room',code,(result)=>{if(!result||!result.ok){$('g68-onlinemsg').textContent=result?.error||'No se pudo entrar a la sala.';return}lobbyCode=result.code;window.gdaLobbyCode=lobbyCode;$('g68-joincode').value=lobbyCode;openLobby('guest',lobbyCode);$('g68-lobby-note').textContent='Conectado a la sala online.';$('g68-onlinemsg').textContent='Te uniste a la sala '+lobbyCode})});
  $('g68-kaiju-select').addEventListener('change',()=>{$('g68-kaiju-status').textContent='Kaiju seleccionado: '+(kaijuNames[$('g68-kaiju-select').value]||$('g68-kaiju-select').value);$('g68-player1-kaiju').textContent=kaijuNames[$('g68-kaiju-select').value]||$('g68-kaiju-select').value});
  const onlineMapSelect=$('g68-map-select');
- const availableOnlineMaps=window.gdaGetOnlineMaps?window.gdaGetOnlineMaps():[];
- if(onlineMapSelect&&availableOnlineMaps.length){
-  onlineMapSelect.replaceChildren();
-  const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='— El anfitrión debe elegir un mapa —';placeholder.disabled=true;placeholder.selected=true;
-  onlineMapSelect.appendChild(placeholder);
-  availableOnlineMaps.forEach(name=>{const option=document.createElement('option');option.value=name;option.textContent=name;onlineMapSelect.appendChild(option)});
+ // La lista de escenarios se crea en el script principal. Reintentar evita
+ // dejar el selector bloqueado en "Cargando mapas disponibles…" si ese script tarda.
+ function populateOnlineMapSelect(attempt=0){
+  if(!onlineMapSelect)return;
+  let availableOnlineMaps=[];
+  try{
+   if(typeof window.gdaGetOnlineMaps==='function')availableOnlineMaps=window.gdaGetOnlineMaps();
+  }catch(error){console.error('No se pudo leer la lista de mapas de GDA:',error);}
+  availableOnlineMaps=Array.isArray(availableOnlineMaps)?[...new Set(availableOnlineMaps.filter(name=>typeof name==='string'&&name.trim()))]:[];
+  if(availableOnlineMaps.length){
+   const previous=onlineMapSelect.value;
+   onlineMapSelect.replaceChildren();
+   const placeholder=document.createElement('option');
+   placeholder.value='';placeholder.textContent='— El anfitrión debe elegir un mapa —';placeholder.disabled=true;
+   onlineMapSelect.appendChild(placeholder);
+   availableOnlineMaps.forEach(name=>{const option=document.createElement('option');option.value=name;option.textContent=name;onlineMapSelect.appendChild(option)});
+   onlineMapSelect.value=availableOnlineMaps.includes(previous)?previous:'';
+   onlineMapSelect.disabled=lobbyRole!=='host';
+   return;
+  }
+  if(attempt<30){
+   onlineMapSelect.replaceChildren();
+   const loading=document.createElement('option');loading.value='';loading.textContent='Cargando mapas disponibles…';loading.selected=true;
+   onlineMapSelect.appendChild(loading);
+   setTimeout(()=>populateOnlineMapSelect(attempt+1),200);
+  }else{
+   onlineMapSelect.replaceChildren();
+   const failed=document.createElement('option');failed.value='';failed.textContent='No se pudieron cargar los mapas. Recarga la página.';failed.selected=true;
+   onlineMapSelect.appendChild(failed);
+   const status=$('g68-map-status');if(status)status.textContent='Error al cargar los mapas del juego. Recarga la página con Ctrl+Shift+R.';
+   console.error('GDA Online: gdaGetOnlineMaps no devolvió escenarios.');
+  }
  }
+ populateOnlineMapSelect();
  onlineMapSelect.required=true;
  onlineMapSelect.addEventListener('change',()=>{
   if(lobbyRole!=='host'||!onlineMapSelect.value)return;
