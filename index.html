@@ -1380,7 +1380,7 @@ function hurt(a,t,dmg,base,gr,ang,dir){if(t.inv>0||t.shield>0||t.dead>0)return;i
  dmg*=au.power||1;dmg*=1-Math.min(.8,(tu.armor||0)*.08);dmg*=a.spamState?.penalty??1;
  t.pct+=dmg;
  if(String(t.r?.n||"").toUpperCase()===GDA_PUMPKIN_BOSS_NAME){
-  const phase=t.pct>=140?2:t.pct>=65?1:0;
+  const currentPhase=Number(t.pumpkinPhase)||0;const phase=currentPhase===0?(t.pct>=65?1:0):(currentPhase===1?(t.pct>=140?2:1):2);
   if((t.pumpkinPhase||0)!==phase){
    t.pumpkinPhase=phase;const art=ARTS[t.idx];if(art)art.bossPhase=phase;
    try{const old=t.mesh.material.map,tex=new THREE.CanvasTexture(paint(t.idx,phase));tex.colorSpace=THREE.SRGBColorSpace;tex.magFilter=THREE.LinearFilter;tex.minFilter=THREE.LinearFilter;tex.generateMipmaps=false;t.mesh.material.map=tex;t.mesh.material.needsUpdate=true;if(old)old.dispose()}catch(e){console.warn("GDA: no se pudo actualizar la fase visual del jefe",e)}
