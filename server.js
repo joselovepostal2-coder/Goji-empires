@@ -9,6 +9,54 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
+// Estadísticas agregadas de logros. El servidor guarda solo IDs aleatorios de navegador
+// y los conjuntos de logros desbloqueados; no recibe nombres, correos ni IP desde el cliente.
+app.use(express.json({ limit: "8kb" }));
+const achievementPlayers = new Set();
+const achievementUnlocks = new Map();
+const MAX_ACHIEVEMENT_ID = 300; // 301 logros: índices 0–300
+function validAchievementClientId(value) {
+  return typeof value === "string" && /^[a-z0-9-]{16,80}$/i.test(value);
+}
+app.post("/api/achievements/visit", (req, res) => {
+  const clientId = req.body && req.body.clientId;
+  if (!validAchievementClientId(clientId)) {
+    return res.status(400).json({ ok: false, error: "Identificador anónimo inválido." });
+  }
+  achievementPlayers.add(clientId);
+  res.set("Cache-Control", "no-store").json({ ok: true, totalPlayers: achievementPlayers.size });
+});
+app.post("/api/achievements/unlock", (req, res) => {
+  const clientId = req.body && req.body.clientId;
+  const achievementId = Number(req.body && req.body.achievementId);
+  if (!validAchievementClientId(clientId) ||
+      !Number.isInteger(achievementId) ||
+      achievementId < 0 || achievementId > MAX_ACHIEVEMENT_ID) {
+    return res.status(400).json({ ok: false, error: "Desbloqueo inválido." });
+  }
+  achievementPlayers.add(clientId);
+  if (!achievementUnlocks.has(achievementId)) achievementUnlocks.set(achievementId, new Set());
+  achievementUnlocks.get(achievementId).add(clientId);
+  res.set("Cache-Control", "no-store").json({ ok: true });
+});
+app.get("/api/achievements/stats", (_req, res) => {
+  const totalPlayers = achievementPlayers.size;
+  const achievements = {};
+  for (let id = 0; id <= MAX_ACHIEVEMENT_ID; id++) {
+    const count = achievementUnlocks.get(id)?.size || 0;
+    achievements[id] = {
+      count,
+      percent: totalPlayers ? Math.round((count / totalPlayers) * 1000) / 10 : 0
+    };
+  }
+  res.set("Cache-Control", "no-store").json({
+    totalPlayers,
+    achievements,
+    scope: "since_server_start",
+    persistent: false
+  });
+});
+
 app.use(express.static(__dirname));
 
 app.get("/", (req, res) => {
