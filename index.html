@@ -4261,7 +4261,7 @@ for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e
 
 
 <script id="geModeRecoveryScript">
-/* Recuperación aislada de interfaz: no modifica combate ni sockets online. */
+/* Recuperación de interfaz sin interceptar el despachador original de GDA. */
 (function(){
  "use strict";
  const modes=[
@@ -4277,39 +4277,29 @@ for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e
   const list=document.getElementById("mlist");
   if(!list)return;
   if(!list.querySelector("li")){
-   list.innerHTML=modes.map((label,i)=>'<li data-i="'+i+'" data-ge-mode="'+i+'" tabindex="0" role="button">'+label+'</li>').join("");
-  }else{
-   list.querySelectorAll("li").forEach((item,i)=>{
-    item.dataset.geMode=String(i);
-    item.tabIndex=0;
-    item.setAttribute("role","button");
-   });
+   list.innerHTML=modes.map((label,i)=>'<li data-i="'+i+'">'+label+'</li>').join("");
   }
-  if(!list.dataset.geRecoveryBound){
-   list.dataset.geRecoveryBound="1";
-   const activate=(item,event)=>{
-    if(!item)return;
-    if(event){event.preventDefault();event.stopPropagation();}
-    const index=Number(item.dataset.geMode);
-    if(typeof window.nav!=="function"){
-     let note=document.getElementById("geModeRecoveryNote");
-     if(!note){note=document.createElement("p");note.id="geModeRecoveryNote";note.style.cssText="color:#ffd56f;font:600 13px Arial,sans-serif;max-width:420px";list.insertAdjacentElement("afterend",note);}
-     note.textContent="La interfaz se recuperó, pero el motor de modos no terminó de iniciar. Recarga la página; si persiste, revisaremos el error JavaScript.";
-     return;
-    }
-    const current=[...list.querySelectorAll("li")].findIndex(x=>x.classList.contains("on"));
-    const from=current<0?0:current;
-    const steps=(index-from+modes.length)%modes.length;
-    for(let n=0;n<steps;n++)window.nav("ArrowDown");
-    window.nav("Enter");
-   };
-   list.addEventListener("click",event=>{
-    const item=event.target.closest("li[data-ge-mode]");
-    if(item)activate(item,event);
-   },true);
+  list.querySelectorAll("li").forEach((item,i)=>{
+   item.dataset.i=String(i);
+   item.tabIndex=0;
+   item.setAttribute("role","button");
+  });
+  /* Importante: no interceptar clics. El manejador original de GDA en document
+     necesita recibirlos para ejecutar nav(), abrir la selección de kaijus y el combate. */
+  if(!list.dataset.geRecoveryKeyboardBound){
+   list.dataset.geRecoveryKeyboardBound="1";
    list.addEventListener("keydown",event=>{
-    if((event.key==="Enter"||event.key===" ")&&event.target.matches("li[data-ge-mode]"))activate(event.target,event);
-   },true);
+    const item=event.target.closest("li[data-i]");
+    if(!item||(event.key!=="Enter"&&event.key!==" "))return;
+    if(typeof window.nav==="function"){
+     event.preventDefault();
+     const index=Number(item.dataset.i);
+     const current=[...list.querySelectorAll("li")].findIndex(x=>x.classList.contains("on"));
+     const from=current<0?0:current;
+     for(let n=0;n<(index-from+modes.length)%modes.length;n++)window.nav("ArrowDown");
+     window.nav("Enter");
+    }
+   });
   }
  }
  function recoverAchievements(){
