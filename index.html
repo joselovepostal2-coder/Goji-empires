@@ -215,7 +215,12 @@ h1 small{display:block;margin-top:.25em;font-size:.3em;letter-spacing:.55em;back
 .achItem{padding:10px;border:1px solid #354365;border-radius:9px;background:#121d38;color:#d7e1f8;font-size:13px}.achItem.unlocked{border-color:#e9c85a;color:#ffe69a;background:#2b2819}.achItem small{display:block;color:#91a4ca;margin-top:4px}
 </style>
 <button id="achLaunch" type="button">🏆 LOGROS 0/300</button>
-<div id="achPanel"><div class="achInner"><h2>🏆 LOGROS TITÁN · <span id="achCount">0/300</span></h2><p>Progreso guardado en este navegador.</p><div id="achList"></div><button id="achClose" style="margin-top:16px;padding:10px 18px;border-radius:8px;cursor:pointer">VOLVER AL JUEGO</button></div></div>
+<button id="adminSecretBox" type="button" aria-label="Cajita secreta" title="¿Qué habrá dentro?" style="position:fixed;left:16px;bottom:16px;z-index:902;width:48px;height:48px;border:1px solid #ffbd58;border-radius:13px;background:linear-gradient(145deg,#5c321c,#25132f);color:#fff;font-size:25px;cursor:pointer;box-shadow:0 0 18px #ff9b3555">📦</button>
+<style>
+#adminSecretBox:focus-visible{outline:3px solid #ffe66b;outline-offset:3px}
+@media(max-width:600px){#adminSecretBox{left:10px;bottom:12px;width:50px;height:50px}}
+</style>
+<div id="achPanel"><div class="achInner"><h2>🏆 LOGROS TITÁN · <span id="achCount">0/300</span></h2><p>Progreso guardado en este navegador. Los porcentajes globales cuentan navegadores registrados desde el último reinicio del servidor.</p><div id="achList"></div><button id="achClose" style="margin-top:16px;padding:10px 18px;border-radius:8px;cursor:pointer">VOLVER AL JUEGO</button></div></div>
 
 <div id="shaderLoading" style="display:none;position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at center,#15254a 0%,#030611 75%);color:#eafaff;align-items:center;justify-content:center;text-align:center;padding:24px;font-family:Orbitron,system-ui,sans-serif"><div style="width:min(520px,92vw)"><div style="font-size:clamp(24px,5vw,42px);font-weight:900;letter-spacing:.12em;text-shadow:0 0 24px #54e8ff">GODZILLA: DESTROY ALL</div><div style="margin:16px 0 22px;color:#f5d477;letter-spacing:.2em;font-size:13px">COMPILANDO SHADERS</div><div style="height:8px;border-radius:20px;background:#ffffff20;overflow:hidden;border:1px solid #54e8ff66"><div id="shaderLoadBar" style="height:100%;width:0;background:linear-gradient(90deg,#54e8ff,#f4cc60);box-shadow:0 0 20px #54e8ff;transition:width 13s linear"></div></div><div id="shaderLoadText" style="margin-top:14px;color:#b9c6e7;font:12px system-ui,sans-serif">Preparando escenario y efectos… 0%</div></div></div>
 
@@ -266,7 +271,7 @@ h1 small{display:block;margin-top:.25em;font-size:.3em;letter-spacing:.55em;back
  <section id="halloweenSkinsBelow" style="display:none;flex:0 0 auto;max-height:158px;margin:0 3vw 10px;padding:9px 12px;border:1px solid #ff9b3555;border-radius:14px;background:#140d20;overflow:hidden"><h3 style="margin:0 0 4px;color:#ffb45f;font-size:14px">🎃 SKINS DE HALLOWEEN</h3><p style="margin:0 0 7px;color:#c8bfd5;font-size:11px">Solo se muestran cuando pulsas SKINS.</p><div id="skinShelf" style="display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;padding:2px 2px 8px;scrollbar-width:thin"></div></section>
 </div>
 
-<div id="halloweenShop" class="scr hide" style="overflow:auto;background:#10091b;padding:16px;color:#fff"><div class="top"><button id="closeHalloweenShop" class="bk" type="button">‹ VOLVER</button><h2>🎃 TIENDA DE HALLOWEEN</h2><span id="hShopTokens" class="chip">TOKENS: 0</span></div><p style="color:#d7c7e7">50 skins temáticas y 35 kaijus nuevos de la colección. Las compras se guardan en este navegador.</p><h3 style="color:#ffb45f">50 SKINS · 300 TOKENS CADA UNA</h3><div id="hShopSkins" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:9px"></div><h3 style="color:#8fe7ff;margin-top:24px">35 KAIJUS NUEVOS</h3><div id="hShopKaijus" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:9px"></div><p id="hShopStatus" role="status" style="min-height:24px;color:#ffd27a"></p></div>
+<div id="halloweenShop" class="scr hide" style="overflow:auto;background:#10091b;padding:16px;color:#fff"><div class="top"><button id="closeHalloweenShop" class="bk" type="button">‹ VOLVER</button><h2>🎃 TIENDA DE HALLOWEEN</h2><span id="hShopTokens" class="chip">TOKENS: 0</span></div><p style="color:#d7c7e7">Catálogo de skins temáticas y 35 kaijus especiales. Las compras se guardan en este navegador.</p><div id="hShopRefreshBanner" hidden style="display:none;margin:12px 0;padding:14px;border:1px solid #ffbd58;border-radius:12px;background:linear-gradient(100deg,#492018,#27143b);color:#ffe7a2;font:800 13px Orbitron,sans-serif;text-align:center;box-shadow:0 0 22px #ff8c3455"></div><h3 id="hShopSkinTitle" style="color:#ffb45f">50 SKINS · CATÁLOGO ORIGINAL</h3><div id="hShopSkins" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:9px"></div><h3 style="color:#8fe7ff;margin-top:24px">35 KAIJUS NUEVOS</h3><div id="hShopKaijus" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:9px"></div><p id="hShopStatus" role="status" style="min-height:24px;color:#ffd27a"></p></div>
 
 <div id="skinChoiceScreen" class="hide" style="position:fixed;inset:0;z-index:5000;background:radial-gradient(ellipse at top,#322044,#070914 75%);color:#fff;overflow:auto;padding:20px;display:none"><div style="max-width:1000px;margin:auto"><h2 style="color:#ffb45f;font-family:Orbitron,sans-serif">🎃 ELIGE UNA SKIN</h2><p id="skinChoiceFor" style="color:#d7c7e7">Selecciona una skin que hayas comprado para tu kaiju.</p><div id="ownedSkinChoices" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px"></div><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:20px"><button id="skinChoiceNone" type="button" style="padding:12px 18px;border-radius:9px;background:#252b45;color:#fff;border:1px solid #59617e">CONTINUAR SIN SKIN</button><button id="skinChoiceContinue" type="button" style="padding:12px 18px;border-radius:9px;background:#a3431c;color:#fff;border:1px solid #ffb45f" disabled>CONTINUAR ›</button></div></div></div>
 
@@ -1225,14 +1230,44 @@ const HALLOWEEN_SKINS=[
  ["Huesos de Oro", "#b69b55","#514323","#fff0a3"],["Calavera Verde", "#8eaa64","#3b4a2a","#e4ffae"],["Magma Nocturno", "#652d27","#24101a","#ff713b"],["Estrella Muerta", "#515078","#1d1b39","#d6c8ff"],["Plaga", "#727d36","#30351b","#e1f05b"],["Rey Calabaza", "#d96c21","#5c2417","#ffe45b"],["Reina Bruja", "#6d2e83","#28123a","#ff9de8"],["Cítrico Terror", "#d6d72e","#52521a","#fff68a"],["Tóxico", "#39a36b","#174b3d","#a7ff8a"],["Horror VHS", "#8c263c","#25182f","#6effe8"],
  ["Nieve Negra", "#697b8c","#222d3a","#d7faff"],["Luz de Linterna", "#7c6b3a","#2f291c","#fff0a0"],["Lago Maldito", "#2e6a78","#102e3c","#80efff"],["Cueva de Murciélagos", "#49315f","#1a1027","#b98aff"],["Noche de Trueno", "#394b77","#121b36","#a6c6ff"],["Llama Fantasma", "#b84a2c","#4a1c28","#ffe07a"],["Piedra Rúnica", "#727c8b","#2e3544","#c4f2ff"],["Sangre Lunar", "#8f2c58","#32152d","#ff9dba"],["Pesadilla", "#3b293d","#130e1c","#a8ffef"],["Halloween Supremo", "#ff7a24","#28143f","#ffe45c"]
 ].map((v,i)=>({id:i,name:v[0],pal:v.slice(1),price:300}));
+const HALLOWEEN_NIGHT_SKINS=[
+ {name:"Calabaza Imperial",pal:["#ff9b22","#572014","#ffe66b"]},
+ {name:"Ghidorah Espectral",pal:["#d8b95b","#554027","#fff0a0"]},
+ {name:"Fuego de Cementerio",pal:["#e45a32","#421b30","#ffd477"]},
+ {name:"Marea Fantasma",pal:["#a9e9ef","#315b78","#f5ffff"]},
+ {name:"Luna Carmesí",pal:["#a92f4f","#421329","#ffb2b8"]},
+ {name:"Caramelo Cósmico",pal:["#8c65db","#39245f","#ffe087"]},
+ {name:"Ceniza Titánica",pal:["#777d91","#292c42","#d9e4ff"]},
+ {name:"Reactor Embrujado",pal:["#64c77a","#19473e","#d6ff81"]},
+ {name:"Hueso Radiante",pal:["#e5d9b7","#756b60","#fff8dc"]},
+ {name:"Tormenta de Murciélagos",pal:["#5b4b8a","#20172f","#c9a6ff"]}
+];
+let halloweenNightStockAdded=false;
+function halloweenNightRefreshDue(){return Date.now()>=new Date(2026,9,31,1,0,0).getTime()}
+function activateHalloweenShopRefresh(){
+ if(halloweenNightStockAdded||!halloweenNightRefreshDue())return false;
+ HALLOWEEN_NIGHT_SKINS.forEach(s=>HALLOWEEN_SKINS.push({id:HALLOWEEN_SKINS.length,name:s.name,pal:[...s.pal],price:450}));
+ halloweenNightStockAdded=true;
+ const banner=document.getElementById("hShopRefreshBanner");
+ if(banner){banner.hidden=false;banner.style.display="block";banner.textContent="🌙 RENOVACIÓN 01:00 ACTIVADA · 10 SKINS NUEVAS · EDICIÓN NOCTURNA";}
+ const title=document.getElementById("hShopSkinTitle");
+ if(title)title.textContent=HALLOWEEN_SKINS.length+" SKINS · NUEVA EDICIÓN NOCTURNA";
+ const shop=document.getElementById("halloweenShop");
+ if(shop){shop.classList.add("halloween-night-edition");shop.style.background="radial-gradient(ellipse at top,#462044 0%,#170d22 50%,#080711 100%)";}
+ return true;
+}
+(function scheduleHalloweenShopRefresh(){
+ const target=new Date(2026,9,31,1,0,0).getTime(),delay=target-Date.now();
+ if(delay>0&&delay<2147483000)setTimeout(()=>{if(activateHalloweenShopRefresh()){renderSkinShelf();const shop=document.getElementById("halloweenShop");if(shop&&!shop.classList.contains("hide"))renderHalloweenShop();}},delay);
+})();
 let hShopSelectedSkin=0;
 function halloweenOwned(){try{return JSON.parse(localStorage.getItem('gda_halloween_skins_v1')||'[]')}catch(e){return []}}
 function halloweenApplied(){try{return JSON.parse(localStorage.getItem('gda_halloween_applied_v1')||'{}')}catch(e){return {}}}
 function applyHalloweenSkin(skinId,kaijuIndex=ORDER[ci]){const skin=HALLOWEEN_SKINS[Number(skinId)],r=ROSTER[kaijuIndex],a=ARTS[kaijuIndex];if(!skin||!r||!a)return false;const pal=[...skin.pal];a.skinPal=pal;r.css=pal[2];r.body=hx(pal[0]);r.dark=hx(pal[1]);r.acc=hx(pal[2]);const saved=halloweenApplied();saved[r.n]=skin.id;try{localStorage.setItem('gda_halloween_applied_v1',JSON.stringify(saved))}catch(e){};if(artURL.c)delete artURL.c[kaijuIndex];if(typeof TEX==='object'){for(const key of Object.keys(TEX)){if(key.startsWith(kaijuIndex+'_')){try{TEX[key].dispose()}catch(e){}delete TEX[key]}}}if($('pImg'))$('pImg').src=artURL(kaijuIndex);document.querySelectorAll('#grid img[data-i],#grid img').forEach(im=>{if(Number(im.dataset.i)===kaijuIndex)im.src=artURL(kaijuIndex)});if($('pName'))$('pName').style.color=r.css;renderSkinShelf();return true;}
 const toggleSkinsShelf=$('toggleSkinsShelf');
 if(toggleSkinsShelf)toggleSkinsShelf.addEventListener('click',()=>{const section=$('halloweenSkinsBelow');const opening=section.style.display==='none'||!section.style.display;section.style.display=opening?'block':'none';toggleSkinsShelf.setAttribute('aria-expanded',String(opening));toggleSkinsShelf.textContent=opening?'🎨 OCULTAR SKINS':'🎨 SKINS';if(opening)renderSkinShelf();});
-function renderSkinShelf(){const shelf=$('skinShelf');if(!shelf)return;const own=halloweenOwned(),saved=halloweenApplied(),idx=ORDER[ci],current=saved[ROSTER[idx]?.n];shelf.innerHTML=HALLOWEEN_SKINS.map(k=>`<button type="button" data-skin="${k.id}" style="flex:0 0 138px;min-width:138px;text-align:left;padding:8px;border:1px solid ${current===k.id?'#ffbd58':'#64436e'};border-radius:9px;background:#20142b;color:#fff;cursor:pointer"><span style="display:inline-block;width:100%;height:9px;border-radius:5px;background:linear-gradient(90deg,${k.pal.join(',')});margin-bottom:6px"></span><b>${k.name}</b><small style="display:block;color:#d7c7e7;margin-top:3px">${own.includes(k.id)?(current===k.id?'EQUIPADA':'APLICAR'):'300 tokens'}</small></button>`).join('');shelf.querySelectorAll('[data-skin]').forEach(b=>b.addEventListener('click',()=>{const id=+b.dataset.skin;if(!own.includes(id)){const status=document.getElementById('hShopStatus');if(status)status.textContent='Compra esta skin en la tienda de Halloween por 300 tokens.';const shopButton=document.getElementById('openHalloweenShop');if(shopButton)shopButton.focus();return}if(applyHalloweenSkin(id))renderSkinShelf()}));}
-function renderHalloweenShop(){const own=halloweenOwned(),ks=$('hShopSkins'),ka=$('hShopKaijus');$('hShopTokens').textContent='TOKENS: '+TITAN_TOKENS.toLocaleString('es-CL');ks.innerHTML=HALLOWEEN_SKINS.map(k=>`<article style="padding:11px;border:1px solid #5b3b6c;border-radius:10px;background:#20142b"><div style="height:12px;border-radius:5px;background:linear-gradient(90deg,${k.pal.join(',')});margin-bottom:8px"></div><b>${k.id+1}. ${k.name}</b><p style="font-size:12px;color:#d7c7e7">Paleta de Halloween</p><button type="button" data-buy-skin="${k.id}" ${own.includes(k.id)?'disabled':''} style="padding:8px;border-radius:7px;border:0;background:${own.includes(k.id)?'#37523c':'#a34b20'};color:white;width:100%">${own.includes(k.id)?'COMPRADA':'COMPRAR · 300'}</button></article>`).join('');ks.querySelectorAll('[data-buy-skin]').forEach(b=>b.addEventListener('click',()=>{const id=+b.dataset.buySkin;if(TITAN_TOKENS<300){$('hShopStatus').textContent='No tienes suficientes Tokens Titán (necesitas 300).';return}TITAN_TOKENS-=300;saveTitanTokens();const o=halloweenOwned();o.push(id);try{localStorage.setItem('gda_halloween_skins_v1',JSON.stringify([...new Set(o)]))}catch(e){};$('hShopStatus').textContent='¡Skin '+HALLOWEEN_SKINS[id].name+' comprada! Selecciona un kaiju y aplícala debajo de la lista.';renderHalloweenShop();renderSkinShelf()}));
+function renderSkinShelf(){activateHalloweenShopRefresh();const shelf=$('skinShelf');if(!shelf)return;const own=halloweenOwned(),saved=halloweenApplied(),idx=ORDER[ci],current=saved[ROSTER[idx]?.n];shelf.innerHTML=HALLOWEEN_SKINS.map(k=>`<button type="button" data-skin="${k.id}" style="flex:0 0 138px;min-width:138px;text-align:left;padding:8px;border:1px solid ${current===k.id?'#ffbd58':'#64436e'};border-radius:9px;background:#20142b;color:#fff;cursor:pointer"><span style="display:inline-block;width:100%;height:9px;border-radius:5px;background:linear-gradient(90deg,${k.pal.join(',')});margin-bottom:6px"></span><b>${k.name}</b><small style="display:block;color:#d7c7e7;margin-top:3px">${own.includes(k.id)?(current===k.id?'EQUIPADA':'APLICAR'):(k.price||300)+' tokens'}</small></button>`).join('');shelf.querySelectorAll('[data-skin]').forEach(b=>b.addEventListener('click',()=>{const id=+b.dataset.skin;if(!own.includes(id)){const status=document.getElementById('hShopStatus');if(status)status.textContent='Compra esta skin en la tienda de Halloween por '+(HALLOWEEN_SKINS[id]?.price||300)+' tokens.';const shopButton=document.getElementById('openHalloweenShop');if(shopButton)shopButton.focus();return}if(applyHalloweenSkin(id))renderSkinShelf()}));}
+function renderHalloweenShop(){activateHalloweenShopRefresh();const own=halloweenOwned(),ks=$('hShopSkins'),ka=$('hShopKaijus');$('hShopTokens').textContent='TOKENS: '+TITAN_TOKENS.toLocaleString('es-CL');ks.innerHTML=HALLOWEEN_SKINS.map(k=>`<article style="padding:11px;border:1px solid #5b3b6c;border-radius:10px;background:#20142b"><div style="height:12px;border-radius:5px;background:linear-gradient(90deg,${k.pal.join(',')});margin-bottom:8px"></div><b>${k.id+1}. ${k.name}</b><p style="font-size:12px;color:#d7c7e7">Paleta de Halloween</p><button type="button" data-buy-skin="${k.id}" ${own.includes(k.id)?'disabled':''} style="padding:8px;border-radius:7px;border:0;background:${own.includes(k.id)?'#37523c':'#a34b20'};color:white;width:100%">${own.includes(k.id)?'COMPRADA':'COMPRAR · '+(k.price||300)}</button></article>`).join('');ks.querySelectorAll('[data-buy-skin]').forEach(b=>b.addEventListener('click',()=>{const id=+b.dataset.buySkin,price=HALLOWEEN_SKINS[id]?.price||300;if(TITAN_TOKENS<price){$('hShopStatus').textContent='No tienes suficientes Tokens Titán (necesitas '+price+').';return}TITAN_TOKENS-=price;saveTitanTokens();const o=halloweenOwned();o.push(id);try{localStorage.setItem('gda_halloween_skins_v1',JSON.stringify([...new Set(o)]))}catch(e){};$('hShopStatus').textContent='¡Skin '+HALLOWEEN_SKINS[id].name+' comprada! Selecciona un kaiju y aplícala debajo de la lista.';renderHalloweenShop();renderSkinShelf()}));
  const newKaijuNames=NEWK2.slice(0,35).map(k=>k.n);ka.innerHTML=newKaijuNames.map(n=>{const idx=ROSTER.findIndex(r=>r.n===n.toUpperCase());return `<article style="padding:11px;border:1px solid #2c6476;border-radius:10px;background:#101e2b"><b>${n}</b><p style="font-size:12px;color:#c7d5f4">Kaiju nuevo · ${ROSTER[idx]?.cat||'Halloween'}</p><button type="button" data-pick-kaiju="${idx}" style="padding:8px;border-radius:7px;border:1px solid #4bb6cf;background:#173b4a;color:#fff;width:100%">${idx>=0?'VER EN SELECTOR':'NO DISPONIBLE'}</button></article>`}).join('');ka.querySelectorAll('[data-pick-kaiju]').forEach(b=>b.addEventListener('click',()=>{const idx=+b.dataset.pickKaiju;if(idx<0)return;ci=Math.max(0,ORDER.indexOf(idx));show('select');mark();$('hShopStatus').textContent='Kaiju seleccionado: '+ROSTER[idx].n;}));}
 $('openHalloweenShop').addEventListener('click',()=>{renderHalloweenShop();show('halloweenShop')});$('closeHalloweenShop').addEventListener('click',()=>show('menu'));
 const smS=r=>{const b=r.sm||{w:60+r.stat[1]*16,spd:15+r.stat[2]*3.2,jmp:62+r.stat[2]*3,kb:.7+r.stat[0]*.14};const i=ROSTER.indexOf(r),u=GAME_UPGRADES[i]||{};return {...b,spd:b.spd*(u.speed||1),jmp:b.jmp*(u.jump||1)}};
@@ -2071,8 +2106,10 @@ ACHIEVEMENTS[50]=['Coletazo bajo','Con Godzilla, mantén ABAJO y pulsa clic dere
 // Logro individual por ejecutar una combinación con cada kaiju del plantel.
 for(let ci=0;ci<Math.min(ROSTER.length,100);ci++){const ai=51+ci;if(ai<300)ACHIEVEMENTS[ai]=['Combo de '+ROSTER[ci].n,'Completa una combinación exclusiva con '+ROSTER[ci].n+'.'];}
 const ghComboIndex=ROSTER.findIndex(r=>String(r.n||'').toUpperCase().includes('GHIDORAH')||String(r.n||'').toUpperCase().includes('GHIDORA'));if(ghComboIndex>=0&&51+ghComboIndex<300)ACHIEVEMENTS[51+ghComboIndex]=['Tres cabezas, un combo','Con King Ghidorah, usa ULTIMATE + AGARRE: golpe triple, lanzamiento y rayos.'];
+ACHIEVEMENTS[31]=['HALLOWEEN DEFINITIVO','Entra durante el evento y presencia la presentación especial de Halloween.'];
+ACHIEVEMENTS.push(['Admin desbloqueado','Secreto: pulsa la cajita misteriosa de una esquina de la pantalla.']);
 let achUnlocked = new Set();
-try { achUnlocked = new Set(JSON.parse(localStorage.getItem('gda_achievements_v1')||'[]').filter(i=>Number.isInteger(i)&&i>=0&&i<300)); } catch(e) {}
+try { achUnlocked = new Set(JSON.parse(localStorage.getItem('gda_achievements_v1')||'[]').filter(i=>Number.isInteger(i)&&i>=0&&i<ACHIEVEMENTS.length)); } catch(e) {}
 function grantPlatinumReward(){
  if(localStorage.getItem('gda_platinum_reward_v1')==='1')return;
  TITAN_TOKENS+=200000;saveTitanTokens();
@@ -2081,14 +2118,61 @@ function grantPlatinumReward(){
 }
 function checkPlatinum(){
  if(!achUnlocked.has(298)&&Array.from({length:298},(_,i)=>i).every(i=>achUnlocked.has(i))){
-  achUnlocked.add(298);try{localStorage.setItem('gda_achievements_v1',JSON.stringify([...achUnlocked]))}catch(e){}grantPlatinumReward();
+  achUnlocked.add(298);try{localStorage.setItem('gda_achievements_v1',JSON.stringify([...achUnlocked]))}catch(e){}reportAchievementUnlock(298);grantPlatinumReward();
  }
 }
-function renderAchievements(){const list=document.getElementById('achList');if(!list)return;list.innerHTML=ACHIEVEMENTS.map((a,i)=>`<div class="achItem ${achUnlocked.has(i)?'unlocked':''}">${achUnlocked.has(i)?'🏆':'🔒'} ${i+1}. ${a[0]}<small>${a[1]}</small></div>`).join('');document.getElementById('achCount').textContent=achUnlocked.size+'/300';document.getElementById('achLaunch').textContent='🏆 LOGROS '+achUnlocked.size+'/300';}
-function unlockAchievement(i){if(i<0||i>=300||achUnlocked.has(i))return;achUnlocked.add(i);try{localStorage.setItem('gda_achievements_v1',JSON.stringify([...achUnlocked]));}catch(e){}checkPlatinum();renderAchievements();}
+const achievementStats={available:false,players:0,items:{}};
+function getAchievementClientId(){
+ let id="";
+ try{id=localStorage.getItem("gda_stats_client_v1")||""}catch(e){}
+ if(!/^[a-z0-9-]{16,80}$/i.test(id)){
+  id=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():(Date.now().toString(16)+"-"+Math.random().toString(36).slice(2)+"-"+Math.random().toString(36).slice(2));
+  try{localStorage.setItem("gda_stats_client_v1",id)}catch(e){}
+ }
+ return id;
+}
+const achievementClientId=getAchievementClientId();
+async function postAchievementStat(path,payload){
+ try{return await fetch(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload),cache:"no-store"})}catch(e){return null}
+}
+async function refreshAchievementStats(){
+ try{
+  const response=await fetch("/api/achievements/stats",{cache:"no-store"});
+  if(!response.ok)throw new Error("stats unavailable");
+  const data=await response.json();
+  achievementStats.available=true;achievementStats.players=Number(data.totalPlayers)||0;achievementStats.items=data.achievements||{};
+  renderAchievements();
+ }catch(e){achievementStats.available=false;renderAchievements()}
+}
+async function registerAchievementBrowser(){
+ await postAchievementStat("/api/achievements/visit",{clientId:achievementClientId});
+ await refreshAchievementStats();
+}
+function reportAchievementUnlock(i){
+ postAchievementStat("/api/achievements/unlock",{clientId:achievementClientId,achievementId:i}).then(()=>refreshAchievementStats());
+}
+function renderAchievements(){
+ const list=document.getElementById("achList");if(!list)return;
+ list.innerHTML=ACHIEVEMENTS.map((a,i)=>{
+  const stat=achievementStats.items[i];
+  const globalText=achievementStats.available?(stat?stat.percent+"% de navegadores ("+stat.count+")":"0% de navegadores (0)"):"Porcentaje global no disponible";
+  return '<div class="achItem '+(achUnlocked.has(i)?"unlocked":"")+'">'+(achUnlocked.has(i)?"🏆":"🔒")+' '+(i+1)+'. '+a[0]+'<small>'+a[1]+' · '+globalText+'</small></div>';
+ }).join("");
+ document.getElementById("achCount").textContent=achUnlocked.size+"/"+ACHIEVEMENTS.length;
+ document.getElementById("achLaunch").textContent="🏆 LOGROS "+achUnlocked.size+"/"+ACHIEVEMENTS.length;
+}
+function unlockAchievement(i){
+ if(!Number.isInteger(i)||i<0||i>=ACHIEVEMENTS.length||achUnlocked.has(i))return;
+ achUnlocked.add(i);
+ try{localStorage.setItem("gda_achievements_v1",JSON.stringify([...achUnlocked]))}catch(e){}
+ reportAchievementUnlock(i);checkPlatinum();renderAchievements();
+ if(typeof toastCombat==="function")toastCombat("🏆 LOGRO DESBLOQUEADO: "+ACHIEVEMENTS[i][0],"#ffd24a");
+}
+window.gdaUnlockAchievement=unlockAchievement;
 document.getElementById('achLaunch').addEventListener('click',()=>{renderAchievements();document.getElementById('achPanel').style.display='block'});
 document.getElementById('achClose').addEventListener('click',()=>document.getElementById('achPanel').style.display='none');
-renderAchievements();
+renderAchievements();registerAchievementBrowser();
+document.getElementById('adminSecretBox').addEventListener('click',()=>{if(achUnlocked.has(300)){toastCombat('📦 ADMIN DESBLOQUEADO: ya lo encontraste','#ffd24a');return}unlockAchievement(300);});
 // ---- Lógica de combate ----
 let cpuLevel=9;
 (function initCPUSelector(){
@@ -3270,6 +3354,7 @@ window.gdaPlayHalloweenIntro=function(){
  const halloweenDay=now.getFullYear()===2026&&now.getMonth()===9&&now.getDate()===31;
  const eventStarted=now.getHours()>0||(now.getHours()===0&&now.getMinutes()>=40);
  if(!halloweenDay||!eventStarted)return false;
+ if(typeof window.gdaUnlockAchievement==='function')window.gdaUnlockAchievement(31);
  const seenKey='gda_halloween_definitivo_intro_2026';
  try{if(sessionStorage.getItem(seenKey))return false;sessionStorage.setItem(seenKey,'1')}catch(err){}
  const confetti=overlay.querySelector('.hdi-confetti');
