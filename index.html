@@ -1718,7 +1718,7 @@ let SB={l:-44,r:44};
 // Entrada de P1: mouse (botones, rueda, seguir el cursor), teclado y botones táctiles. P2: su propio esquema.
 let MX=0,lastM=-1e9,sawTouch=false,bindT=0;const wt={};
 function inp(f){
- const two=G.sm.two,id=f.id,online=!!window.__gdaOnlineActive&&two,localSlot=Number(window.__gdaOnlineLocalSlot)||1;
+ const two=G.sm.two,id=f.id,online=!!window.__gdaOnlineActive,localSlot=Number(window.__gdaOnlineLocalSlot)||1;
  const onlineCoop=!!window.__gdaOnlineActive&&(window.__gdaOnlineMode==="story"||window.__gdaOnlineMode==="waves");
  const onlineWave=!!window.__gdaOnlineActive&&["waves","tower","hardcore","raid","survival"].includes(window.__gdaOnlineMode);
  const blank={dir:0,jump:false,down:false,a:false,h:false,u:false,g:false,aHeld:false,gHeld:false};
@@ -2590,7 +2590,12 @@ function smStep(dt){const S=G.sm,[a,b]=S.F;const aimHud=$("doratsAimHud");if(aim
   }else o=f===a?b:a;
   if(!o)continue;
   if(f.dead>0){f.dead-=dt;if(f.dead<=0){Object.assign(f,{x:Number.isFinite(f.spawnX)?f.spawnX:0,y:Number.isFinite(f.spawnY)?f.spawnY:55,vx:0,vy:0,pct:0,inv:2.5,jumps:1,stun:0})}continue}
-  fighter(f,o,dt)}
+  if(window.__gdaOnlineActive && !f.ai && (f.id===1||f.id===2)){
+   const localSlot=Number(window.__gdaOnlineLocalSlot)||1, now=performance.now();
+   if(f.id!==localSlot){const snap=window.__gdaRemoteCombatState;if(snap && now-(window.__gdaRemoteCombatStateAt||0)<500){for(const k of ["x","y","vx","vy","pct","stocks","stun","dead","meter","face"])if(Number.isFinite(snap[k]))f[k]=snap[k];f.ground=0;}}
+   fighter(f,o,dt);
+   if(f.id===localSlot && now-(window.__gdaLastCombatSnapshot||0)>50 && window.gdaOnlineSocket?.connected){window.gdaOnlineSocket.emit("combat-state",{x:f.x,y:f.y,vx:f.vx,vy:f.vy,pct:f.pct,stocks:f.stocks,stun:f.stun,dead:f.dead,meter:f.meter,face:f.face});window.__gdaLastCombatSnapshot=now;}
+  }else fighter(f,o,dt)
  for(const p of S.pr){p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;let o=p.from===a?b:a;
   const projectileBox={x:p.x-p.r,y:p.y-p.r,w:2*p.r,h:2*p.r};
   if(S.mode===6){
@@ -3689,6 +3694,12 @@ for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e
     window.__gdaRemoteInputAt = performance.now();
   });
 
+  gdaOnlineSocket.on("remote-combat-state", (payload) => {
+    if (!window.__gdaOnlineActive || !payload || !payload.state) return;
+    window.__gdaRemoteCombatState = payload.state;
+    window.__gdaRemoteCombatStateAt = performance.now();
+  });
+
   function launchOnlineRoomMatch(room,isRematch=false) {
     if (!room || room.code !== window.gdaLobbyCode) return;
     const players = Array.isArray(room.players) ? room.players : [];
@@ -3701,6 +3712,9 @@ for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e
     window.__gdaOnlineLocalSlot = host.id === gdaOnlineSocket.id ? 1 : 2;
     window.__gdaRemoteInput = {dir:0,jump:false,down:false,a:false,h:false,u:false,g:false,aHeld:false,gHeld:false};
     window.__gdaRemoteInputAt = 0;
+    window.__gdaRemoteCombatState = null;
+    window.__gdaRemoteCombatStateAt = 0;
+    window.__gdaLastCombatSnapshot = 0;
     window.__gdaLastOnlineInput = 0;
     window.__gdaOnlineActive = true;
     const overlay = document.getElementById("g68-online-overlay");
