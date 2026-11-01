@@ -2228,7 +2228,7 @@ const ACHIEVEMENTS_HARD = [
  ['Calabaza conquistada','Desbloquea a la Calabaza Gigante Arácnida de Halloween.']
 ];
 const ACHIEVEMENTS = [...ACHIEVEMENTS_NORMAL,...ACHIEVEMENTS_HARD];
-const ACHIEVEMENT_STORAGE_KEY = "gda_achievements_v3_55";
+const ACHIEVEMENT_STORAGE_KEY = "gda_achievements_v2_54";
 let achUnlocked = new Set();
 try {
  const current=JSON.parse(localStorage.getItem(ACHIEVEMENT_STORAGE_KEY)||"null");
@@ -2240,7 +2240,7 @@ try {
   localStorage.setItem(ACHIEVEMENT_STORAGE_KEY,JSON.stringify([...achUnlocked]));
  }
 } catch(e) {}
-const ACH_TRACK_KEY="gda_achievement_tracker_55_v1";
+const ACH_TRACK_KEY="gda_achievement_tracker_54_v1";
 const ACH_TRACK_DEFAULT={
  normalWins:0,normalCpu9Wins:0,normalStreak:0,godzillaStreak:0,onlineMatches:0,onlineWins:0,onlineStreak:0,
  soloWaves:0,perfectWins:0,cpu9PerfectWins:0,bossPerfectWins:0,ultimates:0,combos:0,totalDamage:0,
