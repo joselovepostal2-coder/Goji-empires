@@ -3094,7 +3094,7 @@ function smStep(dt){const S=G.sm,[a,b]=S.F;const aimHud=$("doratsAimHud");if(aim
   if(f.dead>0){f.dead-=dt;if(f.dead<=0){Object.assign(f,{x:Number.isFinite(f.spawnX)?f.spawnX:0,y:Number.isFinite(f.spawnY)?f.spawnY:55,vx:0,vy:0,pct:0,inv:2.5,jumps:1,stun:0})}continue}
   if(window.__gdaOnlineActive && !f.ai && (f.id===1||f.id===2)){
    const localSlot=Number(window.__gdaOnlineLocalSlot)||1, now=performance.now();
-   if(f.id!==localSlot){const snap=window.__gdaRemoteCombatState;if(snap && now-(window.__gdaRemoteCombatStateAt||0)<500){/* Solo se corrige la posición del rival. El daño, las vidas, el aturdimiento y la energía se calculan en ambos clientes a partir de las entradas sincronizadas; sobrescribirlos aquí podía borrar un impacto recién registrado. */for(const k of ["x","y","vx","vy","pct","stocks","stun","dead","meter","face"])if(Number.isFinite(snap[k]))f[k]=snap[k];f.ground=0;}}
+   if(f.id!==localSlot){const snap=window.__gdaRemoteCombatState;if(snap && now-(window.__gdaRemoteCombatStateAt||0)<500){/* Cada cliente recibe del dueño del kaiju el estado autorizado de daño, vidas y movimiento. Los impactos se envían por remote-combat-hit. */for(const k of ["x","y","vx","vy","pct","stocks","stun","dead","meter","face"])if(Number.isFinite(snap[k]))f[k]=snap[k];f.ground=0;}}
    fighter(f,o,dt);
    if(f.id===localSlot && now-(window.__gdaLastCombatSnapshot||0)>50 && window.gdaOnlineSocket?.connected){window.gdaOnlineSocket.emit("combat-state",{x:f.x,y:f.y,vx:f.vx,vy:f.vy,pct:f.pct,stocks:f.stocks,stun:f.stun,dead:f.dead,meter:f.meter,face:f.face});window.__gdaLastCombatSnapshot=now;}
   }else fighter(f,o,dt)
