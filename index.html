@@ -1402,7 +1402,7 @@ function hurt(a,t,dmg,base,gr,ang,dir){const onlinePvp=!!window.__gdaOnlineActiv
  const readyBefore=a.meter>=200;
  a.meter=Math.min(200,Math.max(0,(a.meter||0)+dmg*1.1));t.meter=Math.min(200,Math.max(0,(t.meter||0)+dmg*.6));
  if(!readyBefore&&a.meter>=200)toastCombat("¡ULTIMATE LISTO! 200/200","#70ffb2");
- const S=G.sm;S.hs=Math.min(.12,.03+dmg*.004);S.shake=Math.min(5,dmg*.35);if(onlinePvp&&a.id===localSlot&&t.id!==localSlot&&window.gdaOnlineSocket?.connected){window.gdaOnlineSocket.emit("combat-hit",{targetId:t.id,state:{x:t.x,y:t.y,vx:t.vx,vy:t.vy,pct:t.pct,stocks:t.stocks,stun:t.stun,dead:t.dead,meter:t.meter,face:t.face}})}}
+ const S=G.sm;S.hs=Math.min(.12,.03+dmg*.004);S.shake=Math.min(5,dmg*.35);if(onlinePvp&&a.id===localSlot&&t.id!==localSlot&&window.gdaOnlineSocket?.connected){window.__gdaHitSeq=(window.__gdaHitSeq||0)+1;window.gdaOnlineSocket.emit("combat-hit",{targetId:t.id,attackerSlot:localSlot,sequence:window.__gdaHitSeq,state:{x:t.x,y:t.y,vx:t.vx,vy:t.vy,pct:t.pct,stocks:t.stocks,stun:t.stun,dead:t.dead,meter:t.meter,face:t.face}})}}
 /*ENDPHYS*/
 const mouth=f=>{const A=f.A;return[f.x+f.face*(A.m[0]-48)/96*f.S,f.y+(96-(A.m[1]+dyOf(f.idx)))/96*f.S]};
 function soft(r,g,b,a){const c=document.createElement("canvas");c.width=c.height=64;const x=c.getContext("2d"),q=x.createRadialGradient(32,32,2,32,32,32);
@@ -1869,7 +1869,7 @@ function inp(f){
    j=k=>L.some(p=>JP[p[k]])||(id===1&&JP["T_"+k]);
   const input={dir:cl((d("right")?1:0)-(d("left")?1:0),-1,1),jump:j("jump"),down:d("down"),a:j("light"),h:j("heavy"),u:j("ult"),g:j("grab"),aHeld:d("light"),gHeld:d("grab")};
   const now=performance.now();
-  if(now-(window.__gdaLastOnlineInput||0)>40&&window.gdaOnlineSocket?.connected){window.gdaOnlineSocket.emit("game-state",input);window.__gdaLastOnlineInput=now}
+  if(now-(window.__gdaLastOnlineInput||0)>40&&window.gdaOnlineSocket?.connected){window.__gdaInputSeq=(window.__gdaInputSeq||0)+1;window.gdaOnlineSocket.emit("game-state",{state:input,sequence:window.__gdaInputSeq,playerSlot:localSlot});window.__gdaLastOnlineInput=now}
   return input;
  }
  if(onlineCoop&&id===1){
@@ -1880,7 +1880,7 @@ function inp(f){
   if(!dir&&localSlot===1&&OPT.follow&&performance.now()-lastM<2500){const hw=Math.tan(cam.fov*Math.PI/360)*CAMZ*cam.aspect,wx=cam.position.x+MX*hw;if(Math.abs(wx-f.x)>4)dir=wx>f.x?1:-1}
   const local={dir,jump:j("jump"),down:d("down"),a:j("light"),h:j("heavy"),u:j("ult"),g:j("grab"),aHeld:d("light"),gHeld:d("grab")};
   const now=performance.now();
-  if(now-(window.__gdaLastOnlineInput||0)>40&&window.gdaOnlineSocket?.connected){window.gdaOnlineSocket.emit("game-state",local);window.__gdaLastOnlineInput=now}
+  if(now-(window.__gdaLastOnlineInput||0)>40&&window.gdaOnlineSocket?.connected){window.__gdaInputSeq=(window.__gdaInputSeq||0)+1;window.gdaOnlineSocket.emit("game-state",{state:local,sequence:window.__gdaInputSeq,playerSlot:localSlot});window.__gdaLastOnlineInput=now}
   const remote=now-(window.__gdaRemoteInputAt||0)<600&&window.__gdaRemoteInput?window.__gdaRemoteInput:blank;
   return {dir:cl((local.dir||0)+(remote.dir||0),-1,1),jump:!!(local.jump||remote.jump),down:!!(local.down||remote.down),a:!!(local.a||remote.a),h:!!(local.h||remote.h),u:!!(local.u||remote.u),g:!!(local.g||remote.g),aHeld:!!(local.aHeld||remote.aHeld),gHeld:!!(local.gHeld||remote.gHeld)};
  }
@@ -3096,7 +3096,7 @@ function smStep(dt){const S=G.sm,[a,b]=S.F;const aimHud=$("doratsAimHud");if(aim
    const localSlot=Number(window.__gdaOnlineLocalSlot)||1, now=performance.now();
    if(f.id!==localSlot){const snap=window.__gdaRemoteCombatState;if(snap && now-(window.__gdaRemoteCombatStateAt||0)<500){/* Cada cliente recibe del dueño del kaiju el estado autorizado de daño, vidas y movimiento. Los impactos se envían por remote-combat-hit. */for(const k of ["x","y","vx","vy","pct","stocks","stun","dead","meter","face"])if(Number.isFinite(snap[k]))f[k]=snap[k];f.ground=0;}}
    fighter(f,o,dt);
-   if(f.id===localSlot && now-(window.__gdaLastCombatSnapshot||0)>50 && window.gdaOnlineSocket?.connected){window.gdaOnlineSocket.emit("combat-state",{x:f.x,y:f.y,vx:f.vx,vy:f.vy,pct:f.pct,stocks:f.stocks,stun:f.stun,dead:f.dead,meter:f.meter,face:f.face});window.__gdaLastCombatSnapshot=now;}
+   if(f.id===localSlot && now-(window.__gdaLastCombatSnapshot||0)>50 && window.gdaOnlineSocket?.connected){window.__gdaCombatSeq=(window.__gdaCombatSeq||0)+1;window.gdaOnlineSocket.emit("combat-state",{playerSlot:localSlot,sequence:window.__gdaCombatSeq,state:{x:f.x,y:f.y,vx:f.vx,vy:f.vy,pct:f.pct,stocks:f.stocks,stun:f.stun,dead:f.dead,meter:f.meter,face:f.face}});window.__gdaLastCombatSnapshot=now;}
   }else fighter(f,o,dt)
  }
  for(const p of S.pr){p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;let o=p.from===a?b:a;
@@ -4481,6 +4481,11 @@ var gdaOnlineSocket = null;
     window.__gdaLastCombatSnapshot = 0;
     window.__gdaLastOnlineInput = 0;
     window.__gdaCombatSeq = 0;
+    window.__gdaInputSeq = 0;
+    window.__gdaHitSeq = 0;
+    window.__gdaRemoteInputSequence = 0;
+    window.__gdaRemoteCombatStateSequence = 0;
+    window.__gdaRemoteHitSequence = 0;
     state.lastRemoteInputAt = 0;
     state.lastCombatStateAt = 0;
     // lastMatchKey se conserva para ignorar eventos match-start duplicados.
@@ -4490,8 +4495,13 @@ var gdaOnlineSocket = null;
     if (!window.__gdaOnlineActive || !isObject(payload)) return;
     if (payload.playerId && payload.playerId === gdaOnlineSocket.id) return;
 
+    var remoteSlot = getCurrentSlot() === 1 ? 2 : 1;
+    if (Number(payload.playerSlot) !== remoteSlot) return;
+    var sequence = Number(payload.sequence);
+    if (!Number.isInteger(sequence) || sequence <= Number(window.__gdaRemoteInputSequence || 0)) return;
     var clean = normalizeInput(payload.state);
     window.__gdaRemoteInput = clean;
+    window.__gdaRemoteInputSequence = sequence;
     window.__gdaRemoteInputAt = performance.now();
     state.lastRemoteInputAt = window.__gdaRemoteInputAt;
   }
@@ -4500,10 +4510,15 @@ var gdaOnlineSocket = null;
     if (!window.__gdaOnlineActive || !isObject(payload)) return;
     if (payload.playerId && payload.playerId === gdaOnlineSocket.id) return;
 
+    var remoteSlot = getCurrentSlot() === 1 ? 2 : 1;
+    if (Number(payload.playerSlot) !== remoteSlot) return;
+    var sequence = Number(payload.sequence);
+    if (!Number.isInteger(sequence) || sequence <= Number(window.__gdaRemoteCombatStateSequence || 0)) return;
     var clean = normalizeCombatState(payload.state);
     if (!clean) return;
 
     window.__gdaRemoteCombatState = clean;
+    window.__gdaRemoteCombatStateSequence = sequence;
     window.__gdaRemoteCombatStateAt = performance.now();
     state.lastCombatStateAt = window.__gdaRemoteCombatStateAt;
   }
@@ -4513,9 +4528,12 @@ var gdaOnlineSocket = null;
     if (payload.playerId && payload.playerId === gdaOnlineSocket.id) return;
     if (Number(payload.targetId) !== getCurrentSlot()) return;
 
+    var sequence = Number(payload.sequence);
+    if (!Number.isInteger(sequence) || sequence <= Number(window.__gdaRemoteHitSequence || 0)) return;
     var clean = normalizeCombatState(payload.state);
     if (!clean) return;
 
+    window.__gdaRemoteHitSequence = sequence;
     if (typeof window.gdaApplyOnlineCombatHit === "function") {
       window.gdaApplyOnlineCombatHit({
         targetId: getCurrentSlot(),
