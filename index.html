@@ -4572,17 +4572,18 @@ var gdaOnlineSocket = null;
       return;
     }
 
-    window.__gdaOnlineLocalSlot = host.id === gdaOnlineSocket.id ? 1 : 2;
-    window.__gdaOnlineActive = true;
-    window.__gdaOnlineMode = VALID_MODES.includes(room.mode) ? room.mode : "normal";
-    resetMatchNetworkState();
-
-    var matchKey = room.code + ":" + host.kaiju + ":" + guest.kaiju + ":" + room.map + ":" + window.__gdaOnlineMode;
+    var nextMode = VALID_MODES.includes(room.mode) ? room.mode : "normal";
+    var matchKey = room.code + ":" + host.kaiju + ":" + guest.kaiju + ":" + room.map + ":" + nextMode;
     if (!isRematch && state.lastMatchKey === matchKey && window.__gdaOnlineActive) {
       console.warn("GDA Online: inicio duplicado ignorado.");
       return;
     }
+
     state.lastMatchKey = matchKey;
+    window.__gdaOnlineLocalSlot = host.id === gdaOnlineSocket.id ? 1 : 2;
+    window.__gdaOnlineActive = true;
+    window.__gdaOnlineMode = nextMode;
+    resetMatchNetworkState();
 
     var resultPanel = byId("g68-online-result");
     if (resultPanel) resultPanel.style.display = "none";
