@@ -2103,7 +2103,12 @@ function startSmash(idx,p2,round,sti){
   }
   S.waveEnemiesTotal=picks.length;S.waveEnemiesRemaining=picks.length;
  }else S.F=[mkF(idx,1,-22,0),mkF(ri,2,22,mode!==2)];
- S.F.forEach(f=>{f.spawnX=f.x;f.spawnY=f.y;sc.add(f.mesh,f.sh)});S.__gdaStartedAt=performance.now();S.__gdaShowaChapter=(mode===0&&selectedStoryChapter>=0&&typeof STORY_CHAPTERS!=="undefined"&&getStoryEraKey(STORY_CHAPTERS[selectedStoryChapter])==="showa")?selectedStoryChapter:-1;S.__gdaShowaStartedAt=0;const showaHud=$("showaTimerHud");if(showaHud){showaHud.style.display=S.__gdaShowaChapter>=0?"block":"none";showaHud.textContent="SHOWA · 00:00";}S.__gdaInitialStocks={};S.__gdaInitialPct={};S.F.forEach(f=>{if(f.id===1||f.id===2){S.__gdaInitialStocks[f.id]=Number(f.stocks)||0;S.__gdaInitialPct[f.id]=Number(f.pct)||0;}});startStoryAchievementTimers();
+ S.F.forEach(f=>{f.spawnX=f.x;f.spawnY=f.y;sc.add(f.mesh,f.sh)});
+ let pumpkinHud=document.getElementById("gdaPumpkinBossHud");
+ if(!pumpkinHud){pumpkinHud=document.createElement("div");pumpkinHud.id="gdaPumpkinBossHud";pumpkinHud.style.cssText="position:fixed;top:72px;left:50%;transform:translateX(-50%);z-index:10020;max-width:92vw;padding:9px 16px;border:1px solid #ff9b35;border-radius:12px;background:linear-gradient(135deg,#241020ee,#35140eee);color:#ffe28a;font:900 clamp(11px,1.7vw,17px) Orbitron,system-ui,sans-serif;text-align:center;letter-spacing:.07em;box-shadow:0 0 20px #ff612b66;pointer-events:none";document.body.appendChild(pumpkinHud)}
+ const isPumpkinBossFight=!!(storyChapter&&String(storyChapter.enemy).toUpperCase()===GDA_PUMPKIN_BOSS_NAME);
+ pumpkinHud.style.display=isPumpkinBossFight?"block":"none";if(isPumpkinBossFight)pumpkinHud.textContent="🎃 CALABAZA ARÁCNIDA · FASE 1/3 · ¡CUIDADO CON LAS TELARAÑAS!";
+ S.__gdaStartedAt=performance.now();S.__gdaShowaChapter=(mode===0&&selectedStoryChapter>=0&&typeof STORY_CHAPTERS!=="undefined"&&getStoryEraKey(STORY_CHAPTERS[selectedStoryChapter])==="showa")?selectedStoryChapter:-1;S.__gdaShowaStartedAt=0;const showaHud=$("showaTimerHud");if(showaHud){showaHud.style.display=S.__gdaShowaChapter>=0?"block":"none";showaHud.textContent="SHOWA · 00:00";}S.__gdaInitialStocks={};S.__gdaInitialPct={};S.F.forEach(f=>{if(f.id===1||f.id===2){S.__gdaInitialStocks[f.id]=Number(f.stocks)||0;S.__gdaInitialPct[f.id]=Number(f.pct)||0;}});startStoryAchievementTimers();
  G={scene:sc,sm:S,p:S.F[0]};
  cam.position.set(0,13,CAMZ);cam.rotation.set(0,0,0);
  for(const k in JP)JP[k]=0;
@@ -2814,7 +2819,7 @@ function act(f,o,dt){const a=f.act,S=G.sm;a.t+=dt;
 function ko(f){const S=G.sm;f.stocks--;f.dead=1.4;f.act=null;f.beam=null;S.shake=8;
  if(S.mode===6&&f.waveEnemy&&f.stocks<=0){f.waveDead=true;f.dead=999;f.mesh.visible=false;f.sh.visible=false;S.waveEnemiesRemaining=Math.max(0,(S.waveEnemiesRemaining||1)-1);toastCombat(`¡ENEMIGO DERROTADO! QUEDAN ${S.waveEnemiesRemaining}`,'#ffd24a');if(S.waveEnemiesRemaining===0){if(!["tower","hardcore","raid","survival"].includes(window.__gdaOnlineMode))waveWins=waveTarget-1;finish(0)}return;}
  if(f.stocks<=0)finish(S.mode===6?(f.wavePlayer?1:0):(f===S.F[0]?1:0))}
-function finish(w){const S=G.sm;if(S.state==="over")return;S.state="over";S.win=w;
+function finish(w){const S=G.sm;if(S.state==="over")return;S.state="over";S.win=w;const pumpkinHud=document.getElementById("gdaPumpkinBossHud");if(pumpkinHud)pumpkinHud.style.display="none";
  let earned=w<0?15:(w===0?25:10),waveCompleted=false;
  if(S.mode===6){
   const onlineMode=window.__gdaOnlineActive?window.__gdaOnlineMode:"waves";
