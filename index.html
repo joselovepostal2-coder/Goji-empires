@@ -1088,7 +1088,7 @@ function drawQilin(c,fr,A){
 }
 function paint(i,fr){const A=ARTS[i],cv=document.createElement("canvas");cv.width=cv.height=N;const c=cv.getContext("2d");
  c.scale(RS,RS);c.translate(0,dyOf(i));const nm=(ROSTER[i]?.n||"").toUpperCase();
- if(nm==="QILIN")drawQilin(c,fr,A);else if(A.build?.combo)drawComboKaiju(c,fr,A);else if(A.build?.mode==="cubes")drawCubeKaiju(c,fr,A);else if(["MINILLA","MEGALON","GODZILLA JUNIOR"].includes(nm))drawSignatureKaiju(c,nm,fr,A);else ART[A.k](c,fr,A.pal,A.v,A);
+ if(nm==="QILIN")drawQilin(c,fr,A);else if(A.build?.combo)drawComboKaiju(c,fr,A);else if(A.build?.mode==="cubes")drawCubeKaiju(c,fr,A);else if(["MINILLA","MEGALON","GODZILLA JUNIOR","CALABAZA GIGANTE ARÁCNIDA"].includes(nm))drawSignatureKaiju(c,nm,fr,A);else ART[A.k](c,fr,A.pal,A.v,A);
  finishKaiju(c,A,i);shade(cv,A);if(A.skinPal)recolorSkinCanvas(cv,A.skinPal);return cv}
 function artURL(i){const m=artURL.c=artURL.c||{};return m[i]||(m[i]=portrait3D(i)||paint(i,0).toDataURL())}
 const TEX={};
