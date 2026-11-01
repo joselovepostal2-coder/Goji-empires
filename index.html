@@ -223,9 +223,9 @@ h1 small{display:block;margin-top:.25em;font-size:.3em;letter-spacing:.55em;back
 #achList{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:9px}
 .achItem{padding:10px;border:1px solid #354365;border-radius:9px;background:#121d38;color:#d7e1f8;font-size:13px}.achItem.unlocked{border-color:#e9c85a;color:#ffe69a;background:#2b2819}.achItem small{display:block;color:#91a4ca;margin-top:4px}.achGroupTitle{grid-column:1/-1;margin:18px 0 4px;padding:10px 12px;border-bottom:1px solid #53658d;color:#ffd56f;font:800 13px Orbitron,sans-serif;letter-spacing:.12em}.achItem.superHard{border-color:#76533f;background:linear-gradient(145deg,#24151b,#151323)}.achItem.superHard.unlocked{border-color:#e4a94c;background:linear-gradient(145deg,#38251a,#282017)}
 </style>
-<button id="achLaunch" type="button">🏆 LOGROS 0/54</button>
+<button id="achLaunch" type="button">🏆 LOGROS 0/55</button>
 
-<div id="achPanel"><div class="achInner"><h2>🏆 LOGROS TITÁN · <span id="achCount">0/54</span></h2><p>Progreso guardado en este navegador. Los porcentajes globales cuentan navegadores registrados desde el último reinicio del servidor.</p><div id="achList"></div><button id="achClose" style="margin-top:16px;padding:10px 18px;border-radius:8px;cursor:pointer">VOLVER AL JUEGO</button></div></div>
+<div id="achPanel"><div class="achInner"><h2>🏆 LOGROS TITÁN · <span id="achCount">0/55</span></h2><p>Progreso guardado en este navegador. Los porcentajes globales cuentan navegadores registrados desde el último reinicio del servidor.</p><div id="achList"></div><button id="achClose" style="margin-top:16px;padding:10px 18px;border-radius:8px;cursor:pointer">VOLVER AL JUEGO</button></div></div>
 
 <div id="shaderLoading" style="display:none;position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at center,#15254a 0%,#030611 75%);color:#eafaff;align-items:center;justify-content:center;text-align:center;padding:24px;font-family:Orbitron,system-ui,sans-serif"><div style="width:min(520px,92vw)"><div style="font-size:clamp(24px,5vw,42px);font-weight:900;letter-spacing:.12em;text-shadow:0 0 24px #54e8ff">GODZILLA: DESTROY ALL</div><div style="margin:16px 0 22px;color:#f5d477;letter-spacing:.2em;font-size:13px">COMPILANDO SHADERS</div><div style="height:8px;border-radius:20px;background:#ffffff20;overflow:hidden;border:1px solid #54e8ff66"><div id="shaderLoadBar" style="height:100%;width:0;background:linear-gradient(90deg,#54e8ff,#f4cc60);box-shadow:0 0 20px #54e8ff;transition:width 6s linear"></div></div><div id="shaderLoadText" style="margin-top:14px;color:#b9c6e7;font:12px system-ui,sans-serif">Preparando shaders y escenario… 0%</div></div></div>
 
@@ -2224,10 +2224,11 @@ const ACHIEVEMENTS_HARD = [
  ['Veterano online','Consigue 50 victorias en combates online normales.'],
  ['Coleccionista total','Desbloquea todos los kaijus disponibles en el plantel.'],
  ['Armario de pesadillas','Compra todas las skins disponibles en la tienda de Halloween.'],
- ['Todo el contenido','Consigue los seis DLC oficiales de GDA cuando estén disponibles.']
+ ['Todo el contenido','Consigue los seis DLC oficiales de GDA cuando estén disponibles.'],
+ ['Calabaza conquistada','Desbloquea a la Calabaza Gigante Arácnida de Halloween.']
 ];
 const ACHIEVEMENTS = [...ACHIEVEMENTS_NORMAL,...ACHIEVEMENTS_HARD];
-const ACHIEVEMENT_STORAGE_KEY = "gda_achievements_v2_54";
+const ACHIEVEMENT_STORAGE_KEY = "gda_achievements_v3_55";
 let achUnlocked = new Set();
 try {
  const current=JSON.parse(localStorage.getItem(ACHIEVEMENT_STORAGE_KEY)||"null");
@@ -2239,7 +2240,7 @@ try {
   localStorage.setItem(ACHIEVEMENT_STORAGE_KEY,JSON.stringify([...achUnlocked]));
  }
 } catch(e) {}
-const ACH_TRACK_KEY="gda_achievement_tracker_54_v1";
+const ACH_TRACK_KEY="gda_achievement_tracker_55_v1";
 const ACH_TRACK_DEFAULT={
  normalWins:0,normalCpu9Wins:0,normalStreak:0,godzillaStreak:0,onlineMatches:0,onlineWins:0,onlineStreak:0,
  soloWaves:0,perfectWins:0,cpu9PerfectWins:0,bossPerfectWins:0,ultimates:0,combos:0,totalDamage:0,
@@ -2291,7 +2292,7 @@ function renderAchievements(){
   const globalText=achievementStats.available?(stat?stat.percent+"% ("+stat.count+")":"0% (0)"):"Global: sin conexión";
   return '<div class="achItem superHard '+(achUnlocked.has(i)?"unlocked":"")+'">'+(achUnlocked.has(i)?"🏆":"🔒")+' '+(i+1)+'. '+a[0]+'<small>💀 SUPERDIFÍCIL · '+a[1]+' · '+globalText+'</small></div>';
  }).join("");
- list.innerHTML='<h3 class="achGroupTitle">🏆 LOGROS NORMALES · 9</h3>'+normal+'<h3 class="achGroupTitle">💀 LOGROS SUPERDIFÍCILES · 45</h3>'+hard;
+ list.innerHTML='<h3 class="achGroupTitle">🏆 LOGROS NORMALES · 9</h3>'+normal+'<h3 class="achGroupTitle">💀 LOGROS SUPERDIFÍCILES · 46</h3>'+hard;
  document.getElementById("achCount").textContent=achUnlocked.size+"/54";
  document.getElementById("achLaunch").textContent="🏆 LOGROS "+achUnlocked.size+"/54";
 }
@@ -3284,7 +3285,7 @@ function gdaUnlockStoryEnemy(chapter){
  if(!chapter||!chapter.enemy)return;
  const enemy=String(chapter.enemy).toUpperCase();
  if(!ROSTER.some(r=>String(r.n).toUpperCase()===enemy))return;
- const names=gdaUnlockedNames(); if(!names.includes(enemy)){names.push(enemy);try{localStorage.setItem(GDA_UNLOCK_KEY,JSON.stringify(names));}catch(e){}}if(ROSTER.every(r=>names.includes(String(r.n).toUpperCase())))unlockAchievement(51);
+ const names=gdaUnlockedNames(); if(!names.includes(enemy)){names.push(enemy);try{localStorage.setItem(GDA_UNLOCK_KEY,JSON.stringify(names));}catch(e){}}if(enemy===GDA_PUMPKIN_BOSS_NAME)unlockAchievement(54);if(ROSTER.every(r=>names.includes(String(r.n).toUpperCase())))unlockAchievement(51);
 }
 function claimHalloween12amRewards(){
  const key="gda_halloween_12am_claim_v1",repairKey="gda_halloween_12am_recovery_v1",status=document.getElementById("halloween12amStatus"),button=document.getElementById("claimHalloween12am");
