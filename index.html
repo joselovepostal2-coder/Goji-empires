@@ -2564,7 +2564,7 @@ function act(f,o,dt){const a=f.act,S=G.sm;a.t+=dt;
    f.face=horizontal;
    // Mover la posición directamente durante el vuelo para evitar que la física terrestre
    // o el frenado de otro bloque anulen el desplazamiento lateral.
-   f.x+=horizontal*Math.max(34,(Number(st.spd)||24)*3.2)*dt;
+   f.x+=horizontal*Math.max(34,(Number(f.st?.spd)||24)*3.2)*dt;
    f.vx=0;
   }else{f.vx=0;}
   // Contrarresta la gravedad aplicada por el motor para que el vuelo se mantenga estable.
