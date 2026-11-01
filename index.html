@@ -2243,29 +2243,45 @@ function getShowaChapterBounds(){
 }
 function startStoryAchievementTimers(){
  if(mode!==0||selectedStoryChapter<0)return;
- if(selectedStoryChapter===0)window.__gdaCampaignSpeedrun={startedAt:performance.now(),first:0};
+ if(selectedStoryChapter===0)window.__gdaCampaignSpeedrun={startedAt:performance.now(),first:0,next:0};
+ const campaign=window.__gdaCampaignSpeedrun;
+ if(campaign&&campaign.next!==selectedStoryChapter)window.__gdaCampaignSpeedrun=null;
  const bounds=getShowaChapterBounds();
- if(bounds&&selectedStoryChapter===bounds.first)window.__gdaShowaSpeedrun={startedAt:performance.now(),first:bounds.first};
+ if(bounds&&selectedStoryChapter===bounds.first)window.__gdaShowaSpeedrun={startedAt:performance.now(),first:bounds.first,next:bounds.first};
+ const showa=window.__gdaShowaSpeedrun;
+ if(showa&&showa.next!==selectedStoryChapter)window.__gdaShowaSpeedrun=null;
 }
 function recordStoryAchievementFinish(w){
  if(mode!==0||selectedStoryChapter<0)return;
+ const index=selectedStoryChapter,bounds=getShowaChapterBounds();
  if(w!==0){
   window.__gdaCampaignSpeedrun=null;
-  const bounds=getShowaChapterBounds();
-  if(bounds&&selectedStoryChapter>=bounds.first&&selectedStoryChapter<=bounds.last)window.__gdaShowaSpeedrun=null;
+  window.__gdaShowaSpeedrun=null;
   return;
  }
- addUniqueAchievementValue('storyEras',getStoryEraKey(STORY_CHAPTERS[selectedStoryChapter]));
+ addUniqueAchievementValue('storyEras',getStoryEraKey(STORY_CHAPTERS[index]));
  if(achTrack.storyEras.length>=5)unlockAchievement(12);
- if(selectedStoryChapter===STORY_CHAPTERS.length-1){
-  const run=window.__gdaCampaignSpeedrun;
-  if(run&&run.first===0){unlockAchievement(29);if((performance.now()-run.startedAt)<35*60*1000)unlockAchievement(11);}
+ let campaign=window.__gdaCampaignSpeedrun;
+ if(campaign){
+  if(campaign.next===index)campaign.next=index+1;
+  else window.__gdaCampaignSpeedrun=null;
+ }
+ let showa=window.__gdaShowaSpeedrun;
+ if(showa){
+  if(showa.next===index)showa.next=index+1;
+  else window.__gdaShowaSpeedrun=null;
+ }
+ campaign=window.__gdaCampaignSpeedrun;
+ if(index===STORY_CHAPTERS.length-1){
+  if(campaign&&campaign.first===0&&campaign.next===index+1){
+   unlockAchievement(29);
+   if((performance.now()-campaign.startedAt)<35*60*1000)unlockAchievement(11);
+  }
   window.__gdaCampaignSpeedrun=null;
  }
- const bounds=getShowaChapterBounds();
- if(bounds&&selectedStoryChapter===bounds.last){
-  const run=window.__gdaShowaSpeedrun;
-  if(run&&run.first===bounds.first&&(performance.now()-run.startedAt)<10*60*1000)unlockAchievement(10);
+ showa=window.__gdaShowaSpeedrun;
+ if(bounds&&index===bounds.last){
+  if(showa&&showa.first===bounds.first&&showa.next===index+1&&(performance.now()-showa.startedAt)<10*60*1000)unlockAchievement(10);
   window.__gdaShowaSpeedrun=null;
  }
 }
@@ -2288,10 +2304,8 @@ function recordAchievementDamage(attacker,target,damage){
   if(achTrack.totalDamage>=100000)unlockAchievement(33);
   saveAchievementTrack();
  }
- if(isLocalAchievementFighter(target)){
-  if(window.__gdaOnlineActive&&target.wavePlayer&&window.__gdaOnlineMode==="hardcore")window.__gdaHardcorePerfect=false;
-  if(window.__gdaOnlineActive&&target.wavePlayer&&window.__gdaOnlineMode==="tower")window.__gdaTowerPerfect=false;
- }
+ if(window.__gdaOnlineActive&&target.wavePlayer&&window.__gdaOnlineMode==="hardcore")window.__gdaHardcorePerfect=false;
+ if(window.__gdaOnlineActive&&target.wavePlayer&&window.__gdaOnlineMode==="tower")window.__gdaTowerPerfect=false;
 }
 function recordAchievementMatchFinish(S,w,waveCompleted){
  const online=!!window.__gdaOnlineActive;
@@ -3175,7 +3189,7 @@ function gdaUnlockStoryEnemy(chapter){
  if(!chapter||!chapter.enemy)return;
  const enemy=String(chapter.enemy).toUpperCase();
  if(!ROSTER.some(r=>String(r.n).toUpperCase()===enemy))return;
- const names=gdaUnlockedNames(); if(!names.includes(enemy)){names.push(enemy);try{localStorage.setItem(GDA_UNLOCK_KEY,JSON.stringify(names));}catch(e){}}if(names.length>=ROSTER.length)unlockAchievement(51);
+ const names=gdaUnlockedNames(); if(!names.includes(enemy)){names.push(enemy);try{localStorage.setItem(GDA_UNLOCK_KEY,JSON.stringify(names));}catch(e){}}if(ROSTER.every(r=>names.includes(String(r.n).toUpperCase())))unlockAchievement(51);
 }
 function gdaLockSelectionCards(){
  const grid=document.getElementById('grid'); if(!grid)return;
