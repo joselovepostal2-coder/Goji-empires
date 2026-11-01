@@ -4184,9 +4184,17 @@ $('gnetSend').onclick=()=>{const ev=$('gnetEv').value.trim();if(!sock||!ev)retur
 for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e.stopPropagation();if(t==='keydown'&&e.key==='Escape')close()});
 })();
 </script>
-<script src="/socket.io/socket.io.js"></script>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <script>
-  const gdaOnlineSocket = io();
+  const GDA_ONLINE_SERVER = "https://goji-empires.onrender.com";
+  const gdaOnlineSocket = io(GDA_ONLINE_SERVER, {
+    transports: ["websocket", "polling"],
+    timeout: 30000,
+    reconnection: true,
+    reconnectionAttempts: Infinity,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000
+  });
   window.gdaOnlineSocket = gdaOnlineSocket;
 
   gdaOnlineSocket.on("connect", () => {
