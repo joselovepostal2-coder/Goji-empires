@@ -96,7 +96,7 @@ function updateRoom(code) {
 }
 const INPUT_PACKET_INTERVAL_MS = 25;
 const COMBAT_PACKET_INTERVAL_MS = 40;
-const HIT_PACKET_INTERVAL_MS = 20;
+const HIT_PACKET_INTERVAL_MS = 8;
 
 function isPlainObject(value) {
   return !!value && typeof value === "object" && !Array.isArray(value);
