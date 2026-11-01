@@ -223,13 +223,13 @@ h1 small{display:block;margin-top:.25em;font-size:.3em;letter-spacing:.55em;back
 #achList{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:9px}
 .achItem{padding:10px;border:1px solid #354365;border-radius:9px;background:#121d38;color:#d7e1f8;font-size:13px}.achItem.unlocked{border-color:#e9c85a;color:#ffe69a;background:#2b2819}.achItem small{display:block;color:#91a4ca;margin-top:4px}.achGroupTitle{grid-column:1/-1;margin:18px 0 4px;padding:10px 12px;border-bottom:1px solid #53658d;color:#ffd56f;font:800 13px Orbitron,sans-serif;letter-spacing:.12em}.achItem.superHard{border-color:#76533f;background:linear-gradient(145deg,#24151b,#151323)}.achItem.superHard.unlocked{border-color:#e4a94c;background:linear-gradient(145deg,#38251a,#282017)}
 </style>
-<button id="achLaunch" type="button">🏆 LOGROS 0/300</button>
+<button id="achLaunch" type="button">🏆 LOGROS 0/54</button>
 <button id="adminSecretBox" type="button" aria-label="Cajita secreta" title="¿Qué habrá dentro?" style="position:fixed;left:16px;bottom:16px;z-index:902;width:48px;height:48px;border:1px solid #ffbd58;border-radius:13px;background:linear-gradient(145deg,#5c321c,#25132f);color:#fff;font-size:25px;cursor:pointer;box-shadow:0 0 18px #ff9b3555">📦</button>
 <style>
 #adminSecretBox:focus-visible{outline:3px solid #ffe66b;outline-offset:3px}
 @media(max-width:600px){#adminSecretBox{left:10px;bottom:12px;width:50px;height:50px}}
 </style>
-<div id="achPanel"><div class="achInner"><h2>🏆 LOGROS TITÁN · <span id="achCount">0/300</span></h2><p>Progreso guardado en este navegador. Los porcentajes globales cuentan navegadores registrados desde el último reinicio del servidor.</p><div id="achList"></div><button id="achClose" style="margin-top:16px;padding:10px 18px;border-radius:8px;cursor:pointer">VOLVER AL JUEGO</button></div></div>
+<div id="achPanel"><div class="achInner"><h2>🏆 LOGROS TITÁN · <span id="achCount">0/54</span></h2><p>Progreso guardado en este navegador. Los porcentajes globales cuentan navegadores registrados desde el último reinicio del servidor.</p><div id="achList"></div><button id="achClose" style="margin-top:16px;padding:10px 18px;border-radius:8px;cursor:pointer">VOLVER AL JUEGO</button></div></div>
 
 <div id="shaderLoading" style="display:none;position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at center,#15254a 0%,#030611 75%);color:#eafaff;align-items:center;justify-content:center;text-align:center;padding:24px;font-family:Orbitron,system-ui,sans-serif"><div style="width:min(520px,92vw)"><div style="font-size:clamp(24px,5vw,42px);font-weight:900;letter-spacing:.12em;text-shadow:0 0 24px #54e8ff">GODZILLA: DESTROY ALL</div><div style="margin:16px 0 22px;color:#f5d477;letter-spacing:.2em;font-size:13px">COMPILANDO SHADERS</div><div style="height:8px;border-radius:20px;background:#ffffff20;overflow:hidden;border:1px solid #54e8ff66"><div id="shaderLoadBar" style="height:100%;width:0;background:linear-gradient(90deg,#54e8ff,#f4cc60);box-shadow:0 0 20px #54e8ff;transition:width 6s linear"></div></div><div id="shaderLoadText" style="margin-top:14px;color:#b9c6e7;font:12px system-ui,sans-serif">Preparando shaders y escenario… 0%</div></div></div>
 
@@ -4342,7 +4342,12 @@ for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e
  function recoverAchievements(){
   const launch=document.getElementById("achLaunch");
   const panel=document.getElementById("achPanel");
+  const secret=document.getElementById("adminSecretBox");
   if(!launch||!panel)return;
+  // Reforzar el acceso incluso si el manejador original no llegó a registrarse.
+  launch.style.pointerEvents="auto";
+  launch.style.zIndex="2147483000";
+  panel.style.zIndex="2147483001";
   if(!launch.dataset.geRecoveryBound){
    launch.dataset.geRecoveryBound="1";
    launch.addEventListener("click",()=>{
@@ -4357,7 +4362,46 @@ for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e
    close.dataset.geRecoveryBound="1";
    close.addEventListener("click",()=>{panel.style.display="none";});
   }
+  if(secret){
+   secret.style.pointerEvents="auto";
+   secret.style.zIndex="2147482999";
+   if(!secret.dataset.geRecoveryBound){
+    secret.dataset.geRecoveryBound="1";
+    secret.addEventListener("click",()=>{
+     let message=document.getElementById("geSecretFeedback");
+     if(!message){
+      message=document.createElement("div");message.id="geSecretFeedback";
+      message.style.cssText="position:fixed;z-index:2147483647;left:50%;top:18px;transform:translateX(-50%);max-width:90vw;padding:14px 20px;border:2px solid #ffd56f;border-radius:12px;background:#171329;color:#fff;text-align:center;font:700 14px system-ui;box-shadow:0 0 24px #ffbd5870";
+      document.body.appendChild(message);
+     }
+     try{
+      if(typeof window.gdaUnlockAchievement==="function"){
+       window.gdaUnlockAchievement(8);
+       message.textContent="📦 ¡CAJITA SECRETA! Logro «ADMIN DESBLOQUEADO» comprobado. Abre 🏆 LOGROS para verlo.";
+      }else{
+       message.textContent="📦 ¡Encontraste la cajita secreta! El sistema de logros no terminó de inicializarse. Abre 🏆 LOGROS o revisa la consola.";
+      }
+     }catch(error){
+      console.error("GDA: error al desbloquear el secreto",error);
+      message.textContent="📦 Cajita encontrada, pero hubo un error al guardar el logro. Revisa la consola.";
+     }
+     message.style.display="block";
+    });
+   }
+  }
   try{if(typeof window.renderAchievements==="function")window.renderAchievements()}catch(error){console.error("GDA: error al iniciar logros",error)}
+  // Fallback de captura: abre la pantalla aunque otro elemento haya interferido con el clic normal.
+  if(!document.documentElement.dataset.geAchievementCapture){
+   document.documentElement.dataset.geAchievementCapture="1";
+   document.addEventListener("click",event=>{
+    const target=event.target instanceof Element?event.target:null;
+    if(!target)return;
+    if(target.closest("#achLaunch")){
+     panel.style.display="block";panel.style.zIndex="2147483001";
+     try{if(typeof window.renderAchievements==="function")window.renderAchievements()}catch(error){console.error(error)}
+    }else if(target.closest("#achClose"))panel.style.display="none";
+   },true);
+  }
  }
  function recover(){
   try{recoverMenu()}catch(error){console.error("GDA: recuperación del menú fallida",error)}
