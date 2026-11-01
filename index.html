@@ -1369,7 +1369,7 @@ function addDamageSprite(f,dmg){
  if(f.damageMarks.length>8){const old=f.damageMarks.shift();G.scene.remove(old.mesh);old.mesh.geometry.dispose();old.mesh.material.dispose();old.tex.dispose();}
 }
 // Daño y knockback al estilo Smash: primero se suma el %, luego fuerza = (base + % × crecimiento) × fuerza del atacante ÷ peso del rival
-function hurt(a,t,dmg,base,gr,ang,dir){if(t.inv>0||t.shield>0||t.dead>0)return;if(a?.aggressiveUntil&&a.aggressiveUntil>performance.now()/1000)dmg*=1.35;if(a&&a.dmgMult)dmg*=a.dmgMult;
+function hurt(a,t,dmg,base,gr,ang,dir){const onlinePvp=!!window.__gdaOnlineActive&&(window.__gdaOnlineMode==="normal"||window.__gdaOnlineMode==="tournament")&&(a?.id===1||a?.id===2)&&(t?.id===1||t?.id===2);const localSlot=Number(window.__gdaOnlineLocalSlot)||1;if(onlinePvp&&t.id===localSlot&&a.id!==localSlot)return;if(t.inv>0||t.shield>0||t.dead>0)return;if(a?.aggressiveUntil&&a.aggressiveUntil>performance.now()/1000)dmg*=1.35;if(a&&a.dmgMult)dmg*=a.dmgMult;
  const au=GAME_UPGRADES[a.idx]||{},tu=GAME_UPGRADES[t.idx]||{};
  // Pasivas de evolución: se aplican dentro del daño real del combate.
  const victimName=String(ROSTER[t.idx]?.n||t.st?.n||'').toLowerCase();
@@ -1402,7 +1402,7 @@ function hurt(a,t,dmg,base,gr,ang,dir){if(t.inv>0||t.shield>0||t.dead>0)return;i
  const readyBefore=a.meter>=200;
  a.meter=Math.min(200,Math.max(0,(a.meter||0)+dmg*1.1));t.meter=Math.min(200,Math.max(0,(t.meter||0)+dmg*.6));
  if(!readyBefore&&a.meter>=200)toastCombat("¡ULTIMATE LISTO! 200/200","#70ffb2");
- const S=G.sm;S.hs=Math.min(.12,.03+dmg*.004);S.shake=Math.min(5,dmg*.35)}
+ const S=G.sm;S.hs=Math.min(.12,.03+dmg*.004);S.shake=Math.min(5,dmg*.35);if(onlinePvp&&a.id===localSlot&&t.id!==localSlot&&window.gdaOnlineSocket?.connected){window.gdaOnlineSocket.emit("combat-hit",{targetId:t.id,state:{x:t.x,y:t.y,vx:t.vx,vy:t.vy,pct:t.pct,stocks:t.stocks,stun:t.stun,dead:t.dead,meter:t.meter,face:t.face}})}}
 /*ENDPHYS*/
 const mouth=f=>{const A=f.A;return[f.x+f.face*(A.m[0]-48)/96*f.S,f.y+(96-(A.m[1]+dyOf(f.idx)))/96*f.S]};
 function soft(r,g,b,a){const c=document.createElement("canvas");c.width=c.height=64;const x=c.getContext("2d"),q=x.createRadialGradient(32,32,2,32,32,32);
@@ -2870,7 +2870,8 @@ function act(f,o,dt){const a=f.act,S=G.sm;a.t+=dt;
     G.scene.add(m);S.pr.push({x:mx,y:my,vx:f.face*s.sp*.55,vy:u*(s.spread||0)*14,life:s.life||2,r,dmg:s.dmg*.2,from:f,m})}}
   if(a.t>=.6)f.act=null;
  }else{if(a.t>=.2&&!a.fx){a.fx=1;f.shield=3;f.boost=3;if(s.rollGuard){f.guardUntil=S.t+3;toastCombat("\u00a1CAPARAZ\u00d3N DEFENSIVO! RODADA ESPINOSA POTENCIADA","#d8d0b0")}}if(a.t>=.4)f.act=null}}
-function ko(f){const S=G.sm;f.stocks--;f.dead=1.4;f.act=null;f.beam=null;S.shake=8;
+function ko(f){const S=G.sm;const onlinePvp=!!window.__gdaOnlineActive&&(window.__gdaOnlineMode==="normal"||window.__gdaOnlineMode==="tournament");const localSlot=Number(window.__gdaOnlineLocalSlot)||1;if(onlinePvp&&(f.id===1||f.id===2)&&f.id!==localSlot)return;f.stocks--;f.dead=1.4;f.act=null;f.beam=null;S.shake=8;
+window.gdaApplyOnlineCombatHit=function(payload){if(!window.__gdaOnlineActive||!payload||!payload.state)return;const localSlot=Number(window.__gdaOnlineLocalSlot)||1;if(Number(payload.targetId)!==localSlot)return;const fighters=typeof G!=="undefined"&&G?.sm?.F;if(!Array.isArray(fighters))return;const target=fighters.find(f=>f.id===localSlot);if(!target)return;for(const key of ["x","y","vx","vy","pct","stocks","stun","dead","meter","face"]){const value=Number(payload.state[key]);if(Number.isFinite(value))target[key]=value;}target.act=null;target.beam=null;};
  if(S.mode===6&&f.waveEnemy&&f.stocks<=0){f.waveDead=true;f.dead=999;f.mesh.visible=false;f.sh.visible=false;S.waveEnemiesRemaining=Math.max(0,(S.waveEnemiesRemaining||1)-1);toastCombat(`¡ENEMIGO DERROTADO! QUEDAN ${S.waveEnemiesRemaining}`,'#ffd24a');if(S.waveEnemiesRemaining===0){if(!["tower","hardcore","raid","survival"].includes(window.__gdaOnlineMode))waveWins=waveTarget-1;finish(0)}return;}
  if(f.stocks<=0)finish(S.mode===6?(f.wavePlayer?1:0):(f===S.F[0]?1:0))}
 function finish(w){const S=G.sm;if(S.state==="over")return;S.state="over";S.win=w;const pumpkinHud=document.getElementById("gdaPumpkinBossHud");if(pumpkinHud)pumpkinHud.style.display="none";
@@ -3093,7 +3094,7 @@ function smStep(dt){const S=G.sm,[a,b]=S.F;const aimHud=$("doratsAimHud");if(aim
   if(f.dead>0){f.dead-=dt;if(f.dead<=0){Object.assign(f,{x:Number.isFinite(f.spawnX)?f.spawnX:0,y:Number.isFinite(f.spawnY)?f.spawnY:55,vx:0,vy:0,pct:0,inv:2.5,jumps:1,stun:0})}continue}
   if(window.__gdaOnlineActive && !f.ai && (f.id===1||f.id===2)){
    const localSlot=Number(window.__gdaOnlineLocalSlot)||1, now=performance.now();
-   if(f.id!==localSlot){const snap=window.__gdaRemoteCombatState;if(snap && now-(window.__gdaRemoteCombatStateAt||0)<500){/* Solo se corrige la posición del rival. El daño, las vidas, el aturdimiento y la energía se calculan en ambos clientes a partir de las entradas sincronizadas; sobrescribirlos aquí podía borrar un impacto recién registrado. */for(const k of ["x","y","vx","vy","face"])if(Number.isFinite(snap[k]))f[k]=snap[k];f.ground=0;}}
+   if(f.id!==localSlot){const snap=window.__gdaRemoteCombatState;if(snap && now-(window.__gdaRemoteCombatStateAt||0)<500){/* Solo se corrige la posición del rival. El daño, las vidas, el aturdimiento y la energía se calculan en ambos clientes a partir de las entradas sincronizadas; sobrescribirlos aquí podía borrar un impacto recién registrado. */for(const k of ["x","y","vx","vy","pct","stocks","stun","dead","meter","face"])if(Number.isFinite(snap[k]))f[k]=snap[k];f.ground=0;}}
    fighter(f,o,dt);
    if(f.id===localSlot && now-(window.__gdaLastCombatSnapshot||0)>50 && window.gdaOnlineSocket?.connected){window.gdaOnlineSocket.emit("combat-state",{x:f.x,y:f.y,vx:f.vx,vy:f.vy,pct:f.pct,stocks:f.stocks,stun:f.stun,dead:f.dead,meter:f.meter,face:f.face});window.__gdaLastCombatSnapshot=now;}
   }else fighter(f,o,dt)
@@ -4277,6 +4278,10 @@ for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e
     if (!window.__gdaOnlineActive || !payload || !payload.state) return;
     window.__gdaRemoteCombatState = payload.state;
     window.__gdaRemoteCombatStateAt = performance.now();
+  });
+
+  gdaOnlineSocket.on("remote-combat-hit", (payload) => {
+    if (typeof window.gdaApplyOnlineCombatHit === "function") window.gdaApplyOnlineCombatHit(payload);
   });
 
   function launchOnlineRoomMatch(room,isRematch=false) {
