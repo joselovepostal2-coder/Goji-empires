@@ -247,6 +247,7 @@ h1 small{display:block;margin-top:.25em;font-size:.3em;letter-spacing:.55em;back
    <ul id="mlist"></ul>
     <button id="gnetBtn" type="button" style="margin-top:12px;padding:12px 16px;border-radius:10px;background:linear-gradient(135deg,#0f3b4a,#12627b);color:#fff;border:1px solid #5ee7ff;font:800 14px Orbitron,system-ui;cursor:pointer;box-shadow:0 0 16px #29c9ff55">🌐 ONLINE</button>
    <button id="openHalloweenShop" type="button" style="margin-top:12px;padding:13px 18px;border:1px solid #ff9b35;border-radius:10px;background:linear-gradient(135deg,#52206c,#a3431c);color:#fff;font:800 13px Orbitron,sans-serif;cursor:pointer">🎃 TIENDA DE HALLOWEEN</button>
+   <div id="halloween12amCard" style="margin-top:12px;max-width:390px;padding:13px;border:1px solid #ffb52e;border-radius:14px;background:radial-gradient(ellipse at top,#54251c,#170d22 72%);color:#fff;text-align:center;box-shadow:0 0 20px #ff8a322b"><div style="font-size:42px;line-height:1.1" aria-hidden="true">🎃</div><div style="font:900 15px Orbitron,sans-serif;color:#ffe28a;margin:7px 0">12 AM · HALLOWEEN DEFINITIVO</div><div style="font:12px/1.5 Arial,sans-serif;color:#ead8ef;margin-bottom:10px">Calabaza Gigante · 10.000 Tokens Titán · 25 kaijus desbloqueados · skins de Halloween gratis</div><button id="claimHalloween12am" type="button" style="width:100%;padding:11px;border:1px solid #ffe28a;border-radius:9px;background:linear-gradient(135deg,#a3431c,#62206c);color:#fff;font:800 12px Orbitron,sans-serif;cursor:pointer">🎁 RECLAMAR REGALOS</button><div id="halloween12amStatus" role="status" style="font:11px Arial,sans-serif;color:#ffe28a;margin-top:8px"></div></div>
    <button id="openBattlePass" type="button" style="margin-top:10px;padding:13px 18px;border:1px solid #7be7ff;border-radius:10px;background:linear-gradient(135deg,#123d6b,#36216d);color:#fff;font:800 13px Orbitron,sans-serif;cursor:pointer">🎖️ PASE DE BATALLA · TEMPORADA 1</button>
    <div class="chips"><span>MOUSE</span><span>TECLADO</span><span>TÁCTIL</span><span>2 JUGADORES</span><span>30 MAPAS HALLOWEEN</span><span>CLIMA DINÁMICO</span></div>
    <div id="cpuDifficultyBox" style="margin-top:18px;padding:12px;border:1px solid #54e8ff55;border-radius:12px;background:#071020cc;color:#fff;max-width:390px"><div style="font:700 12px Orbitron,sans-serif;letter-spacing:.12em;margin-bottom:9px">CPU · NIVEL <span id="cpuLevelLabel">9</span></div><div id="cpuLevelButtons" style="display:grid;grid-template-columns:repeat(9,minmax(24px,1fr));gap:5px"></div><div style="font:11px Arial,sans-serif;color:#b9c6e7;margin-top:8px">Predeterminado: nivel 9 · selecciona del 1 al 9</div></div>
@@ -3234,6 +3235,23 @@ function gdaUnlockStoryEnemy(chapter){
  if(!ROSTER.some(r=>String(r.n).toUpperCase()===enemy))return;
  const names=gdaUnlockedNames(); if(!names.includes(enemy)){names.push(enemy);try{localStorage.setItem(GDA_UNLOCK_KEY,JSON.stringify(names));}catch(e){}}if(ROSTER.every(r=>names.includes(String(r.n).toUpperCase())))unlockAchievement(51);
 }
+function claimHalloween12amRewards(){
+ const key="gda_halloween_12am_claim_v1",status=document.getElementById("halloween12amStatus"),button=document.getElementById("claimHalloween12am");
+ let claimed=false;try{claimed=localStorage.getItem(key)==="1"}catch(e){}
+ if(claimed){if(status)status.textContent="REGALOS YA RECLAMADOS EN ESTE NAVEGADOR.";if(button){button.disabled=true;button.textContent="✓ REGALOS RECLAMADOS"}return}
+ try{if(typeof activateHalloweenShopRefresh==="function")activateHalloweenShopRefresh()}catch(e){}
+ TITAN_TOKENS+=10000;saveTitanTokens();
+ const owned=HALLOWEEN_SKINS.map(k=>Number(k.id));try{localStorage.setItem("gda_halloween_skins_v1",JSON.stringify(owned))}catch(e){}
+ const unlocked=gdaUnlockedNames();NEWK2.slice(0,25).forEach(k=>{const name=String(k.n||"").toUpperCase();if(ROSTER.some(r=>String(r.n).toUpperCase()===name)&&!unlocked.includes(name))unlocked.push(name)});
+ try{localStorage.setItem(GDA_UNLOCK_KEY,JSON.stringify(unlocked))}catch(e){}
+ try{localStorage.setItem(key,"1")}catch(e){}
+ try{unlockAchievement(7)}catch(e){}
+ if(status)status.textContent="¡LISTO! +10.000 TOKENS · 25 KAIJUS · TODAS LAS SKINS. Recompensa única; progreso conservado.";
+ if(button){button.disabled=true;button.textContent="✓ REGALOS RECLAMADOS"}
+ renderSkinShelf();if(typeof renderHalloweenShop==="function")renderHalloweenShop();
+}
+const claimHalloweenButton=document.getElementById("claimHalloween12am");
+if(claimHalloweenButton){let claimed=false;try{claimed=localStorage.getItem("gda_halloween_12am_claim_v1")==="1"}catch(e){}if(claimed){claimHalloweenButton.disabled=true;claimHalloweenButton.textContent="✓ REGALOS RECLAMADOS";const status=document.getElementById("halloween12amStatus");if(status)status.textContent="YA RECLAMADOS · PROGRESO CONSERVADO"}claimHalloweenButton.addEventListener("click",claimHalloween12amRewards)}
 function gdaLockSelectionCards(){
  const grid=document.getElementById('grid'); if(!grid)return;
  grid.querySelectorAll('.card').forEach(card=>{
