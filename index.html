@@ -2023,12 +2023,12 @@ function startSmash(idx,p2,round,sti){
   }
   S.waveEnemiesTotal=picks.length;S.waveEnemiesRemaining=picks.length;
  }else S.F=[mkF(idx,1,-22,0),mkF(ri,2,22,mode!==2)];
- S.F.forEach(f=>{f.spawnX=f.x;f.spawnY=f.y;sc.add(f.mesh,f.sh)});S.__gdaStartedAt=performance.now();S.__gdaInitialStocks={};S.__gdaInitialPct={};S.F.forEach(f=>{if(f.id===1||f.id===2){S.__gdaInitialStocks[f.id]=Number(f.stocks)||0;S.__gdaInitialPct[f.id]=Number(f.pct)||0;}});startStoryAchievementTimers();if(Number.isInteger(st))addUniqueAchievementValue("maps",M.n);
+ S.F.forEach(f=>{f.spawnX=f.x;f.spawnY=f.y;sc.add(f.mesh,f.sh)});S.__gdaStartedAt=performance.now();S.__gdaInitialStocks={};S.__gdaInitialPct={};S.F.forEach(f=>{if(f.id===1||f.id===2){S.__gdaInitialStocks[f.id]=Number(f.stocks)||0;S.__gdaInitialPct[f.id]=Number(f.pct)||0;}});startStoryAchievementTimers();
  G={scene:sc,sm:S,p:S.F[0]};
  cam.position.set(0,13,CAMZ);cam.rotation.set(0,0,0);
  for(const k in JP)JP[k]=0;
  S.F.forEach(f=>{if(f.waveEnemy)return;$("shI"+f.id).src=artURL(f.idx);$("shN"+f.id).textContent=(f.ai?"CPU ":`P${f.id} `)+f.r.n;$("shN"+f.id).style.color=f.r.css;$("shN"+f.id).closest(".pn").style.setProperty("--c",f.r.css);f.ls=-1});
- $("shStage").textContent=(mode===0?`HISTORIA ${S.round+1}/3 · `:mode===5?"🎃 HALLOWEEN · ":mode===6?(window.__gdaOnlineMode==="tower"?`PLANTA ${window.__gdaOnlineTowerFloor||1}/10 · `:window.__gdaOnlineMode==="hardcore"?`HARDCORE ${window.__gdaOnlineHardcoreRound||1}/4 · `:window.__gdaOnlineMode==="raid"?"BOSS RAID · ":window.__gdaOnlineMode==="survival"?`SUPERVIVENCIA ${window.__gdaOnlineSurvivalRound||1} · `:`OLEADA ${window.__waveNum||1} · 5 ENEMIGOS · `):"")+M.n;
+ $("shStage").textContent=(mode===0?`HISTORIA ${S.round+1}/3 · `:mode===5?"🎃 HALLOWEEN · ":mode===6?(window.__gdaOnlineMode==="tower"?`PLANTA ${window.__gdaOnlineTowerFloor||1}/10 · `:window.__gdaOnlineMode==="hardcore"?`HARDCORE ${window.__gdaOnlineHardcoreRound||1}/10 · `:window.__gdaOnlineMode==="raid"?"BOSS RAID · ":window.__gdaOnlineMode==="survival"?`SUPERVIVENCIA ${window.__gdaOnlineSurvivalRound||1} · `:`OLEADA ${window.__waveNum||1} · 5 ENEMIGOS · `):"")+M.n;
  const hn=p=>["light","heavy","ult","grab"].map(k=>kn(CTL[p][k])).join(" / ");
  $("shK").textContent=window.__gdaOnlineActive&&["waves","tower","hardcore","raid","survival"].includes(window.__gdaOnlineMode)?`P1: ${hn("p1")} · P2: ${hn("p2")}`:mode===2?`P1: ${hn("p1")} · ${hn("p1b")}   |   P2: ${hn("p2")}`:`${hn("p1")} · ${hn("p1b")}  (ligero / pesado / ultimate)`+(OPT.follow?" · mover: cursor":"");
  $("shF").textContent="FIGHT!";retrig();show("play")}
@@ -2098,7 +2098,7 @@ const ACHIEVEMENTS_HARD = [
  ['Diez oleadas del infierno','Sobrevive las 10 oleadas completas del modo Hardcore online.'],
  ['El rey de la era Showa','Completa todos los capítulos de la era Showa en menos de 10 minutos.'],
  ['La historia definitiva','Completa toda la campaña del modo Historia en menos de 35 minutos.'],
- ['Colección de expansiones','Consigue los seis DLC cuando estén disponibles para comprar.'],
+ ['Conquistador de eras','Completa capítulos de cinco eras diferentes en el modo Historia.'],
  ['Racha perfecta ×25','Gana 25 combates normales seguidos sin perder una vida.'],
  ['Intocable','Gana un combate normal sin recibir ni un punto de daño.'],
  ['CPU imposible','Derrota a la CPU nivel 9 sin recibir daño.'],
@@ -2158,10 +2158,10 @@ const ACH_TRACK_KEY="gda_achievement_tracker_54_v1";
 const ACH_TRACK_DEFAULT={
  normalWins:0,normalCpu9Wins:0,normalStreak:0,godzillaStreak:0,onlineMatches:0,onlineWins:0,onlineStreak:0,
  soloWaves:0,perfectWins:0,cpu9PerfectWins:0,bossPerfectWins:0,ultimates:0,combos:0,totalDamage:0,
- maps:[],bosses:[],comboKaijus:[],winningKaijus:[],bossPerfectNames:[],dlcs:[]
+ maps:[],bosses:[],comboKaijus:[],winningKaijus:[],bossPerfectNames:[],storyEras:[],dlcs:[]
 };
 let achTrack=(()=>{try{return {...ACH_TRACK_DEFAULT,...JSON.parse(localStorage.getItem(ACH_TRACK_KEY)||"{}")}}catch(e){return {...ACH_TRACK_DEFAULT}}})();
-for(const key of ["maps","bosses","comboKaijus","winningKaijus","bossPerfectNames","dlcs"])if(!Array.isArray(achTrack[key]))achTrack[key]=[];
+for(const key of ["maps","bosses","comboKaijus","winningKaijus","bossPerfectNames","storyEras","dlcs"])if(!Array.isArray(achTrack[key]))achTrack[key]=[];
 function saveAchievementTrack(){try{localStorage.setItem(ACH_TRACK_KEY,JSON.stringify(achTrack))}catch(e){}}
 function addUniqueAchievementValue(key,value){if(value==null||value==="")return;const v=String(value);if(!achTrack[key].includes(v)){achTrack[key].push(v);saveAchievementTrack()}}
 const achievementStats={available:false,players:0,items:{}};
@@ -2255,10 +2255,11 @@ function recordStoryAchievementFinish(w){
   if(bounds&&selectedStoryChapter>=bounds.first&&selectedStoryChapter<=bounds.last)window.__gdaShowaSpeedrun=null;
   return;
  }
+ addUniqueAchievementValue('storyEras',getStoryEraKey(STORY_CHAPTERS[selectedStoryChapter]));
+ if(achTrack.storyEras.length>=5)unlockAchievement(12);
  if(selectedStoryChapter===STORY_CHAPTERS.length-1){
-  unlockAchievement(29);
   const run=window.__gdaCampaignSpeedrun;
-  if(run&&run.first===0&&(performance.now()-run.startedAt)<35*60*1000)unlockAchievement(11);
+  if(run&&run.first===0){unlockAchievement(29);if((performance.now()-run.startedAt)<35*60*1000)unlockAchievement(11);}
   window.__gdaCampaignSpeedrun=null;
  }
  const bounds=getShowaChapterBounds();
@@ -2272,7 +2273,7 @@ function markDlcPurchased(dlcId){
  const valid=["historias-otras-eras","archivo-titanes","mundos-combate","crisis-espacial","leyendas-showa","secretos-tierra-hueca"];
  if(!valid.includes(String(dlcId)))return false;
  addUniqueAchievementValue("dlcs",dlcId);
- if(achTrack.dlcs.length===6){unlockAchievement(12);unlockAchievement(53);}
+ if(achTrack.dlcs.length===6)unlockAchievement(53);
  return true;
 }
 window.gdaMarkDlcPurchased=markDlcPurchased;
@@ -2288,8 +2289,8 @@ function recordAchievementDamage(attacker,target,damage){
   saveAchievementTrack();
  }
  if(isLocalAchievementFighter(target)){
-  if(window.__gdaOnlineActive&&window.__gdaOnlineMode==="hardcore")window.__gdaHardcorePerfect=false;
-  if(window.__gdaOnlineActive&&window.__gdaOnlineMode==="tower")window.__gdaTowerPerfect=false;
+  if(window.__gdaOnlineActive&&target.wavePlayer&&window.__gdaOnlineMode==="hardcore")window.__gdaHardcorePerfect=false;
+  if(window.__gdaOnlineActive&&target.wavePlayer&&window.__gdaOnlineMode==="tower")window.__gdaTowerPerfect=false;
  }
 }
 function recordAchievementMatchFinish(S,w,waveCompleted){
@@ -2305,7 +2306,7 @@ function recordAchievementMatchFinish(S,w,waveCompleted){
  const duration=Math.max(0,(performance.now()-(S.__gdaStartedAt||performance.now()))/1000);
  const localWon=S.mode===6&&online?w===0:w===localSlot-1;
  const normal= S.mode===1&&!online;
- if(w===0&&!online&&S.mode!==6)unlockAchievement(3);
+ if(localWon&&!online&&S.mode!==6)unlockAchievement(3);
 
  if(S.mode===0)recordStoryAchievementFinish(w);
 
@@ -2355,11 +2356,11 @@ function recordAchievementMatchFinish(S,w,waveCompleted){
   if(localWon){
    achTrack.onlineWins++;achTrack.onlineStreak++;
    if(achTrack.onlineStreak>=10)unlockAchievement(27);
-   if(achTrack.onlineWins>=50)recordSpecialCombo(f.idx);
+   if(achTrack.onlineWins>=50)unlockAchievement(50);
   }else achTrack.onlineStreak=0;
   if(achTrack.onlineMatches>=50)unlockAchievement(26);
  }
- if(w===0&&S.mode!==6){
+ if(localWon&&S.mode!==6){
   if(Number.isInteger(S.st))addUniqueAchievementValue("maps",MAPS[S.st]?.n);
   if(achTrack.maps.length>=MAPS.length)unlockAchievement(28);
  }
@@ -2389,10 +2390,7 @@ function recordAchievementMatchFinish(S,w,waveCompleted){
   if(achTrack.soloWaves>=50)unlockAchievement(47);
   saveAchievementTrack();
  }
- if(S.mode===6&&!online&&w===0&&waveCompleted&&noDamage&&noLifeLost){
-  achTrack.perfectWins++;
- }
- saveAchievementTrack();
+  saveAchievementTrack();
 }
 document.getElementById('achLaunch').addEventListener('click',()=>{renderAchievements();document.getElementById('achPanel').style.display='block'});
 document.getElementById('achClose').addEventListener('click',()=>document.getElementById('achPanel').style.display='none');
@@ -3177,7 +3175,7 @@ function gdaUnlockStoryEnemy(chapter){
  if(!chapter||!chapter.enemy)return;
  const enemy=String(chapter.enemy).toUpperCase();
  if(!ROSTER.some(r=>String(r.n).toUpperCase()===enemy))return;
- const names=gdaUnlockedNames(); if(!names.includes(enemy)){names.push(enemy);try{localStorage.setItem(GDA_UNLOCK_KEY,JSON.stringify(names));}catch(e){}}
+ const names=gdaUnlockedNames(); if(!names.includes(enemy)){names.push(enemy);try{localStorage.setItem(GDA_UNLOCK_KEY,JSON.stringify(names));}catch(e){}}if(names.length>=ROSTER.length)unlockAchievement(51);
 }
 function gdaLockSelectionCards(){
  const grid=document.getElementById('grid'); if(!grid)return;
@@ -3581,7 +3579,6 @@ window.gdaPlayHalloweenIntro=function(){
  const halloweenDay=now.getFullYear()===2026&&now.getMonth()===9&&now.getDate()===31;
  const eventStarted=now.getHours()>0||(now.getHours()===0&&now.getMinutes()>=40);
  if(!halloweenDay||!eventStarted)return false;
- if(typeof window.gdaUnlockAchievement==='function')window.gdaUnlockAchievement(31);
  if(typeof window.gdaUnlockAchievement==="function")window.gdaUnlockAchievement(7);
  const seenKey='gda_halloween_definitivo_intro_2026';
  try{if(sessionStorage.getItem(seenKey))return false;sessionStorage.setItem(seenKey,'1')}catch(err){}
