@@ -131,8 +131,33 @@ h1 small{display:block;margin-top:.25em;font-size:.3em;letter-spacing:.55em;back
 
 #doratsAimHud{position:fixed;left:50%;top:20%;transform:translateX(-50%);z-index:120;display:none;padding:10px 16px;border:2px solid #fff08a;border-radius:12px;background:#18120de8;color:#fff3a6;font:800 13px Orbitron,sans-serif;text-align:center;box-shadow:0 0 24px #ffe66d66;pointer-events:none}#doratsAimHud.show{display:block}
 </style>
+
+<style id="geBootLoaderStyles">
+#geBootLoader{position:fixed;inset:0;z-index:200000;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse at 50% 42%,#172b55 0%,#0a1026 48%,#03050d 100%);color:#eaf8ff;font-family:Orbitron,system-ui,sans-serif;opacity:1;visibility:visible;transition:opacity .45s ease,visibility .45s ease}
+#geBootLoader.ge-done{opacity:0;visibility:hidden;pointer-events:none}
+#geBootLoader .ge-card{width:min(540px,94vw);text-align:center}
+#geBootLoader .ge-mark{width:76px;height:76px;margin:0 auto 18px;border:1px solid #6feaff;border-radius:22px;display:grid;place-items:center;color:#ffd56b;font-size:42px;text-shadow:0 0 22px #65ddff;box-shadow:0 0 32px #4ddfff33;background:linear-gradient(145deg,#162c54,#11152d)}
+#geBootLoader .ge-brand{font-size:clamp(30px,7vw,52px);font-weight:900;letter-spacing:.14em;color:#eafaff;text-shadow:0 0 20px #54e8ff88}
+#geBootLoader .ge-game{margin-top:9px;color:#ff79df;font-size:clamp(12px,2.5vw,16px);font-weight:800;letter-spacing:.2em}
+#geBootLoader .ge-status{margin:34px 0 12px;color:#a9c9e7;font:700 12px Rajdhani,system-ui,sans-serif;letter-spacing:.18em;min-height:18px}
+#geBootLoader .ge-track{height:9px;border:1px solid #4ecde9;border-radius:20px;overflow:hidden;background:#ffffff16;box-shadow:0 0 18px #54e8ff22}
+#geBootLoader .ge-bar{display:block;width:0;height:100%;border-radius:20px;background:linear-gradient(90deg,#54e8ff,#8f7dff,#ff63d9);box-shadow:0 0 16px #54e8ff;transition:width .15s linear}
+#geBootLoader .ge-percent{margin-top:10px;color:#91a9d4;font:700 11px Orbitron,system-ui,sans-serif;letter-spacing:.14em}
+@media(prefers-reduced-motion:reduce){#geBootLoader,#geBootLoader .ge-bar{transition:none}}
+</style>
 </head>
 <body>
+<div id="geBootLoader" role="status" aria-live="polite" aria-label="Cargando Goji Empires">
+ <div class="ge-card">
+  <div class="ge-mark" aria-hidden="true">♛</div>
+  <div class="ge-brand">GOJI EMPIRES</div>
+  <div class="ge-game">GODZILLA: DESTROY ALL</div>
+  <div class="ge-status" id="geBootStatus">INICIANDO MOTOR DEL JUEGO…</div>
+  <div class="ge-track"><span class="ge-bar" id="geBootBar"></span></div>
+  <div class="ge-percent" id="geBootPercent">0%</div>
+ </div>
+</div>
+
 <div id="adminPanel" class="hide" style="position:fixed;inset:0;z-index:2000;background:rgba(2,4,15,.82);display:flex;align-items:center;justify-content:center;padding:18px">
  <section style="width:min(620px,96vw);max-height:90vh;overflow:auto;background:linear-gradient(145deg,#18264b,#080d20);border:2px solid #ffd24a;border-radius:18px;padding:22px;box-shadow:0 0 36px #ffd24a44;color:#fff;font-family:Orbitron,sans-serif">
   <div style="display:flex;align-items:center;gap:12px"><h2 style="margin:0;flex:1;color:#ffd24a;font-size:clamp(18px,4vw,26px)">👑 PANEL DE ADMINISTRADOR</h2><button id="adminClose" type="button" style="padding:8px 12px;border-radius:8px;background:#293452;color:white;border:1px solid #63739b">CERRAR ✕</button></div>
@@ -163,22 +188,6 @@ h1 small{display:block;margin-top:.25em;font-size:.3em;letter-spacing:.55em;back
   </div><div id="adminStatus" style="min-height:24px;margin-top:14px;color:#5ee7ff;font:14px Rajdhani,sans-serif"></div>
  </section>
 </div>
-<div id="beIntro" role="dialog" aria-label="Presentación de Big Empires">
- <div class="be-stars" aria-hidden="true"></div>
- <div class="be-content">
-  <div class="be-emblem" aria-hidden="true"><span class="be-crown">♛</span></div>
-  <div class="be-brand">BIG EMPIRES</div>
-  <div class="be-rule"></div>
-  <div class="be-tag">GAMES · WORLDS · LEGENDS</div>
-  <div class="be-game">PRESENTA</div>
-  <div class="be-game" style="font-weight:900;color:#eafaff">GODZILLA: DESTROY ALL</div>
-  <div class="be-credit">Una creación de BIG EMPIRES · Colaboradora: Goji Ban</div>
-  <button class="be-launch" id="beLaunch" type="button">▶ INICIAR EXPERIENCIA</button>
-  <div class="be-loading" aria-label="Cargando juego"><span id="beLoadBar"></span></div>
-  <div class="be-credit" id="beLoadText">PREPARADO PARA DESATAR A LOS TITANES</div>
- </div>
-</div>
-
 <style>
 #halloweenDefinitivoIntro{position:fixed;inset:0;z-index:120000;display:none;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(ellipse at 50% 48%,#512018 0%,#170d22 48%,#03050d 100%);color:#fff;text-align:center;font-family:Orbitron,system-ui,sans-serif;opacity:1}
 #halloweenDefinitivoIntro.show{display:flex}
@@ -222,7 +231,7 @@ h1 small{display:block;margin-top:.25em;font-size:.3em;letter-spacing:.55em;back
 </style>
 <div id="achPanel"><div class="achInner"><h2>🏆 LOGROS TITÁN · <span id="achCount">0/300</span></h2><p>Progreso guardado en este navegador. Los porcentajes globales cuentan navegadores registrados desde el último reinicio del servidor.</p><div id="achList"></div><button id="achClose" style="margin-top:16px;padding:10px 18px;border-radius:8px;cursor:pointer">VOLVER AL JUEGO</button></div></div>
 
-<div id="shaderLoading" style="display:none;position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at center,#15254a 0%,#030611 75%);color:#eafaff;align-items:center;justify-content:center;text-align:center;padding:24px;font-family:Orbitron,system-ui,sans-serif"><div style="width:min(520px,92vw)"><div style="font-size:clamp(24px,5vw,42px);font-weight:900;letter-spacing:.12em;text-shadow:0 0 24px #54e8ff">GODZILLA: DESTROY ALL</div><div style="margin:16px 0 22px;color:#f5d477;letter-spacing:.2em;font-size:13px">COMPILANDO SHADERS</div><div style="height:8px;border-radius:20px;background:#ffffff20;overflow:hidden;border:1px solid #54e8ff66"><div id="shaderLoadBar" style="height:100%;width:0;background:linear-gradient(90deg,#54e8ff,#f4cc60);box-shadow:0 0 20px #54e8ff;transition:width 13s linear"></div></div><div id="shaderLoadText" style="margin-top:14px;color:#b9c6e7;font:12px system-ui,sans-serif">Preparando escenario y efectos… 0%</div></div></div>
+<div id="shaderLoading" style="display:none;position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at center,#15254a 0%,#030611 75%);color:#eafaff;align-items:center;justify-content:center;text-align:center;padding:24px;font-family:Orbitron,system-ui,sans-serif"><div style="width:min(520px,92vw)"><div style="font-size:clamp(24px,5vw,42px);font-weight:900;letter-spacing:.12em;text-shadow:0 0 24px #54e8ff">GODZILLA: DESTROY ALL</div><div style="margin:16px 0 22px;color:#f5d477;letter-spacing:.2em;font-size:13px">COMPILANDO SHADERS</div><div style="height:8px;border-radius:20px;background:#ffffff20;overflow:hidden;border:1px solid #54e8ff66"><div id="shaderLoadBar" style="height:100%;width:0;background:linear-gradient(90deg,#54e8ff,#f4cc60);box-shadow:0 0 20px #54e8ff;transition:width 13s linear"></div></div><div id="shaderLoadText" style="margin-top:14px;color:#b9c6e7;font:12px system-ui,sans-serif">Preparando shaders y escenario… 0%</div></div></div>
 
 <canvas id="gl"></canvas><div id="battlePassPanel" style="display:none;position:fixed;inset:0;z-index:4000;overflow:auto;background:radial-gradient(ellipse at top,#182c59,#040711 75%);color:#eef7ff;padding:22px;font-family:Rajdhani,system-ui,sans-serif"><div style="max-width:950px;margin:auto"><button id="battlePassClose" style="padding:10px 16px;border-radius:9px;border:1px solid #4d719f;background:#182849;color:white;font-weight:800">← VOLVER</button><h2 style="font:900 38px Orbitron,sans-serif;margin-top:24px">PASE DE BATALLA · TEMPORADA 1</h2><p>Gana combates para conseguir EXP y desbloquear recompensas gratuitas.</p><div style="padding:18px;border:1px solid #3c638f;border-radius:14px;background:#0b1530;margin:18px 0"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><strong id="bpLevel"></strong><strong id="bpXP"></strong><strong id="bpTotal"></strong></div><div style="height:14px;background:#ffffff18;border-radius:20px;overflow:hidden;margin-top:12px"><div id="bpBar" style="height:100%;width:0;background:linear-gradient(90deg,#39d6ff,#a66bff)"></div></div><p id="bpNext"></p></div><div id="bpRewards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px"></div><p style="font-size:12px;color:#91a7ce">La EXP se guarda en este navegador. Recompensas gratuitas, sin ventajas de pago.</p></div></div>
 
@@ -1964,8 +1973,8 @@ function startSmash(idx,p2,round,sti){
  if(!window.__shaderLoadingActive){
   window.__shaderLoadingActive=true;
   const panel=document.getElementById("shaderLoading"),bar=document.getElementById("shaderLoadBar"),txt=document.getElementById("shaderLoadText");
-  if(panel){panel.style.display="flex";if(bar){bar.style.transition="none";bar.style.width="0";void bar.offsetWidth;bar.style.transition="width 13s linear";requestAnimationFrame(()=>bar.style.width="100%")}if(txt){txt.textContent="Preparando escenario y efectos… 0%";let pct=0;const t=setInterval(()=>{pct=Math.min(100,pct+Math.round(100/130));txt.textContent="Preparando escenario y efectos… "+pct+"%";if(pct>=100)clearInterval(t)},100)}}
-  setTimeout(()=>{if(txt)txt.textContent="Preparación completada… 100%";if(bar)bar.style.width="100%";if(panel)panel.style.display="none";startSmash(idx,p2,round,sti);window.__shaderLoadingActive=false},13000);return;
+  if(panel){panel.style.display="flex";if(bar){bar.style.transition="none";bar.style.width="0";void bar.offsetWidth;bar.style.transition="width 6s linear";requestAnimationFrame(()=>bar.style.width="100%")}if(txt){txt.textContent="Preparando escenario y efectos… 0%";let pct=0;const t=setInterval(()=>{pct=Math.min(100,pct+Math.round(100/60));txt.textContent="Preparando escenario y efectos… "+pct+"%";if(pct>=100)clearInterval(t)},100)}}
+  setTimeout(()=>{if(txt)txt.textContent="Preparación completada… 100%";if(bar)bar.style.width="100%";if(panel)panel.style.display="none";startSmash(idx,p2,round,sti);window.__shaderLoadingActive=false},6000);return;
  }
  unlockAchievement(0);if(mode===0)unlockAchievement(4);if(mode===2&&!window.__gdaOnlineActive)unlockAchievement(5);if(mode===6)unlockAchievement(6);
  let storyChapter=null;
@@ -3556,35 +3565,6 @@ function setGhidorahPerfMode(on){
 })();
 show("menu");
 
-(function initBigEmpiresIntro(){
- const intro=document.getElementById('beIntro');
- const launch=document.getElementById('beLaunch');
- const bar=document.getElementById('beLoadBar');
- const loadText=document.getElementById('beLoadText');
- if(!intro||!launch)return;
- let started=false;
- function playStudioSting(){
-  try{
-   const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
-   const ctx=new AC(); if(ctx.state==='suspended')ctx.resume();
-   const now=ctx.currentTime;
-   [[110,0,.24,.055],[164.81,.12,.32,.045],[220,.28,.38,.045],[329.63,.48,.55,.04],[440,.68,.8,.035]].forEach(([freq,delay,dur,vol])=>{
-    const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type='sawtooth';osc.frequency.setValueAtTime(freq,now+delay);gain.gain.setValueAtTime(.0001,now+delay);gain.gain.exponentialRampToValueAtTime(vol,now+delay+.035);gain.gain.exponentialRampToValueAtTime(.0001,now+delay+dur);osc.connect(gain);gain.connect(ctx.destination);osc.start(now+delay);osc.stop(now+delay+dur+.03);
-   });
-   const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type='sine';osc.frequency.setValueAtTime(55,now);osc.frequency.exponentialRampToValueAtTime(28,now+.75);gain.gain.setValueAtTime(.12,now);gain.gain.exponentialRampToValueAtTime(.0001,now+.8);osc.connect(gain);gain.connect(ctx.destination);osc.start(now);osc.stop(now+.82);
-   setTimeout(()=>ctx.close().catch(()=>{}),2500);
-  }catch(err){console.debug('Audio de presentación no disponible',err)}
- }
- launch.addEventListener('click',()=>{
-  if(started)return;started=true;playStudioSting();intro.classList.add('be-loading-on');
-  if(loadText)loadText.textContent='INICIALIZANDO SISTEMAS DE COMBATE…';
-  requestAnimationFrame(()=>{if(bar)bar.style.width='100%'});
-  setTimeout(()=>{if(loadText)loadText.textContent='¡LOS TITANES TE ESPERAN!'},4200);
-  setTimeout(()=>intro.classList.add('be-out'),5000);
-  setTimeout(()=>{intro.style.display='none';if(window.gdaPlayHalloweenIntro)window.gdaPlayHalloweenIntro();},5850);
- });
-})();
-
 // Presentación especial de Halloween: se muestra una vez por pestaña a partir de las 00:40 del 31/10/2026.
 window.gdaPlayHalloweenIntro=function(){
  const overlay=document.getElementById('halloweenDefinitivoIntro');
@@ -4223,5 +4203,61 @@ for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e
     if (note && !window.__gdaOnlineActive) note.textContent = "Se perdió la conexión con el servidor.";
   });
 </script>
-<body>
+
+<script id="geBootLoaderScript">
+(function initGojiEmpiresBootLoader(){
+ const overlay=document.getElementById("geBootLoader");
+ const bar=document.getElementById("geBootBar");
+ const status=document.getElementById("geBootStatus");
+ const percent=document.getElementById("geBootPercent");
+ if(!overlay)return;
+ const start=performance.now();
+ const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+ const pageReady=document.readyState==="complete"
+  ?Promise.resolve()
+  :new Promise(resolve=>window.addEventListener("load",resolve,{once:true}));
+ const fontsReady=document.fonts&&document.fonts.ready
+  ?Promise.race([document.fonts.ready.catch(()=>{}),wait(3500)])
+  :Promise.resolve();
+ const imageReady=wait(250).then(()=>{
+  const images=[...document.images].filter(img=>img.getAttribute("src")&&img.loading!=="lazy");
+  return Promise.all(images.map(img=>{
+   if(img.complete)return Promise.resolve();
+   return Promise.race([
+    new Promise(resolve=>{img.addEventListener("load",resolve,{once:true});img.addEventListener("error",resolve,{once:true})}),
+    wait(4500)
+   ]);
+  }));
+ });
+ const assetsReady=Promise.race([Promise.all([pageReady,fontsReady,imageReady]),wait(10000)]);
+ const labels=[
+  [0,"INICIANDO MOTOR DEL JUEGO…"],
+  [1400,"CARGANDO INTERFAZ Y MODOS…"],
+  [2800,"PREPARANDO RECURSOS VISUALES…"],
+  [4200,"VERIFICANDO SISTEMAS Y ONLINE…"],
+  [5400,"FINALIZANDO CARGA…"]
+ ];
+ let timer=setInterval(()=>{
+  const elapsed=performance.now()-start;
+  const pct=Math.min(94,Math.floor(elapsed/6000*94));
+  if(bar)bar.style.width=pct+"%";
+  if(percent)percent.textContent=pct+"%";
+  let label=labels[0][1];
+  for(const item of labels)if(elapsed>=item[0])label=item[1];
+  if(status)status.textContent=label;
+ },80);
+ Promise.all([wait(6000),assetsReady]).then(()=>{
+  clearInterval(timer);
+  if(bar)bar.style.width="100%";
+  if(percent)percent.textContent="100%";
+  if(status)status.textContent="¡GOJI EMPIRES ESTÁ LISTO!";
+  setTimeout(()=>{
+   overlay.classList.add("ge-done");
+   setTimeout(()=>{overlay.style.display="none";if(typeof window.gdaPlayHalloweenIntro==="function")window.gdaPlayHalloweenIntro()},500);
+  },180);
+ });
+})();
+</script>
+
+</body>
 </html>
