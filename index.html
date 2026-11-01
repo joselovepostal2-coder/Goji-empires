@@ -1893,7 +1893,7 @@ function inp(f){
  let dir=(d("right")?1:0)-(d("left")?1:0);
  if(!dir&&id===1&&OPT.follow&&performance.now()-lastM<2500){const hw=Math.tan(cam.fov*Math.PI/360)*CAMZ*cam.aspect,wx=cam.position.x+MX*hw;if(Math.abs(wx-f.x)>4)dir=wx>f.x?1:-1}
  const input={dir,jump:j("jump"),down:d("down"),a:j("light"),h:j("heavy"),u:j("ult"),g:j("grab"),aHeld:d("light"),gHeld:d("grab")};
- if(online&&id===localSlot){const now=performance.now();if(now-(window.__gdaLastOnlineInput||0)>40&&window.gdaOnlineSocket?.connected){window.gdaOnlineSocket.emit("game-state",input);window.__gdaLastOnlineInput=now}}
+ if(online&&id===localSlot){const now=performance.now();if(now-(window.__gdaLastOnlineInput||0)>40&&window.gdaOnlineSocket?.connected){window.__gdaInputSeq=(window.__gdaInputSeq||0)+1;window.gdaOnlineSocket.emit("game-state",{state:input,sequence:window.__gdaInputSeq,playerSlot:localSlot});window.__gdaLastOnlineInput=now}}
  return input
 }
 
