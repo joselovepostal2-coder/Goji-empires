@@ -7,7 +7,13 @@ const crypto = require("crypto");
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+// El cliente HTML5 puede estar alojado en itch.io o en otro dominio.
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
 
 // Estadísticas agregadas de logros. El servidor guarda solo IDs aleatorios de navegador
 // y los conjuntos de logros desbloqueados; no recibe nombres, correos ni IP desde el cliente.
