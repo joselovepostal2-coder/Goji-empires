@@ -2712,6 +2712,53 @@ function act(f,o,dt){const a=f.act,S=G.sm;a.t+=dt;
    }}
   if(a.t>=m.su+m.ac+m.rc)f.act=null;return}
  const s=a.u,[mx,my]=mouth(f);
+ // Ultimate evolutiva de la Calabaza: fase 1 usa un ataque; fase 2 encadena dos;
+ // fase 3 dispara TODO el repertorio registrado en ROSTER.sk y termina con una explosión.
+ if(a.pumpkinUltimate){
+  const target=a.target||o,phase=Math.max(0,Math.min(2,Number(a.pumpkinUltimatePhase)||0));
+  const kit=(Array.isArray(f.r?.sk)?f.r.sk:ROSTER[f.idx]?.sk||[]).filter(sk=>sk&&typeof sk==="object");
+  const fallback=[
+   {n:"PATAS DE LA CRIPTA",t:"pulse",c:0xff8a22,R:48,dmg:32,stun:.7},
+   {n:"TELARAÑA DE ESPINAS",t:"proj",c:0x9cff35,n:5,spread:1.1,sp:28,life:2.5,size:4,dmg:24},
+   {n:"TERREMOTO DE CALABAZA",t:"pulse",c:0xff3d30,R:72,dmg:48,stun:1.1}
+  ];
+  const all=kit.length?kit:fallback,attacks=phase===0?all.slice(0,1):phase===1?all.slice(0,2):all.slice();
+  if(!a.pumpkinStarted){a.pumpkinStarted=1;S.shake=phase===2?10:phase===1?7:4;
+   toastCombat(phase===2?"¡ULTIMATE FINAL: PLAGA TOTAL! ¡TODOS LOS ATAQUES!":phase===1?"¡ULTIMATE EVOLUCIONADA · FASE 2!":"¡ULTIMATE DE LA CRIPTA · FASE 1!",phase===2?"#ff554b":phase===1?"#9dff4f":"#ffb347");}
+  a.nextAttack=a.nextAttack||0;
+  while(a.nextAttack<attacks.length&&a.t>=.22+a.nextAttack*.32){
+   const sk=attacks[a.nextAttack++],c=Number(sk.c)||[0xff8a22,0x9cff35,0xff3d30][(a.nextAttack-1)%3],power=phase===0?1:phase===1?1.18:1.4;
+   const R=Math.max(18,Number(sk.R)||48),dmg=Math.max(1,Number(sk.dmg)||24)*power;
+   if(sk.t==="proj"){
+    const n=Math.max(1,Math.min(18,Number(sk.n)||5)),spread=Number(sk.spread)||.8,[sx,sy]=mouth(f);
+    for(let k=0;k<n;k++){const u=n<2?0:k/(n-1)-.5,r=Math.max(.8,(Number(sk.size)||3)*SK),m=new THREE.Mesh(new THREE.SphereGeometry(r,7,5),new THREE.MeshBasicMaterial({color:c}));
+     G.scene.add(m);S.pr.push({x:sx,y:sy+u*6,vx:f.face*(Number(sk.sp)||28)*.55,vy:u*spread*14,life:Number(sk.life)||2,r,dmg:dmg*.2,from:f,m});}
+    S.rings.push({x:mx+f.face*14,y:my,R:16,t:0,c});toastCombat("¡"+String(sk.nm||sk.n||"TELARAÑA").toUpperCase()+"!",phase===2?"#ff554b":"#9dff4f");
+   }else if(sk.t==="beam"){
+    const len=Math.max(70,(Number(sk.r)||2.5)*SK*38),close=target&&target.dead<=0&&Math.abs(target.y-f.y)<f.h*1.45&&Math.abs(target.x-f.x)<len+target.hw;
+    for(let q=1;q<=4;q++)S.rings.push({x:mx+f.face*len*q/4,y:my,R:9+q*3,t:0,c});
+    if(close)hurt(f,target,dmg*.7,45,.45,16,f.face);
+    S.shake=Math.max(S.shake,4);
+   }else if(sk.t==="dash"){
+    const len=Math.max(45,Number(sk.dist)||70);f.vx=f.face*Math.min(110,Number(sk.sp)||75);
+    S.rings.push({x:f.x+f.face*28,y:f.y+f.h*.45,R:30,t:0,c});
+    if(target&&target.dead<=0&&Math.abs(target.x-f.x)<f.hw+target.hw+len&&Math.abs(target.y-f.y)<f.h*1.2){hurt(f,target,dmg*.85,65,.45,22,f.face);target.vx=f.face*27;}
+   }else if(sk.t==="buff"){
+    f.shield=Math.max(f.shield||0,3);f.boost=Math.max(f.boost||0,3);S.rings.push({x:f.x,y:f.y+f.h*.5,R:38,t:0,c});
+   }else{
+    const radius=R*(phase===2?1.3:1),box={x:f.x-radius,y:f.y-radius*.4,w:radius*2,h:f.h+radius*.8};
+    S.rings.push({x:f.x,y:f.y+f.h*.5,R:radius,t:0,c});S.rings.push({x:f.x,y:f.y+f.h*.5,R:radius*.62,t:0,c:0xffffff});S.shake=Math.max(S.shake,phase===2?7:4);
+    if(target&&target.dead<=0&&ov(box,bxOf(target))){hurt(f,target,dmg,65,Number(sk.stun)||.5,phase===2?25:16,Math.sign(target.x-f.x)||f.face);target.stun=Math.max(target.stun,Number(sk.stun)||.35);}
+   }
+  }
+  const endAt=.22+attacks.length*.32+(phase===2?.3:0)+.18;
+  if(phase===2&&a.t>=.22+attacks.length*.32&&!a.pumpkinFinal){a.pumpkinFinal=1;const radius=110;
+   S.shake=13;for(let q=0;q<6;q++)S.rings.push({x:f.x,y:f.y+f.h*.5,R:26+q*18,t:0,c:q%2?0xff3d30:0x9cff35});
+   if(target&&target.dead<=0&&ov({x:f.x-radius,y:f.y-radius*.35,w:radius*2,h:f.h+radius*.7},bxOf(target))){hurt(f,target,42,95,.85,30,Math.sign(target.x-f.x)||f.face);target.stun=Math.max(target.stun,.85);}
+   toastCombat("¡FASE 3: DESCARGA DE TODOS LOS ATAQUES!","#ff554b");
+  }
+  if(a.t>=endAt){f.act=null;f.beam=null;f.vx*=.25;}return;
+ }
  // Ultimate exclusiva de Godzilla: captura, carga y rayo dirigido a la cabeza.
  if(a.godzillaFinisher){
   const target=a.target||o;
@@ -3011,7 +3058,10 @@ function fighter(f,o,dt){const st=f.st,S=G.sm;
   else if(isGodzilla&&recentGrab&&i.a&&f.lastGrabTarget===o){startAct(f,{comboTriple:true,target:o,hits:0});recordSpecialCombo(f.idx);f.lastGrabAt=-1e9;toastCombat('¡GODZILLA: AGARRE + CLIC IZQUIERDO! 3 GOLPES');}
   else if(recentGrab&&i.a&&f.lastGrabTarget===o){startAct(f,{comboTriple:true,target:o,hits:0});recordSpecialCombo(f.idx);f.lastGrabAt=-1e9;toastCombat('COMBO: AGARRE + CLIC IZQUIERDO','#ffd24a');}
   else if(recentGrab&&(i.a||i.h||i.u)){if(isGodzilla)recordSpecialCombo(f.idx);recordSpecialCombo(f.idx);f.lastGrabAt=-1e9;}
-  else if(f.r.omega&&i.a)startAct(f,{omega:'tail'});else if(f.r.omega&&i.h)startAct(f,{omega:'heavy'});else if(i.a)startAct(f,{m:MV.light});else if(i.h){startAct(f,{m:MV.heavy});if(S.breakable&&!S.breakDone){S.breakDone=true;S.breakStageTimer=.7;toastCombat('¡EL ESCENARIO SE PARTE!','#ff765f')}}else if(fighterName.includes("DORATS")&&i.u&&f.meter>=200){f.meter=0;f.doratsAim={time:15};f.doratsJHeld=!!K["KeyJ"];toastCombat("DORATS: APUNTA CON EL MOUSE Y PULSA J · 15 SEGUNDOS","#fff3a6");}else if(i.u&&f.meter>=200){f.meter=0;f.combo=0;f.comboTimer=0;toastCombat('¡ULTIMATE!','#70ffb2');if(f.idx===0)startAct(f,{u:comboUltimateFor(f.idx),godzillaFinisher:true});else startAct(f,{u:comboUltimateFor(f.idx)})}}
+  else if(f.r.omega&&i.a)startAct(f,{omega:'tail'});else if(f.r.omega&&i.h)startAct(f,{omega:'heavy'});else if(i.a)startAct(f,{m:MV.light});else if(i.h){startAct(f,{m:MV.heavy});if(S.breakable&&!S.breakDone){S.breakDone=true;S.breakStageTimer=.7;toastCombat('¡EL ESCENARIO SE PARTE!','#ff765f')}}else if(fighterName.includes("DORATS")&&i.u&&f.meter>=200){f.meter=0;f.doratsAim={time:15};f.doratsJHeld=!!K["KeyJ"];toastCombat("DORATS: APUNTA CON EL MOUSE Y PULSA J · 15 SEGUNDOS","#fff3a6");}else if(i.u&&f.meter>=200){f.meter=0;f.combo=0;f.comboTimer=0;
+  const pumpkinFighter=String(f.r?.n||f.A?.n||ROSTER[f.idx]?.n||"").toUpperCase()===GDA_PUMPKIN_BOSS_NAME;
+  if(pumpkinFighter){const phase=Math.max(0,Math.min(2,Number(f.pumpkinPhase)||0));const labels=["JUICIO DE LA CRIPTA","PLAGA EVOLUTIVA","PLAGA TOTAL"];const colors=[0xff8a22,0x9cff35,0xff3d30];startAct(f,{u:{n:labels[phase],t:"pulse",c:colors[phase],R:72,dmg:48},pumpkinUltimate:true,pumpkinUltimatePhase:phase,target:o});}
+  else{toastCombat('¡ULTIMATE!','#70ffb2');if(f.idx===0)startAct(f,{u:comboUltimateFor(f.idx),godzillaFinisher:true});else startAct(f,{u:comboUltimateFor(f.idx)})}}}
  if(!f.ground)f.vy=Math.max(f.vy+GRAV*dt,-95);
  move(f,dt);
  if(f.x<BZ.l||f.x>BZ.r||f.y<BZ.b||f.y>BZ.t)ko(f)}
