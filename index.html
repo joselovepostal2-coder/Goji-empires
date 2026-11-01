@@ -2974,6 +2974,7 @@ function smStep(dt){const S=G.sm,[a,b]=S.F;const aimHud=$("doratsAimHud");if(aim
    fighter(f,o,dt);
    if(f.id===localSlot && now-(window.__gdaLastCombatSnapshot||0)>50 && window.gdaOnlineSocket?.connected){window.gdaOnlineSocket.emit("combat-state",{x:f.x,y:f.y,vx:f.vx,vy:f.vy,pct:f.pct,stocks:f.stocks,stun:f.stun,dead:f.dead,meter:f.meter,face:f.face});window.__gdaLastCombatSnapshot=now;}
   }else fighter(f,o,dt)
+ }
  for(const p of S.pr){p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;let o=p.from===a?b:a;
   const projectileBox={x:p.x-p.r,y:p.y-p.r,w:2*p.r,h:2*p.r};
   if(S.mode===6){
