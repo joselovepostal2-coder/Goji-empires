@@ -236,6 +236,18 @@ io.on("connection", socket => {
     });
   });
 
+  socket.on("combat-state", state => {
+    const code = playerRooms.get(socket.id);
+    const room = rooms.get(code);
+    if (!room?.started || !state || typeof state !== "object") return;
+    const clean = {};
+    for (const key of ["x","y","vx","vy","pct","stocks","stun","dead","meter","face"]) {
+      const value = Number(state[key]);
+      if (Number.isFinite(value)) clean[key] = Math.max(-100000, Math.min(100000, value));
+    }
+    socket.to(code).emit("remote-combat-state", { playerId: socket.id, state: clean });
+  });
+
   socket.on("online-post-action", action => {
     const code = playerRooms.get(socket.id);
     const room = rooms.get(code);
