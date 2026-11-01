@@ -3501,6 +3501,7 @@ addEventListener("wheel",e=>{
  if(scr==="ctl"&&waitK){e.preventDefault();setKey(e.deltaY<0?"WheelUp":"WheelDown");return}
  if(scr==="play"){e.preventDefault();const c=e.deltaY<0?"WheelUp":"WheelDown";JP[c]=1;K[c]=1;clearTimeout(wt[c]);wt[c]=setTimeout(()=>{K[c]=0},160)}},{passive:false});
 // clic y hover en menús (en pantallas táctiles el primer toque selecciona y el segundo confirma)
+window.__GDA_MAIN_CLICK_HANDLER=true;
 document.addEventListener("click",e=>{if(performance.now()-bindT<250)return;const t=e.target;
  const b=t.closest("[data-k]");if(b){nav(b.dataset.k);return}
  const li=t.closest("#mlist li");if(li){mi=+li.dataset.i;renderMenu();nav("Enter");return}
@@ -4288,17 +4289,32 @@ for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e
      necesita recibirlos para ejecutar nav(), abrir la selección de kaijus y el combate. */
   if(!list.dataset.geRecoveryKeyboardBound){
    list.dataset.geRecoveryKeyboardBound="1";
-   list.addEventListener("keydown",event=>{
-    const item=event.target.closest("li[data-i]");
-    if(!item||(event.key!=="Enter"&&event.key!==" "))return;
-    if(typeof window.nav==="function"){
-     event.preventDefault();
-     const index=Number(item.dataset.i);
+   const activate=(item,event)=>{
+    if(!item)return;
+    if(event)event.preventDefault();
+    const index=Number(item.dataset.i);
+    try{
+     if(typeof window.nav!=="function")throw new Error("La función nav() no está disponible: el script principal no terminó de cargar.");
      const current=[...list.querySelectorAll("li")].findIndex(x=>x.classList.contains("on"));
      const from=current<0?0:current;
      for(let n=0;n<(index-from+modes.length)%modes.length;n++)window.nav("ArrowDown");
      window.nav("Enter");
+    }catch(error){
+     console.error("GDA: fallo al abrir el modo seleccionado",error);
+     let note=document.getElementById("geModeRecoveryNote");
+     if(!note){note=document.createElement("pre");note.id="geModeRecoveryNote";note.style.cssText="white-space:pre-wrap;overflow-wrap:anywhere;max-height:28vh;overflow:auto;color:#fff;background:#4b1010;border:2px solid #ff6969;padding:12px;font:12px monospace;position:fixed;z-index:2147483647;left:10px;right:10px;bottom:10px";document.body.appendChild(note);}
+     note.textContent="ERROR REAL DE GDA\n"+(error&&error.stack?error.stack:String(error));
     }
+   };
+   if(!window.__GDA_MAIN_CLICK_HANDLER){
+    list.addEventListener("click",event=>{
+     const item=event.target.closest("li[data-i]");
+     if(item)activate(item,event);
+    });
+   }
+   list.addEventListener("keydown",event=>{
+    const item=event.target.closest("li[data-i]");
+    if(item&&(event.key==="Enter"||event.key===" ")){activate(item,event)}
    });
   }
  }
