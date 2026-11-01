@@ -4483,7 +4483,7 @@ var gdaOnlineSocket = null;
     window.__gdaCombatSeq = 0;
     state.lastRemoteInputAt = 0;
     state.lastCombatStateAt = 0;
-    state.lastMatchKey = "";
+    // lastMatchKey se conserva para ignorar eventos match-start duplicados.
   }
 
   function handleRemoteInput(payload) {
