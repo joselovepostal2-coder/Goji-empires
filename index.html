@@ -1369,7 +1369,13 @@ function addDamageSprite(f,dmg){
  if(f.damageMarks.length>8){const old=f.damageMarks.shift();G.scene.remove(old.mesh);old.mesh.geometry.dispose();old.mesh.material.dispose();old.tex.dispose();}
 }
 // Daño y knockback al estilo Smash: primero se suma el %, luego fuerza = (base + % × crecimiento) × fuerza del atacante ÷ peso del rival
-function hurt(a,t,dmg,base,gr,ang,dir){if(t.inv>0||t.shield>0||t.dead>0)return;if(a?.aggressiveUntil&&a.aggressiveUntil>performance.now()/1000)dmg*=1.35;if(a&&a.dmgMult)dmg*=a.dmgMult;
+function hurt(a,t,dmg,base,gr,ang,dir){
+ if(window.__gdaOnlineActive){
+  const localSlot=Number(window.__gdaOnlineLocalSlot)||1;
+  // El cliente no vuelve a aplicar daño de ataques simulados del rival.
+  if(a && (a.id===1||a.id===2) && a.id!==localSlot)return;
+ }
+ if(t.inv>0||t.shield>0||t.dead>0)return;if(a?.aggressiveUntil&&a.aggressiveUntil>performance.now()/1000)dmg*=1.35;if(a&&a.dmgMult)dmg*=a.dmgMult;
  const au=GAME_UPGRADES[a.idx]||{},tu=GAME_UPGRADES[t.idx]||{};
  // Pasivas de evolución: se aplican dentro del daño real del combate.
  const victimName=String(ROSTER[t.idx]?.n||t.st?.n||'').toLowerCase();
@@ -1399,6 +1405,11 @@ function hurt(a,t,dmg,base,gr,ang,dir){if(t.inv>0||t.shield>0||t.dead>0)return;i
  }
  addDamageSprite(t,dmg);recordAchievementDamage(a,t,dmg);if(isLocalAchievementFighter(a))unlockAchievement(1);const kb=(base+t.pct*gr)*a.st.kb/(t.st.w/100),r=ang*Math.PI/180;
  t.vx=Math.cos(r)*dir*kb;t.vy=Math.sin(r)*kb;t.ground=0;t.stun=Math.min(1.1,.12+kb*.006);t.act=null;t.beam=null;
+ if(window.__gdaOnlineActive && a && (a.id===1||a.id===2) && t && (t.id===1||t.id===2) &&
+    a.id===(Number(window.__gdaOnlineLocalSlot)||1) && t.id!==(Number(window.__gdaOnlineLocalSlot)||1) &&
+    window.gdaOnlineSocket?.connected){
+  window.gdaOnlineSocket.emit("combat-hit",{targetSlot:t.id,damage:Math.max(0,Math.min(100,dmg)),vx:t.vx,vy:t.vy,stun:t.stun});
+ }
  const readyBefore=a.meter>=200;
  a.meter=Math.min(200,Math.max(0,(a.meter||0)+dmg*1.1));t.meter=Math.min(200,Math.max(0,(t.meter||0)+dmg*.6));
  if(!readyBefore&&a.meter>=200)toastCombat("¡ULTIMATE LISTO! 200/200","#70ffb2");
@@ -4269,6 +4280,24 @@ for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e
     if (!window.__gdaOnlineActive || !payload || !payload.state) return;
     window.__gdaRemoteCombatState = payload.state;
     window.__gdaRemoteCombatStateAt = performance.now();
+  });
+
+  gdaOnlineSocket.on("combat-hit-confirmed", (payload) => {
+    if (!window.__gdaOnlineActive || !payload) return;
+    const S = window.G?.sm;
+    const fighters = S?.F;
+    if (!Array.isArray(fighters)) return;
+    const target = fighters.find(f => f && f.id === Number(payload.targetSlot));
+    const attacker = fighters.find(f => f && f.id === Number(payload.attackerSlot));
+    if (target && Number.isFinite(Number(payload.pct))) {
+      target.pct = Math.max(0, Math.min(9999, Number(payload.pct)));
+      if (Number.isFinite(Number(payload.vx))) target.vx = Number(payload.vx);
+      if (Number.isFinite(Number(payload.vy))) target.vy = Number(payload.vy);
+      if (Number.isFinite(Number(payload.stun))) target.stun = Math.max(target.stun || 0, Number(payload.stun));
+      target.ground = 0;
+    }
+    if (attacker && Number.isFinite(Number(payload.attackerMeter))) attacker.meter = Math.max(0, Math.min(200, Number(payload.attackerMeter)));
+    if (target && Number.isFinite(Number(payload.targetMeter))) target.meter = Math.max(0, Math.min(200, Number(payload.targetMeter)));
   });
 
   function launchOnlineRoomMatch(room,isRematch=false) {
