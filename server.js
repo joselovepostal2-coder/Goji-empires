@@ -269,6 +269,12 @@ io.on("connection", socket => {
         [...room.players.values()].every(p => p.ready && p.kaiju)) {
       room.started = true;
       room.postVotes.clear();
+      room.combatPositions = new Map();
+      room.combatAuthority = {
+        pct: new Map([...room.players.keys()].map(id => [id, 0])),
+        lastHit: new Map(),
+        meter: new Map([...room.players.keys()].map(id => [id, 0]))
+      };
       io.to(code).emit("match-start", getRoomInfo(code));
     }
   });
