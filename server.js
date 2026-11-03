@@ -277,23 +277,63 @@ io.on("connection", socket => {
     const code = playerRooms.get(socket.id);
     const room = rooms.get(code);
     if (!room?.started || !state || typeof state !== "object") return;
-
-    socket.to(code).emit("remote-game-state", {
-      playerId: socket.id,
-      state
-    });
+    socket.to(code).emit("remote-game-state", { playerId: socket.id, state });
   });
 
+  // Posición de referencia: la vida y la energía ya no se aceptan desde snapshots del cliente.
   socket.on("combat-state", state => {
     const code = playerRooms.get(socket.id);
     const room = rooms.get(code);
     if (!room?.started || !state || typeof state !== "object") return;
     const clean = {};
-    for (const key of ["x","y","vx","vy","pct","stocks","stun","dead","meter","face"]) {
+    for (const key of ["x","y","vx","vy","stun","dead","face"]) {
       const value = Number(state[key]);
-      if (Number.isFinite(value)) clean[key] = Math.max(-100000, Math.min(100000, value));
+      if (Number.isFinite(value)) clean[key] = Math.max(-1000, Math.min(1000, value));
     }
+    if (!room.combatPositions) room.combatPositions = new Map();
+    room.combatPositions.set(socket.id, { ...clean, at: Date.now() });
     socket.to(code).emit("remote-combat-state", { playerId: socket.id, state: clean });
+  });
+
+  // La solicitud de impacto se valida en el servidor y el resultado se difunde a ambos jugadores.
+  socket.on("combat-hit", raw => {
+    const code = playerRooms.get(socket.id);
+    const room = rooms.get(code);
+    if (!room?.started || !raw || typeof raw !== "object" ||
+        !["normal", "tournament"].includes(room.mode || "normal")) return;
+    const ids = [...room.players.keys()];
+    const attackerSlot = ids.indexOf(socket.id) + 1;
+    const targetSlot = Number(raw.targetSlot);
+    if ((attackerSlot !== 1 && attackerSlot !== 2) ||
+        targetSlot !== (attackerSlot === 1 ? 2 : 1)) return;
+    const positions = room.combatPositions;
+    const a = positions?.get(socket.id);
+    const targetId = ids[targetSlot - 1];
+    const t = positions?.get(targetId);
+    const now = Date.now();
+    if (!a || !t || now - a.at > 800 || now - t.at > 800) return;
+    if (Math.abs(a.x - t.x) > 125 || Math.abs(a.y - t.y) > 100) return;
+    if (!room.combatAuthority) room.combatAuthority = { pct: new Map(), lastHit: new Map(), meter: new Map() };
+    const auth = room.combatAuthority;
+    const last = auth.lastHit.get(socket.id) || 0;
+    if (now - last < 75) return;
+    const dmg = Math.max(0, Math.min(100, Number(raw.damage) || 0));
+    if (dmg <= 0) return;
+    auth.lastHit.set(socket.id, now);
+    const pct = Math.min(9999, (auth.pct.get(targetId) || 0) + dmg);
+    auth.pct.set(targetId, pct);
+    const attackerMeter = Math.min(200, (auth.meter.get(socket.id) || 0) + dmg * 1.1);
+    auth.meter.set(socket.id, attackerMeter);
+    const targetMeter = Math.min(200, (auth.meter.get(targetId) || 0) + dmg * 0.6);
+    auth.meter.set(targetId, targetMeter);
+    io.to(code).emit("combat-hit-confirmed", {
+      attackerSlot, targetSlot, damage: dmg, pct,
+      attackerMeter, targetMeter,
+      vx: Math.max(-100, Math.min(100, Number(raw.vx) || 0)),
+      vy: Math.max(-100, Math.min(100, Number(raw.vy) || 0)),
+      stun: Math.max(0, Math.min(1.1, Number(raw.stun) || 0)),
+      at: now
+    });
   });
 
   socket.on("online-post-action", action => {
