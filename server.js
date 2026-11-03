@@ -361,6 +361,12 @@ io.on("connection", socket => {
     }
 
     if (action === "rematch") {
+      room.combatPositions = new Map();
+      room.combatAuthority = {
+        pct: new Map([...room.players.keys()].map(id => [id, 0])),
+        lastHit: new Map(),
+        meter: new Map([...room.players.keys()].map(id => [id, 0]))
+      };
       io.to(code).emit("match-rematch", getRoomInfo(code));
       return;
     }
