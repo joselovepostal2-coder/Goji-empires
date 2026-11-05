@@ -3737,7 +3737,7 @@ $("adminApplyStats").addEventListener("click",()=>{const i=adminCurrentIndex();i
 $("adminUnlockAll").addEventListener("click",()=>{ROSTER.forEach((r,i)=>adminUnlockKaiju(i));adminFillKaijuSelect();$("adminStatus").textContent=`¡Todos los ${ROSTER.length} kaijus desbloqueados!`});
 $("adminUnlockAllSkins").addEventListener("click",()=>{const all=HALLOWEEN_SKINS.map(s=>s.id);try{localStorage.setItem('gda_halloween_skins_v1',JSON.stringify(all));}catch(e){};renderSkinShelf();renderHalloweenShop();$('adminStatus').textContent=`¡Todas las ${all.length} skins conseguidas! Se guardaron en este navegador.`;});
 $("adminResetStats").addEventListener("click",()=>{const i=adminCurrentIndex();if(!ROSTER[i])return;GAME_UPGRADES[i]={power:1,armor:0,speed:1,jump:1,levels:{power:1,speed:1,jump:1,armor:1}};try{localStorage.setItem("gda_upgrades_v1",JSON.stringify(GAME_UPGRADES))}catch(e){};adminLoadStats();$("adminStatus").textContent="Estadísticas de "+ROSTER[i].n+" restablecidas."});
-addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();adminRunCommand()}});
+// Eliminado: adminRunCommand no existe; no interceptar Enter globalmente.
 $("adminUnlockAll").addEventListener("click",()=>{ROSTER.forEach((r,i)=>adminUnlockKaiju(i));$("adminStatus").textContent=`¡Todos los ${ROSTER.length} kaijus desbloqueados!`});
 $("adminResetStats").addEventListener("click",()=>{if(!confirm("¿Restablecer estadísticas de todos los kaijus?"))return;ROSTER.forEach((r,i)=>GAME_UPGRADES[i]={power:1,armor:0,speed:1,jump:1,levels:{power:1,speed:1,jump:1,armor:1}});localStorage.setItem("gda_upgrades_v1",JSON.stringify(GAME_UPGRADES));$("adminStatus").textContent="Estadísticas restablecidas."});
 addEventListener("keydown",e=>{
