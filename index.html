@@ -2816,7 +2816,7 @@ function act(f,o,dt){const a=f.act,S=G.sm;a.t+=dt;
    toastCombat("¡EJECUCIÓN ARCOÍRIS! ¡AGARRE ARÁCNIDO!","#ffb347");
    if(target&&target.dead<=0){a.pumpkinTargetX=target.x;a.pumpkinTargetY=target.y;}
   }
-  if(target&&target.dead<=0&&a.t<2.25){
+  if(target&&target.dead<=0&&a.t<1.78){
    // La Calabaza sujeta al rival con sus patas y lo eleva frente a ella.
    const lift=Math.min(1,Math.max(0,(a.t-.12)/.38));
    const tx=f.x+f.face*(f.hw+target.hw*.45+5),ty=f.y+f.h+10+lift*27;
