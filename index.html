@@ -2966,7 +2966,7 @@ function gdaPlayUniversalKO(f,lastLife){
  for(let q=0;q<count;q++)G.sm.rings.push({x:f.x,y:f.y+f.h*.5,R:24+q*15,t:0,c:colors[q%4]});
  G.sm.shake=lastLife?16:10;
 }
-function ko(f){const S=G.sm;f.stocks--;const lastLife=f.stocks<=0;gdaPlayUniversalKO(f,lastLife);f.dead=1.4;f.act=null;f.beam=null;S.shake=8;
+function ko(f){const S=G.sm;f.stocks--;const lastLife=f.stocks<=0;gdaPlayUniversalKO(f,lastLife);if(lastLife)f.koVisual={t:0,duration:.95,x:f.x,y:f.y,vx:(f.x>=0?1:-1)*95,vy:105};f.dead=1.4;f.act=null;f.beam=null;S.shake=8;
  if(S.mode===6&&f.waveEnemy&&f.stocks<=0){f.waveDead=true;f.dead=999;f.mesh.visible=false;f.sh.visible=false;S.waveEnemiesRemaining=Math.max(0,(S.waveEnemiesRemaining||1)-1);toastCombat("¡ENEMIGO DERROTADO! QUEDAN "+S.waveEnemiesRemaining,"#ffd24a");if(S.waveEnemiesRemaining===0){if(!["tower","hardcore","raid","survival"].includes(window.__gdaOnlineMode))waveWins=waveTarget-1;finish(0)}return;}
  if(f.stocks<=0)finish(S.mode===6?(f.wavePlayer?1:0):(f===S.F[0]?1:0))}
 function finish(w){const S=G.sm;if(S.state==="over")return;S.state="over";S.win=w;const pumpkinHud=document.getElementById("gdaPumpkinBossHud");if(pumpkinHud)pumpkinHud.style.display="none";
@@ -3188,7 +3188,7 @@ function smStep(dt){const S=G.sm,[a,b]=S.F;const aimHud=$("doratsAimHud");if(aim
    else o=a;
   }else o=f===a?b:a;
   if(!o)continue;
-  if(f.dead>0){f.dead-=dt;if(f.dead<=0){Object.assign(f,{x:Number.isFinite(f.spawnX)?f.spawnX:0,y:Number.isFinite(f.spawnY)?f.spawnY:55,vx:0,vy:0,pct:0,inv:2.5,jumps:1,stun:0})}continue}
+  if(f.dead>0){if(f.koVisual){f.koVisual.t+=dt;f.koVisual.x+=f.koVisual.vx*dt;f.koVisual.y+=f.koVisual.vy*dt;f.koVisual.vy-=35*dt;if(f.koVisual.t>=f.koVisual.duration)f.koVisual=null;}f.dead-=dt;if(f.dead<=0){f.koVisual=null;Object.assign(f,{x:Number.isFinite(f.spawnX)?f.spawnX:0,y:Number.isFinite(f.spawnY)?f.spawnY:55,vx:0,vy:0,pct:0,inv:2.5,jumps:1,stun:0})}continue}
   if(window.__gdaOnlineActive && !f.ai && (f.id===1||f.id===2)){
    const localSlot=Number(window.__gdaOnlineLocalSlot)||1, now=performance.now();
    if(f.id!==localSlot){const snap=window.__gdaRemoteCombatState;if(snap && now-(window.__gdaRemoteCombatStateAt||0)<500){for(const k of ["x","y","vx","vy","pct","stocks","stun","dead","meter","face"])if(Number.isFinite(snap[k]))f[k]=snap[k];f.ground=0;}}
@@ -3252,7 +3252,7 @@ function smashTick(dt){const S=G.sm;dt=Math.min(dt,.033);
  for(const f of S.F){if(f.squashTimer>0){f.squashTimer-=dt;if(f.squashTimer<=0)f.mesh.scale.set(1,1,1)}}
  const[a,b]=S.F;
  // render: sprites en billboard sobre el eje Y, sombra sobre la plataforma de abajo, rayo desde la boca del sprite
- for(const f of S.F){const m=f.mesh;m.visible=f.dead<=0;m.position.set(f.x,f.y,0);
+ for(const f of S.F){const m=f.mesh;const koFly=!!(f.koVisual&&f.koVisual.t<f.koVisual.duration);m.visible=f.dead<=0||koFly;m.position.set(koFly?f.koVisual.x:f.x,koFly?f.koVisual.y:f.y,koFly?2:0);if(koFly){const kf=f.koVisual.t/f.koVisual.duration;m.rotation.z=-.2+kf*.8;m.scale.setScalar(1-kf*.18)}else if(f.dead<=0&&m.scale.x!==1)m.scale.set(1,1,1);
   if(S.mode===6&&f.waveEnemy){
    if(!f.waveDamageTag){
     const cv=document.createElement("canvas");cv.width=128;cv.height=48;
