@@ -207,6 +207,30 @@ html,body{min-width:0;width:100%;max-width:100%;overscroll-behavior:none}
 #geBootLoader .ge-percent{margin-top:10px;color:#91a9d4;font:700 11px Orbitron,system-ui,sans-serif;letter-spacing:.14em}
 @media(prefers-reduced-motion:reduce){#geBootLoader,#geBootLoader .ge-bar{transition:none}}
 </style>
+
+<style id="gda-universal-smash-ko">
+#gdaUniversalKO{position:fixed;inset:0;z-index:99999;pointer-events:none;display:none;overflow:hidden}
+#gdaUniversalKO.play{display:block}
+#gdaUniversalKO .gda-ko-flash{position:absolute;inset:0;background:radial-gradient(circle,rgba(255,255,255,.96),rgba(255,255,255,0) 62%);opacity:0}
+#gdaUniversalKO .gda-ko-burst{position:absolute;left:50%;top:48%;width:18vmax;height:18vmax;transform:translate(-50%,-50%) scale(.1);border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.98) 0deg 3deg,transparent 3deg 12deg);filter:drop-shadow(0 0 18px #fff)}
+#gdaUniversalKO .gda-ko-streaks{position:absolute;inset:-40%;background:repeating-conic-gradient(from 4deg at 50% 48%,transparent 0deg 7deg,rgba(255,255,255,.9) 7.3deg 8deg,transparent 8.4deg 15deg);opacity:0}
+#gdaUniversalKO .gda-ko-silhouette{position:absolute;left:50%;top:48%;font:900 clamp(90px,20vw,260px)/1 Arial,sans-serif;color:#111;text-shadow:0 0 4px #fff,0 0 24px #fff;transform:translate(-50%,-50%) rotate(-12deg) scale(.3);opacity:0}
+#gdaUniversalKO .gda-ko-label{position:absolute;left:50%;top:14%;transform:translate(-50%,-20px) scale(.7);font:900 clamp(24px,6vw,72px)/1 Orbitron,Arial,sans-serif;letter-spacing:.08em;color:#fff;text-shadow:0 4px 0 #241044,0 0 22px #fff;opacity:0;white-space:nowrap}
+#gdaUniversalKO.stock-loss .gda-ko-flash{animation:gdaKoFlash .62s ease-out}
+#gdaUniversalKO.stock-loss .gda-ko-burst{animation:gdaKoBurst .62s ease-out}
+#gdaUniversalKO.stock-loss .gda-ko-label{animation:gdaKoLabel .62s ease-out}
+#gdaUniversalKO.last-life .gda-ko-flash{animation:gdaKoFlash .95s ease-out}
+#gdaUniversalKO.last-life .gda-ko-burst{animation:gdaKoBurst .95s ease-out}
+#gdaUniversalKO.last-life .gda-ko-streaks{animation:gdaKoStreaks .95s ease-out}
+#gdaUniversalKO.last-life .gda-ko-silhouette{animation:gdaKoLaunch .95s cubic-bezier(.12,.72,.18,1) both}
+#gdaUniversalKO.last-life .gda-ko-label{animation:gdaKoLabel .95s ease-out}
+@keyframes gdaKoFlash{0%{opacity:1}100%{opacity:0}}
+@keyframes gdaKoBurst{0%{transform:translate(-50%,-50%) scale(.1) rotate(0);opacity:1}100%{transform:translate(-50%,-50%) scale(8) rotate(40deg);opacity:0}}
+@keyframes gdaKoStreaks{0%{opacity:0;transform:scale(.25) rotate(0)}20%{opacity:1}100%{opacity:0;transform:scale(1.25) rotate(18deg)}}
+@keyframes gdaKoLaunch{0%{opacity:0;transform:translate(-50%,-35%) rotate(-12deg) scale(.3)}18%{opacity:1}100%{opacity:0;transform:translate(95vw,-110vh) rotate(35deg) scale(.75)}}
+@keyframes gdaKoLabel{0%{opacity:0;transform:translate(-50%,-20px) scale(.7)}18%{opacity:1;transform:translate(-50%,0) scale(1.12)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,10px) scale(.95)}}
+@media(prefers-reduced-motion:reduce){#gdaUniversalKO *{animation-duration:.18s!important}}
+</style>
 </head>
 <body>
 <div id="geBootLoader" role="status" aria-live="polite" aria-label="Cargando Goji Empires">
@@ -2933,8 +2957,17 @@ function act(f,o,dt){const a=f.act,S=G.sm;a.t+=dt;
     G.scene.add(m);S.pr.push({x:mx,y:my,vx:f.face*s.sp*.55,vy:u*(s.spread||0)*14,life:s.life||2,r,dmg:s.dmg*.2,from:f,m})}}
   if(a.t>=.6)f.act=null;
  }else{if(a.t>=.2&&!a.fx){a.fx=1;f.shield=3;f.boost=3;if(s.rollGuard){f.guardUntil=S.t+3;toastCombat("\u00a1CAPARAZ\u00d3N DEFENSIVO! RODADA ESPINOSA POTENCIADA","#d8d0b0")}}if(a.t>=.4)f.act=null}}
-function ko(f){const S=G.sm;f.stocks--;f.dead=1.4;f.act=null;f.beam=null;S.shake=8;
- if(S.mode===6&&f.waveEnemy&&f.stocks<=0){f.waveDead=true;f.dead=999;f.mesh.visible=false;f.sh.visible=false;S.waveEnemiesRemaining=Math.max(0,(S.waveEnemiesRemaining||1)-1);toastCombat(`¡ENEMIGO DERROTADO! QUEDAN ${S.waveEnemiesRemaining}`,'#ffd24a');if(S.waveEnemiesRemaining===0){if(!["tower","hardcore","raid","survival"].includes(window.__gdaOnlineMode))waveWins=waveTarget-1;finish(0)}return;}
+function gdaPlayUniversalKO(f,lastLife){
+ const id="gdaUniversalKO";let el=document.getElementById(id);
+ if(!el){el=document.createElement("div");el.id=id;el.setAttribute("aria-hidden","true");el.innerHTML='<div class="gda-ko-flash"></div><div class="gda-ko-burst"></div><div class="gda-ko-streaks"></div><div class="gda-ko-silhouette">◆</div><div class="gda-ko-label"></div>';document.body.appendChild(el);}
+ el.className=lastLife?"last-life":"stock-loss";const label=el.querySelector(".gda-ko-label");if(label)label.textContent=lastLife?"¡KO!":"¡VIDA PERDIDA!";
+ el.classList.remove("play");void el.offsetWidth;el.classList.add("play");
+ const colors=[0xff3df0,0x39dfff,0xffdf45,0x8cff52],count=lastLife?8:4;
+ for(let q=0;q<count;q++)G.sm.rings.push({x:f.x,y:f.y+f.h*.5,R:24+q*15,t:0,c:colors[q%4]});
+ G.sm.shake=lastLife?16:10;
+}
+function ko(f){const S=G.sm;f.stocks--;const lastLife=f.stocks<=0;gdaPlayUniversalKO(f,lastLife);f.dead=1.4;f.act=null;f.beam=null;S.shake=8;
+ if(S.mode===6&&f.waveEnemy&&f.stocks<=0){f.waveDead=true;f.dead=999;f.mesh.visible=false;f.sh.visible=false;S.waveEnemiesRemaining=Math.max(0,(S.waveEnemiesRemaining||1)-1);toastCombat("¡ENEMIGO DERROTADO! QUEDAN "+S.waveEnemiesRemaining,"#ffd24a");if(S.waveEnemiesRemaining===0){if(!["tower","hardcore","raid","survival"].includes(window.__gdaOnlineMode))waveWins=waveTarget-1;finish(0)}return;}
  if(f.stocks<=0)finish(S.mode===6?(f.wavePlayer?1:0):(f===S.F[0]?1:0))}
 function finish(w){const S=G.sm;if(S.state==="over")return;S.state="over";S.win=w;const pumpkinHud=document.getElementById("gdaPumpkinBossHud");if(pumpkinHud)pumpkinHud.style.display="none";
  let earned=w<0?15:(w===0?25:10),waveCompleted=false;
