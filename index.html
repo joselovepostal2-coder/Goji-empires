@@ -374,6 +374,12 @@ html,body{min-width:0;width:100%;max-width:100%;overscroll-behavior:none}
   <select id="mapFilter" aria-label="Filtrar mapas" style="background:#101a3a;color:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit"><option value="all">TODOS LOS MAPAS</option><option value="halloween">🎃 HALLOWEEN</option><option value="normal">MAPAS NORMALES</option></select>
   <span id="mapCount" style="color:var(--cy);font-size:12px;white-space:nowrap"></span>
  </div>
+ <div id="gdaNormalRules" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:0 0 12px;padding:12px 14px;border:1px solid #5b86a8;border-radius:12px;background:linear-gradient(110deg,#101c36,#142b39);color:#fff">
+  <strong style="font:900 12px Orbitron,sans-serif;color:#8eeeff">⚔ REGLAS DEL COMBATE</strong>
+  <label for="gdaNormalLives" style="font:700 12px Arial,sans-serif">VIDAS POR JUGADOR</label>
+  <select id="gdaNormalLives" style="background:#091329;color:#fff;border:1px solid #54e8ff;border-radius:8px;padding:9px 12px;font-weight:800"><option value="1">1 vida · KO rápido</option><option value="2">2 vidas</option><option value="3" selected>3 vidas · clásico</option><option value="4">4 vidas</option><option value="5">5 vidas</option><option value="6">6 vidas</option><option value="7">7 vidas</option><option value="8">8 vidas</option><option value="9">9 vidas</option></select>
+  <span style="font:11px Arial,sans-serif;color:#b9c6e7">Elige las vidas antes de seleccionar el escenario.</span>
+ </div>
  <div id="sgrid"></div>
 </div>
 
@@ -1808,6 +1814,29 @@ function buildStage(sc,S,M){
   const crown=new THREE.Mesh(new THREE.BoxGeometry(164,7,13),MT(0x213b4d));
   crown.position.set(0,308,-12);sc.add(crown);
  }
+ // Monumentos del Mundo de los Kaijus: estatuas de Godzilla y King Ghidorah.
+ if(M.kaijuMonuments){
+  const stone=c=>new THREE.MeshLambertMaterial({color:c,flatShading:true});
+  const dark=stone(0x263b50),gold=stone(0xb49a62),blue=stone(0x527d91),wing=stone(0x53647a);
+  const godzilla=new THREE.Group(),torso=new THREE.Mesh(new THREE.CylinderGeometry(7,10,25,8),dark);torso.position.y=22;godzilla.add(torso);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(7,8,6),dark);head.position.set(0,39,0);godzilla.add(head);
+  const jaw=new THREE.Mesh(new THREE.BoxGeometry(8,3,8),gold);jaw.position.set(0,34,1);godzilla.add(jaw);
+  for(const side of [-1,1]){
+   const arm=new THREE.Mesh(new THREE.CylinderGeometry(2.2,3,13,6),dark);arm.position.set(side*9,25,1);arm.rotation.z=side*.45;godzilla.add(arm);
+   const leg=new THREE.Mesh(new THREE.CylinderGeometry(4,4.8,13,7),dark);leg.position.set(side*4,7,0);godzilla.add(leg);
+   for(let p=0;p<4;p++){const plate=new THREE.Mesh(new THREE.ConeGeometry(4-p*.35,9-p*.5,5),blue);plate.position.set(side*(3.5+p*1.2),29-p*5,5);plate.rotation.z=side*.25;godzilla.add(plate)}
+  }
+  godzilla.position.set(-76,-4,-28);godzilla.scale.setScalar(1.45);sc.add(godzilla);
+  const ghidorah=new THREE.Group(),core=new THREE.Mesh(new THREE.SphereGeometry(9,9,7),gold);core.position.y=20;ghidorah.add(core);
+  for(const side of [-1,0,1]){
+   const x=side*8,neck=new THREE.Mesh(new THREE.CylinderGeometry(2.1,3.2,24,7),gold);neck.position.set(x,35,0);neck.rotation.z=-side*.32;ghidorah.add(neck);
+   const h=new THREE.Mesh(new THREE.ConeGeometry(4.2,8,6),gold);h.position.set(x*1.45,49-Math.abs(side)*2,0);h.rotation.x=Math.PI;ghidorah.add(h);
+   const horn=new THREE.Mesh(new THREE.ConeGeometry(1.2,6,5),gold);horn.position.set(x*1.45+side*2,53,0);ghidorah.add(horn);
+  }
+  for(const side of [-1,1]){const w=new THREE.Mesh(new THREE.ConeGeometry(15,26,4),wing);w.position.set(side*18,28,-1);w.rotation.z=side*.72;ghidorah.add(w);const leg=new THREE.Mesh(new THREE.CylinderGeometry(2,3,11,6),gold);leg.position.set(side*5,8,1);ghidorah.add(leg)}
+  ghidorah.position.set(76,-5,-30);ghidorah.scale.setScalar(1.25);sc.add(ghidorah);
+  for(const x of [-76,76]){const base=new THREE.Mesh(new THREE.BoxGeometry(42,8,12),stone(0x172b3b));base.position.set(x,-8,-27);sc.add(base);const rim=new THREE.Mesh(new THREE.BoxGeometry(46,1.4,13),gold);rim.position.set(x,-3.5,-26);sc.add(rim)}
+ }
  // Tren gigante del escenario especial: locomotora y vagones geométricos.
  if(M.train){
   S.train={x:-92,y:5,vx:13,thrown:false,mesh:new THREE.Group()};
@@ -2096,6 +2125,9 @@ for(let i=13;i<=STORY_CHAPTERS.length;i++){
  }
 }
 
+// Mundo de los Kaijus: arena ceremonial con monumentos gigantes.
+LAY.KJ=[[-76,0,152,9,1],[-57,24,25,3,0],[-12,37,24,3,0],[34,24,25,3,0]];
+MAPS.push(mp("MUNDO DE LOS KAIJUS","KJ",["#101b3a","#286b78","#f4b86c"],"#31515c",["#c8f5ff","#10182c"],"#ffe0a0",["#45566b","#718b8e"],"spires","#193c4b",{stars:1,fx:["mote"],c2:"#75d8cb",disc:["#ffe0a0",44,72,19],kaijuMonuments:1}));
 const STORY_MAPS=STORY_CHAPTERS.map((c,i)=>{const keys=Object.keys(STORY_LAYOUTS),key=c.layout;LAY[key]=STORY_LAYOUTS[key];const palettes=[
  ["#141b32","#72546b","#ffb58a"],["#1b2b42","#637d89","#f5c08a"],["#251c3b","#a56b54","#ffd77a"],["#240e18","#a43d2b","#ff9b4d"],["#101d2d","#526f88","#f2d18d"],["#14251e","#497d4e","#d8e99a"],["#110d2d","#493b86","#d8b6ff"],["#260909","#9e2b32","#ff5a45"],["#0b1e2c","#3c7182","#b9eaff"],["#150b2b","#5c3186","#ff7dc8"],["#071d20","#2d675c","#a9ffcf"],["#130e2b","#583c83","#ffe19a"]][i%12];
  const m=mp(c.map, key,palettes,"#26364b",["#dce8ff","#101628"],palettes[2],["#4b5361","#75808b"],i===3||i===7?"peaks":i===10?"forest":i===6||i===9||i===11?"spires":"city",palettes[1],{stars:i===6||i===9||i===11?1:0,fx:i===3||i===7?["ember"]:i===10?["mote"]:[],flash:i===7?.012:0});if(c.autoKaijuArchive)m.custom=true;MAPS.push(m);return MAPS.length-1;});
@@ -2195,6 +2227,11 @@ function startSmash(idx,p2,round,sti){
   }
   S.waveEnemiesTotal=picks.length;S.waveEnemiesRemaining=picks.length;
  }else S.F=[mkF(idx,1,-22,0),mkF(ri,2,22,mode!==2)];
+ // Vidas personalizables estilo Smash para combates normales locales.
+ if(!window.__gdaOnlineActive&&mode!==0&&mode!==5&&mode!==6){
+  const chosen=Math.max(1,Math.min(9,Number(document.getElementById("gdaNormalLives")?.value||3)));
+  S.F.forEach(f=>{f.stocks=chosen;});
+ }
  S.F.forEach(f=>{f.spawnX=f.x;f.spawnY=f.y;sc.add(f.mesh,f.sh)});
  let pumpkinHud=document.getElementById("gdaPumpkinBossHud");
  if(!pumpkinHud){pumpkinHud=document.createElement("div");pumpkinHud.id="gdaPumpkinBossHud";pumpkinHud.style.cssText="position:fixed;top:72px;left:50%;transform:translateX(-50%);z-index:10020;max-width:92vw;padding:9px 16px;border:1px solid #ff9b35;border-radius:12px;background:linear-gradient(135deg,#241020ee,#35140eee);color:#ffe28a;font:900 clamp(11px,1.7vw,17px) Orbitron,system-ui,sans-serif;text-align:center;letter-spacing:.07em;box-shadow:0 0 20px #ff612b66;pointer-events:none";document.body.appendChild(pumpkinHud)}
