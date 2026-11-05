@@ -4246,7 +4246,7 @@ $('gnetSend').onclick=()=>{const ev=$('gnetEv').value.trim();if(!sock||!ev)retur
 for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e.stopPropagation();if(t==='keydown'&&e.key==='Escape')close()});
 })();
 </script>
-<script src="/socket.io/socket.io.js"></script>
+<!-- Socket.IO eliminado: GDA funciona en modo offline. -->
 <script>
   // GAS/compatibilidad: en alojamientos estáticos puede no existir Socket.IO.
   // Mantener el juego y los menús funcionando aunque el servicio online no esté disponible.
@@ -4681,7 +4681,7 @@ for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e
 
 <style id="gda-offline-only">
 /* GDA OFFLINE: ocultar por completo las interfaces de red/multijugador. */
-#g68-online-overlay,#g68-online-launch,#gnet,#gnet-launch,[data-mode="online"],[data-online] {display:none!important}
+#g68-online-overlay,#g68-online-launch,#gnet,#gnet-launch,#gnetBtn,[data-mode="online"],[data-online] {display:none!important}
 </style>
 <script id="gda-offline-only-guard">
 (function(){
