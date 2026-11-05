@@ -2579,7 +2579,7 @@ function ai(f,o){const dx=o.x-f.x,ad=Math.abs(dx),i={dir:0},skill=cpuLevel/5;f.a
  if(f.ground&&o.y>f.y+10&&Math.random()<(.01+cpuLevel*.009))i.jump=1;
  if(f.meter>=200&&ad<50&&Math.abs(o.y-f.y)<12&&Math.random()<(.25+cpuLevel*.075))i.u=1;
  return i}
-function startAct(f,a){f.act=Object.assign({t:0,hit:0,tick:0,fx:0},a);if(a.m===MV.heavy)unlockAchievement(2);if(a.u){if(isLocalAchievementFighter(f)){achTrack.ultimates++;saveAchievementTrack();if(achTrack.ultimates>=100)unlockAchievement(30)}if(G&&G.sm)G.sm.__gdaUltimateUsed=true;}}
+function startAct(f,a){f.act=Object.assign({t:0,hit:0,tick:0,fx:0},a);if(a.m===MV.heavy)unlockAchievement(2);if(a.u&&!a.nonUltimate){if(isLocalAchievementFighter(f)){achTrack.ultimates++;saveAchievementTrack();if(achTrack.ultimates>=100)unlockAchievement(30)}if(G&&G.sm)G.sm.__gdaUltimateUsed=true;}}
 function act(f,o,dt){const a=f.act,S=G.sm;a.t+=dt;
  // Combo especial de Mechagodzilla: agarre -> misiles -> impacto contra el suelo -> puñetazo cargado (100).
  if(a.mechaCombo){const target=a.target||o;f.vx*=Math.max(0,1-8*dt);
@@ -3101,8 +3101,8 @@ function fighter(f,o,dt){const st=f.st,S=G.sm;
   const isPhoenix=fighterName.includes('FÉNIX')||fighterName.includes('FENIX');
   const isQilin=fighterName.includes('QILIN');const isGoro=fighterName==='GOROSAURUS';const isPumpkinArachnid=fighterName===GDA_PUMPKIN_BOSS_NAME;
   // Habilidades personalizadas de King Ghidorah y Mechagodzilla tienen prioridad sobre ataques normales.
-  if(isPumpkinArachnid&&i.a){startAct(f,{u:{n:"RAYO LÁSER BUCAL",t:"beam",c:0xff9b24,r:4.2,dmg:92,k:165,kb:22,dur:1.05}});toastCombat("¡LÁSER DE CALABAZA DESDE LA BOCA!","#ffb52e");}
-  else if(isPumpkinArachnid&&i.h){startAct(f,{u:{n:"DOBLE LÁSER OCULAR",t:"beam",c:0x9cff35,r:4.6,dmg:112,k:185,kb:25,dur:1.1,eyeBeam:1}});toastCombat("¡DOBLE LÁSER DESDE LOS OJOS!","#9cff35");}
+  if(isPumpkinArachnid&&i.a){startAct(f,{nonUltimate:true,u:{n:"RAYO LÁSER BUCAL",t:"beam",c:0xff9b24,r:4.2,dmg:92,k:165,kb:22,dur:1.05}});toastCombat("¡LÁSER DE CALABAZA DESDE LA BOCA!","#ffb52e");}
+  else if(isPumpkinArachnid&&i.h){startAct(f,{nonUltimate:true,u:{n:"DOBLE LÁSER OCULAR",t:"beam",c:0x9cff35,r:4.6,dmg:112,k:185,kb:25,dur:1.1,eyeBeam:1}});toastCombat("¡DOBLE LÁSER DESDE LOS OJOS!","#9cff35");}
   else if(isGhidorah&&i.h){if(f.ghidorahFlying){startAct(f,{ghidorahKick:true,target:o});toastCombat('¡PATADA AÉREA DE KING GHIDORAH!','#ffe66d');}else{f.ghidorahFlying=true;f.vy=Math.max(f.vy,34);f.ground=0;startAct(f,{ghidorahFlight:true});toastCombat('¡GHIDORAH VUELA 8 S! A/D MOVER · W/ESPACIO SUBIR · S BAJAR · CLIC DERECHO: PATADA','#ffe66d');}}
   else if(isGhidorah&&i.a){startAct(f,{ghidorahTail:true,target:o});}
   else if(isMecha&&i.a){startAct(f,{mechaMissiles:true});toastCombat('¡MECHAGODZILLA: SALVA DE 5 MISILES!','#ffb347');}
