@@ -2023,81 +2023,46 @@ function gdaFormatTime(ms){
 }
 // ---------- Campaña cronológica: capítulos con escenarios exclusivos ----------
 const STORY_CHAPTERS=[
- {title:"01 · EL DESPERTAR",era:"1954 · ORIGEN",hero:"GODZILLA",enemy:"ANGUIRUS",map:"TOKYO 1954: ZONA DE EVACUACIÓN",layout:"STORY1",desc:"El monstruo emerge del océano y llega a una ciudad que aún no comprende la amenaza."},
- {title:"02 · EL RIVAL DE LA ISLA",era:"1955 · PRIMER RIVAL",hero:"GODZILLA",enemy:"ANGUIRUS",map:"ISLA ROGUE: CRÁTER DE COMBATE",layout:"STORY2",desc:"Un duelo entre titanes sacude una isla rocosa y sus acantilados."},
- {title:"03 · INVASIÓN DESDE EL ESPACIO",era:"1964 · GHIDORAH",hero:"GODZILLA",enemy:"KING GHIDORAH",map:"MONTE FUJI: TORMENTA DORADA",layout:"STORY3",desc:"Los defensores de la Tierra se enfrentan al dragón de tres cabezas."},
- {title:"04 · EL GUARDIÁN ALADO",era:"1964 · MOTHRA",hero:"GODZILLA",enemy:"MOTHRA",map:"INFIERNO VOLCÁNICO: NIDO DE LARVAS",layout:"STORY4",desc:"La batalla se desarrolla entre ruinas, ceniza y un nido sagrado."},
- {title:"05 · GUERRA DE MÁQUINAS",era:"1974 · MECHAGODZILLA",hero:"GODZILLA",enemy:"MECHAGODZILLA MK-1",map:"OKINAWA: FORTALEZA MECÁNICA",layout:"STORY5",desc:"Una máquina de combate revela su verdadero poder en una fortaleza costera."},
- {title:"06 · EL DEVORADOR DE CIUDADES",era:"1989 · BIOLLANTE",hero:"GODZILLA",enemy:"BIOLLANTE",map:"LABORATORIO BIOARMA: INVERNADERO",layout:"STORY6",desc:"La ciencia y la naturaleza colisionan en un complejo experimental."},
- {title:"07 · CRISTALES CÓSMICOS",era:"1994 · SPACEGODZILLA",hero:"GODZILLA",enemy:"SPACEGODZILLA",map:"FUKUOKA: TORRES DE CRISTAL",layout:"STORY7",desc:"Cristales alienígenas transforman el paisaje urbano en una trampa."},
- {title:"08 · EL JUICIO FINAL",era:"1995 · DESTOROYAH",hero:"GODZILLA",enemy:"DESTOROYAH",map:"TOKYO: ZONA DE ENERGÍA ROJA",layout:"STORY8",desc:"Una amenaza nacida de la destrucción pone a prueba al rey de los monstruos."},
- {title:"09 · EL ÚLTIMO REACTOR",era:"2002 · KIRYU",hero:"GODZILLA",enemy:"KIRYU",map:"TOKYO BAY: MUELLE DE KIRYU",layout:"STORY9",desc:"El pasado vuelve en forma de una máquina construida para detener a Godzilla."},
- {title:"10 · GUERRA MONSTRUOSA",era:"2004 · MONSTER X",hero:"GODZILLA",enemy:"MONSTER X",map:"XILIEN: PLATAFORMA DE INVASIÓN",layout:"STORY10",desc:"Una invasión global culmina en una arena alienígena."},
- {title:"11 · TIERRA HUECA",era:"NUEVA ERA · TITANES",hero:"GODZILLA",enemy:"SKULLCRAWLER",map:"TIERRA HUECA: PUENTE DE BASALTO",layout:"STORY11",desc:"Bajo la superficie, una criatura embosca en un puente entre abismos."},
- {title:"12 · REY DE LOS TITANES",era:"FINAL · CONVERGENCIA",hero:"GODZILLA",enemy:"KAISER GHIDORAH",map:"NEXO TITÁNICO: ARENA DIMENSIONAL",layout:"STORY12",desc:"Los titanes de distintas eras convergen para el combate definitivo."}
-
- ,{title:"13 · GODZILLA RAIDS AGAIN",era:"1955 · SHOWA",hero:"GODZILLA",enemy:"ANGUIRUS",map:"OSAKA: DISTRITO INDUSTRIAL",layout:"STORY13",desc:"Godzilla y Anguirus convierten Osaka en un campo de batalla."}
- ,{title:"14 · KING KONG CONTRA GODZILLA",era:"1962 · SHOWA",hero:"GODZILLA",enemy:"KONG",map:"MONTE FUJI: VALLE DE LA TORMENTA",layout:"STORY14",desc:"Dos titanes legendarios se enfrentan entre montañas y tormentas."}
- ,{title:"15 · MOTHRA CONTRA GODZILLA",era:"1964 · SHOWA",hero:"GODZILLA",enemy:"MOTHRA",map:"SHIZUOKA: COSTA DE LOS HUEVOS",layout:"STORY15",desc:"La guardiana alada defiende su territorio de la amenaza gigante."}
- ,{title:"16 · INVASIÓN DE ASTRO-MONSTER",era:"1965 · SHOWA",hero:"GODZILLA",enemy:"KING GHIDORAH",map:"PLANETA X: PLATAFORMA ALIENÍGENA",layout:"STORY16",desc:"Una alianza sospechosa conduce a un combate fuera de la Tierra."}
- ,{title:"17 · EBIRAH: HORROR EN EL MAR",era:"1966 · SHOWA",hero:"GODZILLA",enemy:"EBIRAH",map:"ISLA LETRA: BASE COSTERA",layout:"STORY17",desc:"Una criatura marina ataca cerca de una isla dominada por una base secreta."}
- ,{title:"18 · HIJOS DE GODZILLA",era:"1967 · SHOWA",hero:"GODZILLA",enemy:"KAMACURAS",map:"ISLA SOLGELL: SELVA TROPICAL",layout:"STORY18",desc:"En una isla remota, Godzilla protege a la nueva generación."}
- ,{title:"19 · DESTROY ALL MONSTERS",era:"1968 · SHOWA",hero:"GODZILLA",enemy:"KING GHIDORAH",map:"LUNA DE MONSTRUOS: BATALLA FINAL",layout:"STORY19",desc:"Los monstruos de la Tierra se reúnen para detener una invasión."}
- ,{title:"20 · ALL MONSTERS ATTACK",era:"1969 · SHOWA",hero:"GODZILLA",enemy:"MEGALON",map:"ISLA DE LOS SUEÑOS",layout:"STORY20",desc:"Un capítulo especial inspirado en los sueños y leyendas de los kaiju."}
- ,{title:"21 · GODZILLA VS. HEDORAH",era:"1971 · SHOWA",hero:"GODZILLA",enemy:"HEDORAH",map:"TOKYO: ZONA DE CONTAMINACIÓN",layout:"STORY21",desc:"El rey de los monstruos combate una amenaza nacida de la contaminación."}
- ,{title:"22 · GODZILLA VS. GIGAN",era:"1972 · SHOWA",hero:"GODZILLA",enemy:"GIGAN",map:"PARQUE MONSTRUOSO: TRAMPA ALIENÍGENA",layout:"STORY22",desc:"Una trampa extraterrestre se convierte en una batalla de supervivencia."}
- ,{title:"23 · GODZILLA VS. MEGALON",era:"1973 · SHOWA",hero:"GODZILLA",enemy:"MEGALON",map:"SEATOPIA: CIUDAD SUBTERRÁNEA",layout:"STORY23",desc:"Megalon emerge desde el reino subterráneo para desafiar a Godzilla."}
- ,{title:"24 · TERROR DE MECHAGODZILLA",era:"1975 · SHOWA",hero:"GODZILLA",enemy:"MECHAGODZILLA MK-1",map:"OKINAWA: COSTA DEL DRAGÓN",layout:"STORY24",desc:"Una última amenaza mecánica pone a prueba al guardián de la Tierra."}
- ,{title:"25 · EL REGRESO DE GODZILLA",era:"1984 · HEISEI",hero:"GODZILLA",enemy:"GODZILLA 1954",map:"TOKYO: CENTRAL ELÉCTRICA",layout:"STORY25",desc:"El monstruo regresa a una ciudad moderna y provoca una crisis energética."}
- ,{title:"26 · GODZILLA VS. KING GHIDORAH",era:"1991 · HEISEI",hero:"GODZILLA",enemy:"KING GHIDORAH",map:"TOKYO: RUINAS TEMPORALES",layout:"STORY26",desc:"Una amenaza llegada del tiempo altera el destino de Japón."}
- ,{title:"27 · GODZILLA VS. MOTHRA",era:"1992 · HEISEI",hero:"GODZILLA",enemy:"MOTHRA",map:"YOKOHAMA: SANTUARIO ANTIGUO",layout:"STORY27",desc:"Godzilla se cruza con Mothra y una fuerza vinculada a una civilización perdida."}
- ,{title:"28 · GODZILLA VS. MECHAGODZILLA II",era:"1993 · HEISEI",hero:"GODZILLA",enemy:"MECHAGODZILLA MK-1",map:"KYOTO: HANGAR ANTIMONSTRUOS",layout:"STORY28",desc:"La humanidad despliega una nueva máquina de combate contra Godzilla."}
- ,{title:"29 · GODZILLA VS. SPACEGODZILLA",era:"1994 · HEISEI",hero:"GODZILLA",enemy:"SPACEGODZILLA",map:"FUKUOKA: FORTALEZA CRISTALINA",layout:"STORY29",desc:"Un doble cósmico usa cristales y energía para dominar el campo de batalla."}
- ,{title:"30 · GODZILLA 2000",era:"1999 · MILLENNIUM",hero:"GODZILLA",enemy:"ORGA",map:"NEMURO: CRÁTER DEL METEORITO",layout:"STORY30",desc:"Un objeto caído del espacio revela una criatura capaz de adaptarse."}
- ,{title:"31 · GODZILLA VS. MEGAGUIRUS",era:"2000 · MILLENNIUM",hero:"GODZILLA",enemy:"MEGAGUIRUS",map:"TOKYO: EXPERIMENTO DIMENSIONAL",layout:"STORY31",desc:"Un experimento energético abre el camino a una amenaza insectoide."}
- ,{title:"32 · GODZILLA, MOTHRA Y KING GHIDORAH",era:"2001 · MILLENNIUM",hero:"GODZILLA",enemy:"KING GHIDORAH",map:"TOKYO: SANTUARIO DE LOS GUARDIANES",layout:"STORY32",desc:"Los guardianes ancestrales se alzan frente al destructor de ciudades."}
- ,{title:"33 · GODZILLA: TOKYO S.O.S.",era:"2003 · MILLENNIUM",hero:"GODZILLA",enemy:"KIRYU",map:"TOKYO BAY: DEFENSA COSTERA",layout:"STORY33",desc:"Kiryu vuelve al combate mientras el destino de la ciudad pende de un hilo."}
- ,{title:"34 · GODZILLA: FINAL WARS",era:"2004 · MILLENNIUM",hero:"GODZILLA",enemy:"MONSTER X",map:"ANTÁRTIDA: BASE XILIEN",layout:"STORY34",desc:"Una ofensiva mundial culmina en el enfrentamiento contra el invasor definitivo."}
- ,{title:"35 · SHIN GODZILLA",era:"2016 · REIWA",hero:"GODZILLA",enemy:"GODZILLA ULTIMA",map:"TOKYO: CORREDOR DE EVACUACIÓN",layout:"STORY35",desc:"Una amenaza desconocida avanza por la ciudad mientras se organiza la evacuación."}
- ,{title:"36 · GODZILLA MINUS ONE",era:"1945–1947 · REIWA",hero:"GODZILLA",enemy:"GODZILLA 1954",map:"GINZA: CIUDAD EN RECONSTRUCCIÓN",layout:"STORY36",desc:"En un Japón devastado por la guerra, la población afronta una nueva pesadilla."}
- ,{title:"37 · GODZILLA: PLANET OF THE MONSTERS",era:"ANIME · PLANETA",hero:"GODZILLA EARTH",enemy:"GODZILLA EARTH",map:"TIERRA FUTURA: RUINAS VEGETALES",layout:"STORY37",desc:"La humanidad regresa a una Tierra transformada por el titán dominante."}
- ,{title:"38 · CITY ON THE EDGE OF BATTLE",era:"ANIME · MECHAGODZILLA CITY",hero:"GODZILLA EARTH",enemy:"MECHAGODZILLA CITY",map:"MECHAGODZILLA CITY: NÚCLEO",layout:"STORY38",desc:"Una ciudad mecánica ofrece una última oportunidad para desafiar a Godzilla."}
- ,{title:"39 · THE PLANET EATER",era:"ANIME · GHIDORAH",hero:"GODZILLA EARTH",enemy:"KEIZER GHIDORAH",map:"ÓRBITA TERRESTRE: PORTAL DORADO",layout:"STORY39",desc:"Una entidad cósmica amenaza con consumir el planeta."}
- ,{title:"40 · GODZILLA (2014)",era:"MONSTERVERSE · 2014",hero:"GODZILLA",enemy:"RODAN",map:"SAN FRANCISCO: DISTRITO EN RUINAS",layout:"STORY40",desc:"Godzilla aparece mientras dos criaturas parásitas ponen en peligro a la humanidad."}
- ,{title:"41 · KING OF THE MONSTERS",era:"MONSTERVERSE · 2019",hero:"GODZILLA",enemy:"KING GHIDORAH",map:"BOSTON: TORMENTA TITÁNICA",layout:"STORY41",desc:"Godzilla lucha por recuperar su lugar entre los titanes despertados."}
- ,{title:"42 · GODZILLA VS. KONG",era:"MONSTERVERSE · 2021",hero:"GODZILLA",enemy:"KONG",map:"HONG KONG: RASCACIELOS NEÓN",layout:"STORY42",desc:"Dos titanes chocan en una ciudad iluminada y llena de obstáculos."}
- ,{title:"43 · GODZILLA X KONG: THE NEW EMPIRE",era:"MONSTERVERSE · 2024",hero:"GODZILLA",enemy:"SKAR KING",map:"TIERRA HUECA: TRONO ESCARLATA",layout:"STORY43",desc:"Godzilla y Kong se enfrentan a una amenaza que emerge desde la Tierra Hueca."}
- ,{title:"44 · GODZILLA: SINGULAR POINT",era:"ANIME · SINGULAR POINT",hero:"GODZILLA ULTIMA",enemy:"KING GHIDORAH",map:"TOKYO: ZONA DEL POLVO ROJO",layout:"STORY44",desc:"Una anomalía altera la realidad y trae una amenaza imposible de medir."}
- ,{title:"45 · BATALLA DE TODAS LAS ERAS",era:"CAPÍTULO ESPECIAL · MULTIVERSO",hero:"GODZILLA",enemy:"DESTOROYAH",map:"NEXO DE ERAS: ARENA IMPERIAL",layout:"STORY45",desc:"Un combate final reúne homenajes a las distintas etapas cinematográficas."}
- ,{title:"46 · ALAS DE ECLIPSE",era:"KAIJU UNIVERSE · ECLIPSIS",hero:"GODZILLA",enemy:"MOTHMAN ECLIPSIS",map:"TOKYO: ZONA DEL POLVO ROJO",layout:"STORY44",desc:"Una criatura alada de ojos rojos aparece durante un eclipse y acecha a Godzilla desde el cielo."}
- ,{title:"47 · HUESOS DEL REY",era:"CAPÍTULO ESPECIAL · ESQUELETO",hero:"BURNING GODZILLA",enemy:"GODZILLA ESQUELETO",map:"NEXO DE ERAS: ARENA IMPERIAL",layout:"STORY45",desc:"Tras el colapso nuclear, un esqueleto colosal se levanta para un último duelo."}
- ,{title:"48 · EL VUELO DE LOS DORATS",era:"CAPÍTULOS ESPECIALES · SHOWA",hero:"GODZILLA",enemy:"DORATS",map:"ISLA DE DORATS: VUELO DE LOS DORATS",layout:"STORY48",desc:"Tres pequeñas criaturas aladas anuncian una nueva amenaza en una isla remota."}
- ,{title:"49 · EL MISTERIO DE GABARA",era:"CAPÍTULOS ESPECIALES · SHOWA",hero:"GODZILLA",enemy:"GABARA",map:"ISLA DE LOS MONSTRUOS: PANTANO DE GABARA",layout:"STORY49",desc:"Una tormenta eléctrica cubre el pantano mientras una criatura misteriosa desafía a Godzilla."}
- ,{title:"50 · EL ABISMO DE GEZORA",era:"CAPÍTULOS ESPECIALES · SHOWA",hero:"GODZILLA",enemy:"GEZORA",map:"FOSA OCEÁNICA: RUINAS DE GEZORA",layout:"STORY50",desc:"En unas ruinas sumergidas, Godzilla se enfrenta a un monstruo de las profundidades."}
- ,{title:"51 · PINZAS DE GANIMES",era:"CAPÍTULOS ESPECIALES · SHOWA",hero:"GODZILLA",enemy:"GANIMES",map:"COSTA DE CRUSTÁCEOS: ARENA DE GANIMES",layout:"STORY51",desc:"Una costa rocosa se convierte en escenario de un choque contra un kaiju acorazado."}
- ,{title:"52 · CAZADOR DE LA TIERRA HUECA",era:"CAPÍTULOS ESPECIALES · MONSTERVERSE",hero:"GODZILLA",enemy:"SKULLCRAWLER",map:"TIERRA HUECA: CAVERNA SKULLCRAWLER",layout:"STORY52",desc:"Un depredador de la Tierra Hueca acecha entre cavernas y plataformas naturales."},
- ,{title:"53 · LA CALABAZA DE OCHO PATAS",era:"EVENTO HALLOWEEN · JEFE FINAL",hero:"GODZILLA",enemy:"CALABAZA GIGANTE ARÁCNIDA",map:"CIUDAD CALABAZA: NÚCLEO MALDITO",layout:"STORY53",desc:"La Calabaza Gigante despierta con ocho patas. Supera sus tres fases y sobrevive a sus telarañas y terremotos."}
-
+ {title:"01 · Godzilla",film:"Godzilla",year:"1954",era:"SHOWA · 1954",hero:"GODZILLA",enemy:"ANGUIRUS",map:"TOKYO 1954",layout:"STORY1",desc:"La película que inició la era de los kaiju."},
+ {title:"02 · Godzilla Raids Again",film:"Godzilla Raids Again",year:"1955",era:"SHOWA · 1955",hero:"GODZILLA",enemy:"ANGUIRUS",map:"OSAKA 1955",layout:"STORY2",desc:"Godzilla se enfrenta por primera vez a Anguirus."},
+ {title:"03 · King Kong vs. Godzilla",film:"King Kong vs. Godzilla",year:"1962",era:"SHOWA · 1962",hero:"GODZILLA",enemy:"KONG",map:"MONTE FUJI",layout:"STORY3",desc:"Dos titanes chocan en Japón."},
+ {title:"04 · Mothra vs. Godzilla",film:"Mothra vs. Godzilla",year:"1964",era:"SHOWA · 1964",hero:"GODZILLA",enemy:"MOTHRA",map:"SHIZUOKA",layout:"STORY4",desc:"Mothra protege sus huevos frente a Godzilla."},
+ {title:"05 · Ghidorah, the Three-Headed Monster",film:"Ghidorah, the Three-Headed Monster",year:"1964",era:"SHOWA · 1964",hero:"GODZILLA",enemy:"KING GHIDORAH",map:"MONTE FUJI",layout:"STORY5",desc:"Los monstruos se unen contra el dragón de tres cabezas."},
+ {title:"06 · Invasion of Astro-Monster",film:"Invasion of Astro-Monster",year:"1965",era:"SHOWA · 1965",hero:"GODZILLA",enemy:"KING GHIDORAH",map:"PLANET X",layout:"STORY6",desc:"La amenaza de King Ghidorah llega desde el espacio."},
+ {title:"07 · Ebirah, Horror of the Deep",film:"Ebirah, Horror of the Deep",year:"1966",era:"SHOWA · 1966",hero:"GODZILLA",enemy:"EBIRAH",map:"ISLA LETRA",layout:"STORY7",desc:"Una aventura en una isla dominada por una organización secreta."},
+ {title:"08 · Son of Godzilla",film:"Son of Godzilla",year:"1967",era:"SHOWA · 1967",hero:"GODZILLA",enemy:"KAMACURAS",map:"ISLA SOLGELL",layout:"STORY8",desc:"Godzilla encuentra a Minilla en una isla remota."},
+ {title:"09 · Destroy All Monsters",film:"Destroy All Monsters",year:"1968",era:"SHOWA · 1968",hero:"GODZILLA",enemy:"KING GHIDORAH",map:"MONSTERLAND",layout:"STORY9",desc:"Los monstruos se enfrentan a una invasión extraterrestre."},
+ {title:"10 · All Monsters Attack",film:"All Monsters Attack",year:"1969",era:"SHOWA · 1969",hero:"GODZILLA",enemy:"GABARA",map:"ISLA DE LOS SUEÑOS",layout:"STORY10",desc:"Un relato con escenas imaginadas y el mundo de los kaiju."},
+ {title:"11 · Godzilla vs. Hedorah",film:"Godzilla vs. Hedorah",year:"1971",era:"SHOWA · 1971",hero:"GODZILLA",enemy:"HEDORAH",map:"TOKYO CONTAMINADO",layout:"STORY11",desc:"Godzilla combate a Hedorah, nacido de la contaminación."},
+ {title:"12 · Godzilla vs. Gigan",film:"Godzilla vs. Gigan",year:"1972",era:"SHOWA · 1972",hero:"GODZILLA",enemy:"GIGAN",map:"PARQUE MONSTRUOSO",layout:"STORY12",desc:"Una conspiración alienígena amenaza la Tierra."},
+ {title:"13 · Godzilla vs. Megalon",film:"Godzilla vs. Megalon",year:"1973",era:"SHOWA · 1973",hero:"GODZILLA",enemy:"MEGALON",map:"SEATOPIA",layout:"STORY13",desc:"Megalon emerge del reino subterráneo."},
+ {title:"14 · Godzilla vs. Mechagodzilla",film:"Godzilla vs. Mechagodzilla",year:"1974",era:"SHOWA · 1974",hero:"GODZILLA",enemy:"MECHAGODZILLA MK-1",map:"OKINAWA",layout:"STORY14",desc:"Se revela la identidad de una máquina impostora."},
+ {title:"15 · Terror of Mechagodzilla",film:"Terror of Mechagodzilla",year:"1975",era:"SHOWA · 1975",hero:"GODZILLA",enemy:"MECHAGODZILLA MK-1",map:"OKINAWA",layout:"STORY15",desc:"Mechagodzilla regresa en una nueva amenaza."},
+ {title:"16 · The Return of Godzilla",film:"The Return of Godzilla",year:"1984",era:"HEISEI · 1984",hero:"GODZILLA",enemy:"GODZILLA",map:"TOKYO 1984",layout:"STORY16",desc:"Godzilla regresa tras casi una década de ausencia."},
+ {title:"17 · Godzilla vs. Biollante",film:"Godzilla vs. Biollante",year:"1989",era:"HEISEI · 1989",hero:"GODZILLA",enemy:"BIOLLANTE",map:"OSAKA",layout:"STORY17",desc:"La biotecnología da origen a Biollante."},
+ {title:"18 · Godzilla vs. King Ghidorah",film:"Godzilla vs. King Ghidorah",year:"1991",era:"HEISEI · 1991",hero:"GODZILLA",enemy:"KING GHIDORAH",map:"TOKYO TEMPORAL",layout:"STORY18",desc:"Un conflicto temporal altera el destino de Godzilla."},
+ {title:"19 · Godzilla vs. Mothra",film:"Godzilla vs. Mothra",year:"1992",era:"HEISEI · 1992",hero:"GODZILLA",enemy:"MOTHRA",map:"YOKOHAMA",layout:"STORY19",desc:"Mothra y Battra se cruzan con Godzilla."},
+ {title:"20 · Godzilla vs. Mechagodzilla II",film:"Godzilla vs. Mechagodzilla II",year:"1993",era:"HEISEI · 1993",hero:"GODZILLA",enemy:"MECHAGODZILLA MK-1",map:"KYOTO",layout:"STORY20",desc:"La humanidad despliega su arma anti-Godzilla."},
+ {title:"21 · Godzilla vs. SpaceGodzilla",film:"Godzilla vs. SpaceGodzilla",year:"1994",era:"HEISEI · 1994",hero:"GODZILLA",enemy:"SPACEGODZILLA",map:"FUKUOKA",layout:"STORY21",desc:"Un doble cósmico desafía al rey de los monstruos."},
+ {title:"22 · Godzilla vs. Destoroyah",film:"Godzilla vs. Destoroyah",year:"1995",era:"HEISEI · 1995",hero:"GODZILLA",enemy:"DESTOROYAH",map:"TOKYO",layout:"STORY22",desc:"Una amenaza vinculada al Destructor de Oxígeno aparece."},
+ {title:"23 · Godzilla 2000: Millennium",film:"Godzilla 2000: Millennium",year:"1999",era:"MILLENNIUM · 1999",hero:"GODZILLA",enemy:"ORGA",map:"NEMURO",layout:"STORY23",desc:"Un objeto extraterrestre trae una amenaza nueva."},
+ {title:"24 · Godzilla vs. Megaguirus",film:"Godzilla vs. Megaguirus",year:"2000",era:"MILLENNIUM · 2000",hero:"GODZILLA",enemy:"MEGAGUIRUS",map:"TOKYO",layout:"STORY24",desc:"Un experimento dimensional libera una amenaza insectoide."},
+ {title:"25 · Godzilla, Mothra and King Ghidorah: Giant Monsters All-Out Attack",film:"Godzilla, Mothra and King Ghidorah: Giant Monsters All-Out Attack",year:"2001",era:"MILLENNIUM · 2001",hero:"GODZILLA",enemy:"KING GHIDORAH",map:"TOKYO",layout:"STORY25",desc:"Los guardianes ancestrales se enfrentan a Godzilla."},
+ {title:"26 · Godzilla Against Mechagodzilla",film:"Godzilla Against Mechagodzilla",year:"2002",era:"MILLENNIUM · 2002",hero:"GODZILLA",enemy:"MECHAGODZILLA MK-1",map:"TOKYO BAY",layout:"STORY26",desc:"Kiryu es desplegado para detener a Godzilla."},
+ {title:"27 · Godzilla: Tokyo S.O.S.",film:"Godzilla: Tokyo S.O.S.",year:"2003",era:"MILLENNIUM · 2003",hero:"GODZILLA",enemy:"MECHAGODZILLA MK-1",map:"TOKYO BAY",layout:"STORY27",desc:"Kiryu vuelve a combatir junto a Mothra."},
+ {title:"28 · Godzilla: Final Wars",film:"Godzilla: Final Wars",year:"2004",era:"MILLENNIUM · 2004",hero:"GODZILLA",enemy:"MONSTER X",map:"ANTÁRTIDA",layout:"STORY28",desc:"Godzilla se enfrenta a una amenaza mundial."},
+ {title:"29 · Godzilla",film:"Godzilla",year:"2014",era:"MONSTERVERSE · 2014",hero:"GODZILLA",enemy:"RODAN",map:"SAN FRANCISCO",layout:"STORY29",desc:"Godzilla aparece en el MonsterVerse."},
+ {title:"30 · Shin Godzilla",film:"Shin Godzilla",year:"2016",era:"REIWA · 2016",hero:"SHIN GODZILLA",enemy:"GODZILLA",map:"TOKYO",layout:"STORY30",desc:"Una criatura desconocida evoluciona mientras avanza por Japón."},
+ {title:"31 · Godzilla: Planet of the Monsters",film:"Godzilla: Planet of the Monsters",year:"2017",era:"ANIME · 2017",hero:"GODZILLA EARTH",enemy:"GODZILLA EARTH",map:"TIERRA FUTURA",layout:"STORY31",desc:"La humanidad regresa a una Tierra dominada por Godzilla Earth."},
+ {title:"32 · Godzilla: City on the Edge of Battle",film:"Godzilla: City on the Edge of Battle",year:"2018",era:"ANIME · 2018",hero:"GODZILLA EARTH",enemy:"MECHAGODZILLA CITY",map:"MECHAGODZILLA CITY",layout:"STORY32",desc:"La humanidad intenta usar una ciudad mecánica contra Godzilla."},
+ {title:"33 · Godzilla: The Planet Eater",film:"Godzilla: The Planet Eater",year:"2018",era:"ANIME · 2018",hero:"GODZILLA EARTH",enemy:"KING GHIDORAH",map:"ÓRBITA TERRESTRE",layout:"STORY33",desc:"King Ghidorah amenaza con consumir el planeta."},
+ {title:"34 · Godzilla: King of the Monsters",film:"Godzilla: King of the Monsters",year:"2019",era:"MONSTERVERSE · 2019",hero:"GODZILLA",enemy:"KING GHIDORAH",map:"BOSTON",layout:"STORY34",desc:"Godzilla lucha por recuperar su lugar entre los titanes."},
+ {title:"35 · Godzilla vs. Kong",film:"Godzilla vs. Kong",year:"2021",era:"MONSTERVERSE · 2021",hero:"GODZILLA",enemy:"KONG",map:"HONG KONG",layout:"STORY35",desc:"Dos titanes se enfrentan y descubren una amenaza mayor."},
+ {title:"36 · Godzilla Minus One",film:"Godzilla Minus One",year:"2023",era:"REIWA · 2023",hero:"GODZILLA MINUS ONE",enemy:"GODZILLA",map:"GINZA",layout:"STORY36",desc:"El Japón de posguerra afronta una nueva pesadilla."},
+ {title:"37 · Godzilla x Kong: The New Empire",film:"Godzilla x Kong: The New Empire",year:"2024",era:"MONSTERVERSE · 2024",hero:"GODZILLA",enemy:"SKAR KING",map:"TIERRA HUECA",layout:"STORY37",desc:"Una amenaza emerge desde las profundidades de la Tierra Hueca."},
+ {title:"38 · Godzilla Minus Zero",film:"Godzilla Minus Zero",year:"2026",era:"REIWA · 2026",hero:"GODZILLA MINUS ZERO",enemy:"GODZILLA",map:"JAPÓN 2026",layout:"STORY38",desc:"Nuevo capítulo cinematográfico; el contenido de la misión queda preparado para desarrollarse."}
 ];
-// Archivo de eras: cada kaiju jugable que aún no tiene capítulo obtiene un encuentro propio.
-const GDA_STORY_ARCHIVE_NAMES=new Set(STORY_CHAPTERS.map(ch=>String(ch.enemy||"").toUpperCase()));
-ROSTER.forEach(r=>{
- const enemy=String(r.n||"").trim().toUpperCase();
- if(!enemy||enemy==="???"||enemy==="GODZILLA"||r.custom||!Array.isArray(r.sk)||GDA_STORY_ARCHIVE_NAMES.has(enemy))return;
- GDA_STORY_ARCHIVE_NAMES.add(enemy);
- const number=STORY_CHAPTERS.length+1;
- const eraLabel=typeof eraForKaiju==="function"?eraForKaiju(r):"ARCHIVO DE KAIJUS";
- STORY_CHAPTERS.push({
-  title:String(number).padStart(3,"0")+" · ARCHIVO: "+enemy,
-  era:"ARCHIVO DE ERAS · "+eraLabel,
-  hero:"GODZILLA",
-  enemy,
-  map:"ARCHIVO DE ERAS: "+enemy,
-  layout:"STORY_AUTO_"+String(number).padStart(3,"0"),
-  desc:"Enfréntate a "+enemy+" en el archivo de esta era y desbloquéalo para tu colección.",
-  autoKaijuArchive:true
- });
-});
+// Catálogo de campaña: solo largometrajes oficiales de Godzilla.
 const STORY_LAYOUTS={
  STORY1:[[-52,0,104,8,1],[-42,18,20,2],[-10,29,22,2],[24,18,20,2],[38,36,18,2]],
  STORY2:[[-70,0,50,8,1],[20,0,50,8,1],[-43,19,24,2],[20,31,25,2],[-8,43,18,2]],
@@ -2145,12 +2110,16 @@ const HALLOWEEN_MAPS=[];
 })();
 
 let selectedStoryChapter=-1;
+const GDA_STORY_PROGRESS_KEY="gdaStory2UnlockedThrough_v1";
+function gdaStoryUnlockedThrough(){try{return Math.max(0,Math.min(STORY_CHAPTERS.length-1,Number(localStorage.getItem(GDA_STORY_PROGRESS_KEY))||0))}catch(e){return 0}}
+function gdaRecordStoryProgress(index){if(!Number.isInteger(index)||index<0)return;const next=Math.min(STORY_CHAPTERS.length-1,index+1);try{localStorage.setItem(GDA_STORY_PROGRESS_KEY,String(Math.max(gdaStoryUnlockedThrough(),next)))}catch(e){}}
+window.gdaGetStoryProgress=()=>({unlockedThrough:gdaStoryUnlockedThrough(),total:STORY_CHAPTERS.length});
 function openStoryCampaign(){
  let ov=document.getElementById('storyCampaign');if(!ov){ov=document.createElement('div');ov.id='storyCampaign';ov.style.cssText='position:fixed;inset:0;z-index:9999;background:radial-gradient(ellipse at top,#1d2d58,#070b18 70%);color:#eaf5ff;overflow:auto;padding:24px;font-family:inherit';document.body.appendChild(ov)}
  const storyEra=c=>{const t=(c.era+" "+c.title+" "+c.enemy).toUpperCase();if(/1954|1955|1964|1974|SHOWA/.test(t))return "ERA SHOWA · 1954–1975";if(/1989|1994|1995|HEISEI|BIOLLANTE|SPACEGODZILLA|DESTOROYAH/.test(t))return "ERA HEISEI · 1984–1995";if(/2002|2004|KIRYU|MONSTER X/.test(t))return "ERA MILLENNIUM · 1999–2004";if(/REIWA|SHIN GODZILLA|MINUS ONE|2016/.test(t))return "ERA REIWA · 2016–ACTUALIDAD";if(/ANIME|PLANET OF THE MONSTERS|PLANETA|SINGULAR POINT|MECHAGODZILLA CITY/.test(t))return "ANIME · CONTINUIDADES ALTERNATIVAS";if(/TIERRA HUECA|SKULLCRAWLER|MONSTERVERSE|NUEVA ERA|2014|2019|2021|2024/.test(t))return "MONSTERVERSE · TITANES";return "CAPÍTULOS ESPECIALES"};
- const storyGroups=["ERA SHOWA · 1954–1975","ERA HEISEI · 1984–1995","ERA MILLENNIUM · 1999–2004","ERA REIWA · 2016–ACTUALIDAD","MONSTERVERSE · TITANES","ANIME · CONTINUIDADES ALTERNATIVAS","CAPÍTULOS ESPECIALES"];
- ov.innerHTML=`<div style="max-width:1100px;margin:auto"><button id="storyBack" style="padding:10px 16px;border-radius:10px;background:#182849;color:#fff;border:1px solid #4b719e;cursor:pointer">← VOLVER</button><p style="letter-spacing:3px;color:#ff72d2;font-weight:800;margin-top:22px">CAMPAÑA · CRONOLOGÍA DE GODZILLA</p><h1 style="font-size:clamp(28px,5vw,54px);margin:8px 0">UNA HISTORIA DE TITANES</h1><p style="max-width:760px;color:#b7c8e8">Elige una era para recorrer sus capítulos en orden cronológico. Cada capítulo conserva su rival y su escenario dedicado. <button id="storyAdminSecret" type="button" aria-label="Secreto" style="display:inline-block;vertical-align:baseline;width:3px;height:4px;min-width:0;min-height:0;padding:0;margin:0;border:0;background:transparent;color:#b7c8e8;font:2px/2px Arial,sans-serif;opacity:.08;overflow:hidden;cursor:default">a</button></p>${storyGroups.map(group=>{const chapters=STORY_CHAPTERS.map((c,i)=>({c,i})).filter(x=>storyEra(x.c)===group);return chapters.length?`<section style="margin-top:26px"><h2 style="color:#72e7ff;border-bottom:1px solid #35517d;padding-bottom:9px">${group}</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:12px;margin-top:12px">${chapters.map(({c,i})=>`<button data-story="${i}" style="text-align:left;min-height:150px;padding:16px;border-radius:14px;border:1px solid #35517d;background:linear-gradient(135deg,#182747,#10172b);color:#fff;cursor:pointer"><small style="color:#ff8bdd;font-weight:800">${c.era}</small><h3 style="margin:9px 0">${c.title}</h3><p style="font-size:12px;color:#c2cee4;line-height:1.5">${c.desc}</p><strong style="font-size:11px;color:#7be7ff">MAPA: ${c.map}</strong></button>`).join("")}</div></section>`:""}).join("")}<p style="color:#8497bb;font-size:12px;margin-top:22px">Inspirado en distintas eras y continuidades; algunos capítulos son encuentros de homenaje, no una única continuidad oficial.</p></div>`;
- ov.classList.remove('hide');ov.style.display='block';ov.querySelector('#storyBack').onclick=()=>{ov.style.display='none';show('menu')};ov.querySelectorAll('[data-story]').forEach(b=>b.onclick=()=>{selectedStoryChapter=Number(b.dataset.story);mode=0;pick1=-1;ov.style.display='none';show('select')});const secret=ov.querySelector('#storyAdminSecret');if(secret)secret.onclick=e=>{e.preventDefault();try{unlockAchievement(8)}catch(error){console.error('GDA: no se pudo registrar el logro secreto',error)}const panel=document.getElementById('adminPanel');if(panel){panel.style.zIndex='2147483001';toggleAdmin(true)}};
+ const storyGroups=["ERA SHOWA · 1954–1975","ERA HEISEI · 1984–1995","ERA MILLENNIUM · 1999–2004","ERA REIWA · 2016–2026","MONSTERVERSE · TITANES","ANIME · TRILOGÍA"];
+ ov.innerHTML=`<div style="max-width:1100px;margin:auto"><button id="storyBack" style="padding:10px 16px;border-radius:10px;background:#182849;color:#fff;border:1px solid #4b719e;cursor:pointer">← VOLVER</button><p style="letter-spacing:3px;color:#ff72d2;font-weight:800;margin-top:22px">CAMPAÑA · CRONOLOGÍA DE GODZILLA</p><h1 style="font-size:clamp(28px,5vw,54px);margin:8px 0">UNA HISTORIA DE TITANES</h1><p style="max-width:760px;color:#b7c8e8">Elige una era para recorrer sus capítulos en orden cronológico. Cada capítulo conserva su rival y su escenario dedicado. <button id="storyAdminSecret" type="button" aria-label="Secreto" style="display:inline-block;vertical-align:baseline;width:3px;height:4px;min-width:0;min-height:0;padding:0;margin:0;border:0;background:transparent;color:#b7c8e8;font:2px/2px Arial,sans-serif;opacity:.08;overflow:hidden;cursor:default">a</button></p>${storyGroups.map(group=>{const unlockedThrough=gdaStoryUnlockedThrough();const chapters=STORY_CHAPTERS.map((c,i)=>({c,i,locked:i>unlockedThrough})).filter(x=>storyEra(x.c)===group);return chapters.length?`<section style="margin-top:26px"><h2 style="color:#72e7ff;border-bottom:1px solid #35517d;padding-bottom:9px">${group}</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:12px;margin-top:12px">${chapters.map(({c,i,locked})=>`<button data-story="${i}" ${locked?"disabled":""} style="text-align:left;min-height:150px;padding:16px;border-radius:14px;border:1px solid ${locked?"#28344b":"#35517d"};background:${locked?"linear-gradient(135deg,#101522,#0b101b)":"linear-gradient(135deg,#182747,#10172b)"};color:${locked?"#78869b":"#fff"};cursor:${locked?"not-allowed":"pointer"};opacity:${locked?".62":"1"}"><small style="color:${locked?"#758198":"#ff8bdd"};font-weight:800">${c.era} · ${locked?"🔒 BLOQUEADO":"DISPONIBLE"}</small><h3 style="margin:9px 0">${c.title}</h3><p style="font-size:12px;color:#c2cee4;line-height:1.5">${c.desc}</p><strong style="font-size:11px;color:#7be7ff">ESCENARIO: ${c.map}</strong><div style="font-size:11px;margin-top:8px;color:#a9c9df">Protagonista: ${c.hero}</div></button>`).join("")}</div></section>`:""}).join("")}<p style="color:#8497bb;font-size:12px;margin-top:22px">Inspirado en distintas eras y continuidades; algunos capítulos son encuentros de homenaje, no una única continuidad oficial.</p></div>`;
+ ov.classList.remove('hide');ov.style.display='block';ov.querySelector('#storyBack').onclick=()=>{ov.style.display='none';show('menu')};ov.querySelectorAll('[data-story]').forEach(b=>b.onclick=()=>{const chapterIndex=Number(b.dataset.story);if(chapterIndex>gdaStoryUnlockedThrough())return;selectedStoryChapter=chapterIndex;mode=0;const chapter=STORY_CHAPTERS[chapterIndex];const heroIndex=ROSTER.findIndex(r=>String(r.n).toUpperCase()===String(chapter.hero).toUpperCase());const enemyIndex=ROSTER.findIndex(r=>String(r.n).toUpperCase()===String(chapter.enemy).toUpperCase());const playerIndex=heroIndex>=0?heroIndex:ROSTER.findIndex(r=>r.n==="GODZILLA");ov.style.display="none";startSmash(playerIndex>=0?playerIndex:0,enemyIndex>=0&&enemyIndex!==(playerIndex>=0?playerIndex:0)?enemyIndex:null,0,STORY_MAPS[chapterIndex]??null)});const secret=ov.querySelector('#storyAdminSecret');if(secret)secret.onclick=e=>{e.preventDefault();try{unlockAchievement(8)}catch(error){console.error('GDA: no se pudo registrar el logro secreto',error)}const panel=document.getElementById('adminPanel');if(panel){panel.style.zIndex='2147483001';toggleAdmin(true)}};
 }
 
 function applyWeather(base,weather){
@@ -2450,12 +2419,12 @@ function recordSpecialCombo(kaijuIndex){
 function getStoryEraKey(chapter){
  const value=String((chapter&&chapter.era)||"")+" "+String((chapter&&chapter.title)||"")+" "+String((chapter&&chapter.enemy)||"");
  const t=value.toUpperCase();
- if(/1954|1955|1964|1974|SHOWA/.test(t))return "showa";
- if(/1989|1994|1995|HEISEI|BIOLLANTE|SPACEGODZILLA|DESTOROYAH/.test(t))return "heisei";
- if(/2002|2004|KIRYU|MONSTER X/.test(t))return "millennium";
- if(/REIWA|SHIN GODZILLA|MINUS ONE|2016/.test(t))return "reiwa";
- if(/ANIME|PLANET OF THE MONSTERS|PLANETA|SINGULAR POINT|MECHAGODZILLA CITY/.test(t))return "anime";
- if(/TIERRA HUECA|SKULLCRAWLER|MONSTERVERSE|NUEVA ERA|2014|2019|2021|2024/.test(t))return "monsterverse";
+ if(/1954|1955|1962|1964|1965|1966|1967|1968|1969|1971|1972|1973|1974|1975|SHOWA/.test(t))return "showa";
+ if(/1984|1989|1991|1992|1993|1994|1995|HEISEI|BIOLLANTE|SPACEGODZILLA|DESTOROYAH/.test(t))return "heisei";
+ if(/1999|2000|2001|2002|2003|2004|KIRYU|MONSTER X|MILLENNIUM/.test(t))return "millennium";
+ if(/REIWA|SHIN GODZILLA|MINUS ONE|MINUS ZERO|2016|2023|2026/.test(t))return "reiwa";
+ if(/ANIME|PLANET OF THE MONSTERS|PLANETA|MECHAGODZILLA CITY/.test(t))return "anime";
+ if(/TIERRA HUECA|SKULLCRAWLER|MONSTERVERSE|2014|2019|2021|2024/.test(t))return "monsterverse";
  return "special";
 }
 function getShowaChapterBounds(){
@@ -2480,6 +2449,7 @@ function recordStoryAchievementFinish(w){
   window.__gdaShowaSpeedrun=null;
   return;
  }
+ gdaRecordStoryProgress(index);
  addUniqueAchievementValue('storyEras',getStoryEraKey(STORY_CHAPTERS[index]));
  if(achTrack.storyEras.length>=5)unlockAchievement(12);
  let campaign=window.__gdaCampaignSpeedrun;
