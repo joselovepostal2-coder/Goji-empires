@@ -4248,7 +4248,17 @@ for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e
 </script>
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  const gdaOnlineSocket = io();
+  // GAS/compatibilidad: en alojamientos estáticos puede no existir Socket.IO.
+  // Mantener el juego y los menús funcionando aunque el servicio online no esté disponible.
+  const gdaOnlineSocket = (typeof window.io === "function")
+    ? window.io()
+    : {
+        connected: false,
+        id: null,
+        on() { return this; },
+        emit() { return this; },
+        disconnect() { return this; }
+      };
   window.gdaOnlineSocket = gdaOnlineSocket;
 
   gdaOnlineSocket.on("connect", () => {
