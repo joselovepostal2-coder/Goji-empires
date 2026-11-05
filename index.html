@@ -2808,48 +2808,38 @@ function act(f,o,dt){const a=f.act,S=G.sm;a.t+=dt;
  // fase 3 dispara TODO el repertorio registrado en ROSTER.sk y termina con una explosión.
  if(a.pumpkinUltimate){
   const target=a.target||o,phase=Math.max(0,Math.min(2,Number(a.pumpkinUltimatePhase)||0));
-  const kit=(Array.isArray(f.r?.sk)?f.r.sk:ROSTER[f.idx]?.sk||[]).filter(sk=>sk&&typeof sk==="object");
-  const fallback=[
-   {n:"PATAS DE LA CRIPTA",t:"pulse",c:0xff8a22,R:48,dmg:32,stun:.7},
-   {n:"TELARAÑA DE ESPINAS",t:"proj",c:0x9cff35,n:5,spread:1.1,sp:28,life:2.5,size:4,dmg:24},
-   {n:"TERREMOTO DE CALABAZA",t:"pulse",c:0xff3d30,R:72,dmg:48,stun:1.1}
-  ];
-  const all=kit.length?kit:fallback,attacks=phase===0?all.slice(0,3):phase===1?all.slice(0,6):all.slice();
-  if(!a.pumpkinStarted){a.pumpkinStarted=1;S.shake=phase===2?10:phase===1?7:4;
-   toastCombat(phase===2?"¡ULTIMATE FINAL: PLAGA TOTAL! ¡TODOS LOS ATAQUES!":phase===1?"¡ULTIMATE EVOLUCIONADA · FASE 2!":"¡ULTIMATE DE LA CRIPTA · FASE 1!",phase===2?"#ff554b":phase===1?"#9dff4f":"#ffb347");}
-  a.nextAttack=a.nextAttack||0;
-  while(a.nextAttack<attacks.length&&a.t>=.22+a.nextAttack*.32){
-   const sk=attacks[a.nextAttack++],c=Number(sk.c)||[0xff8a22,0x9cff35,0xff3d30][(a.nextAttack-1)%3],power=phase===0?1:phase===1?1.18:1.4;
-   const R=Math.max(18,Number(sk.R)||48),dmg=Math.max(1,Number(sk.dmg)||24)*power;
-   if(sk.t==="proj"){
-    const n=Math.max(1,Math.min(18,Number(sk.n)||5)),spread=Number(sk.spread)||.8,[sx,sy]=mouth(f);
-    for(let k=0;k<n;k++){const u=n<2?0:k/(n-1)-.5,r=Math.max(.8,(Number(sk.size)||3)*SK),m=new THREE.Mesh(new THREE.SphereGeometry(r,7,5),new THREE.MeshBasicMaterial({color:c}));
-     G.scene.add(m);S.pr.push({x:sx,y:sy+u*6,vx:f.face*(Number(sk.sp)||28)*.55,vy:u*spread*14,life:Number(sk.life)||2,r,dmg:dmg*.2,from:f,m});}
-    S.rings.push({x:mx+f.face*14,y:my,R:16,t:0,c});toastCombat("¡"+String(sk.label||sk.nm||(typeof sk.n==="string"?sk.n:"ATAQUE ARÁCNIDO")).toUpperCase()+"!",phase===2?"#ff554b":"#9dff4f");
-   }else if(sk.t==="beam"){
-    const len=Math.max(70,(Number(sk.r)||2.5)*SK*38),close=target&&target.dead<=0&&Math.abs(target.y-f.y)<f.h*1.45&&Math.abs(target.x-f.x)<len+target.hw;
-    for(let q=1;q<=4;q++)S.rings.push({x:mx+f.face*len*q/4,y:my,R:9+q*3,t:0,c});
-    if(close)hurt(f,target,dmg*.7,45,.45,16,f.face);
-    S.shake=Math.max(S.shake,4);
-   }else if(sk.t==="dash"){
-    const len=Math.max(45,Number(sk.dist)||70);f.vx=f.face*Math.min(110,Number(sk.sp)||75);
-    S.rings.push({x:f.x+f.face*28,y:f.y+f.h*.45,R:30,t:0,c});
-    if(target&&target.dead<=0&&Math.abs(target.x-f.x)<f.hw+target.hw+len&&Math.abs(target.y-f.y)<f.h*1.2){hurt(f,target,dmg*.85,65,.45,22,f.face);target.vx=f.face*27;}
-   }else if(sk.t==="buff"){
-    f.shield=Math.max(f.shield||0,3);f.boost=Math.max(f.boost||0,3);S.rings.push({x:f.x,y:f.y+f.h*.5,R:38,t:0,c});
-   }else{
-    const radius=R*(phase===2?1.3:1),box={x:f.x-radius,y:f.y-radius*.4,w:radius*2,h:f.h+radius*.8};
-    S.rings.push({x:f.x,y:f.y+f.h*.5,R:radius,t:0,c});S.rings.push({x:f.x,y:f.y+f.h*.5,R:radius*.62,t:0,c:0xffffff});S.shake=Math.max(S.shake,phase===2?7:4);
-    if(target&&target.dead<=0&&ov(box,bxOf(target))){hurt(f,target,dmg,65,Number(sk.stun)||.5,phase===2?25:16,Math.sign(target.x-f.x)||f.face);target.stun=Math.max(target.stun,Number(sk.stun)||.35);}
+  const colors=[0xff8a22,0x9cff35,0xff3d30,0xff42d6,0x39dfff,0xffffff];
+  const rainbow=[0xff42d6,0xff4b4b,0xffd83d,0x64ff55,0x39dfff,0x9b63ff];
+  if(!a.pumpkinStarted){
+   a.pumpkinStarted=1;a.pumpkinHits=0;a.pumpkinNextHit=.52;
+   a.pumpkinColor=colors[phase];S.shake=8;
+   toastCombat("¡EJECUCIÓN ARCOÍRIS! ¡AGARRE ARÁCNIDO!","#ffb347");
+   if(target&&target.dead<=0){a.pumpkinTargetX=target.x;a.pumpkinTargetY=target.y;}
+  }
+  if(target&&target.dead<=0&&a.t<2.25){
+   // La Calabaza sujeta al rival con sus patas y lo eleva frente a ella.
+   const lift=Math.min(1,Math.max(0,(a.t-.12)/.38));
+   const tx=f.x+f.face*(f.hw+target.hw*.45+5),ty=f.y+f.h+10+lift*27;
+   target.x+=(tx-target.x)*Math.min(1,dt*18);target.y+=(ty-target.y)*Math.min(1,dt*18);
+   target.vx=0;target.vy=0;target.stun=Math.max(target.stun,.08);target.inv=0;
+   if(a.t>=a.pumpkinNextHit&&a.pumpkinHits<10){
+    a.pumpkinHits++;a.pumpkinNextHit=.52+a.pumpkinHits*.115;
+    const c=rainbow[(a.pumpkinHits-1)%rainbow.length];
+    S.rings.push({x:target.x,y:target.y+target.h*.5,R:18+a.pumpkinHits*2,t:0,c});
+    S.rings.push({x:target.x+f.face*8,y:target.y+target.h*.5,R:10,t:0,c:0xffffff});
+    hurt(f,target,6,4,.04,8,f.face);target.inv=0;target.x=tx;target.y=ty;target.vx=0;target.vy=0;
+    S.shake=Math.max(S.shake,3);
+    if(a.pumpkinHits===1)toastCombat("¡10 IMPACTOS ARÁCNIDOS!","#9cff35");
    }
   }
-  const endAt=.22+attacks.length*.32+(phase===2?.3:0)+.18;
-  if(phase===2&&a.t>=.22+attacks.length*.32&&!a.pumpkinFinal){a.pumpkinFinal=1;const radius=110;
-   S.shake=13;for(let q=0;q<6;q++)S.rings.push({x:f.x,y:f.y+f.h*.5,R:26+q*18,t:0,c:q%2?0xff3d30:0x9cff35});
-   if(target&&target.dead<=0&&ov({x:f.x-radius,y:f.y-radius*.35,w:radius*2,h:f.h+radius*.7},bxOf(target))){hurt(f,target,42,95,.85,30,Math.sign(target.x-f.x)||f.face);target.stun=Math.max(target.stun,.85);}
-   toastCombat("¡FASE 3: DESCARGA DE TODOS LOS ATAQUES!","#ff554b");
+  if(a.t>=1.78&&!a.pumpkinFinal){
+   a.pumpkinFinal=1;S.shake=15;
+   for(let q=0;q<12;q++)S.rings.push({x:target&&target.dead<=0?target.x:f.x+f.face*30,y:target&&target.dead<=0?target.y+target.h*.5:f.y+f.h*.6,R:22+q*13,t:0,c:rainbow[q%rainbow.length]});
+   if(target&&target.dead<=0){target.inv=0;target.shield=0;hurt(f,target,42,105,.28,31,f.face);target.vx=f.face*112;target.vy=68;target.stun=Math.max(target.stun,.7);target.inv=0;}
+   toastCombat("¡GOLPE FINAL ARCOÍRIS!","#ff42d6");
   }
-  if(a.t>=endAt){f.act=null;f.beam=null;f.vx*=.25;}return;
+  if(a.t>=2.42){f.act=null;f.beam=null;f.vx*=.2;}
+  return;
  }
  // Ultimate exclusiva de Godzilla: captura, carga y rayo dirigido a la cabeza.
  if(a.godzillaFinisher){
