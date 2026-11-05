@@ -2227,10 +2227,16 @@ function startSmash(idx,p2,round,sti){
   }
   S.waveEnemiesTotal=picks.length;S.waveEnemiesRemaining=picks.length;
  }else S.F=[mkF(idx,1,-22,0),mkF(ri,2,22,mode!==2)];
- // Vidas personalizables estilo Smash para combates normales locales.
- if(!window.__gdaOnlineActive&&mode!==0&&mode!==5&&mode!==6){
-  const chosen=Math.max(1,Math.min(9,Number(document.getElementById("gdaNormalLives")?.value||3)));
+ // Vidas personalizables estilo Smash: aplicar únicamente a Versus CPU (1) y Versus local (2).
+ if(!window.__gdaOnlineActive&&(mode===1||mode===2)){
+  const livesControl=document.getElementById("gdaNormalLives");
+  let savedLives=3;
+  try{savedLives=Number(localStorage.getItem("gdaNormalMatchLives")||livesControl?.value||3)}catch(_){}
+  const chosen=Math.max(1,Math.min(9,Number(livesControl?.value||savedLives||3)));
+  try{localStorage.setItem("gdaNormalMatchLives",String(chosen))}catch(_){}
+  if(livesControl)livesControl.value=String(chosen);
   S.F.forEach(f=>{f.stocks=chosen;});
+  S.normalMatchLives=chosen;
  }
  S.F.forEach(f=>{f.spawnX=f.x;f.spawnY=f.y;sc.add(f.mesh,f.sh)});
  let pumpkinHud=document.getElementById("gdaPumpkinBossHud");
@@ -4730,5 +4736,9 @@ body.gda-in-combat #gda068-launch,body.gda-in-combat #g68-evo-launch,body.gda-in
 })();
 </script>
 
+
+<script id="gda-normal-lives-persistence">
+(()=>{const el=document.getElementById("gdaNormalLives");if(!el||el.dataset.gdaBound)return;el.dataset.gdaBound="1";try{const v=Number(localStorage.getItem("gdaNormalMatchLives"));if(v>=1&&v<=9)el.value=String(v)}catch(_){}el.addEventListener("change",()=>{const v=Math.max(1,Math.min(9,Number(el.value)||3));try{localStorage.setItem("gdaNormalMatchLives",String(v))}catch(_){}el.value=String(v);});})();
+</script>
 </body>
 </html>
