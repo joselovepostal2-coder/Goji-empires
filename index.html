@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Godzilla: Destroy All – Beta 0.90 · Pixel art + Online (cliente)</title>
+<title>Godzilla: Destroy All – Beta 0.90 · Offline</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#070b1a;--glass:rgba(14,20,46,.66);--line:rgba(120,200,255,.25);--cy:#5ee7ff;--mg:#ff3df0;--gold:#ffd24a;--ink:#e9f2ff;--mut:#8fa2cf}
@@ -3322,8 +3322,8 @@ function heroNext(){const i=ORDER[(Math.random()*ORDER.length)|0],h=$("hero");h.
  setTimeout(()=>{h.src=artURL(i);h.style.setProperty("--c",ROSTER[i].css);$("heroN").textContent=ROSTER[i].n+" · "+ROSTER[i].cat;$("heroN").style.color=ROSTER[i].css;h.classList.remove("fade")},260)}
 
 // ---------- Menús ----------
-const MENU=["MODO HISTORIA","COMBATE LIBRE","VERSUS · 2 JUGADORES","CONFIGURAR CONTROLES","LABORATORIO · CREADORES Y MEJORAS","🎃 EVENTO HALLOWEEN · 30 MAPAS","🌊 MODO OLEADAS · SUPERVIVENCIA"];
-const MODES=["MODO HISTORIA","COMBATE LIBRE","VERSUS"];
+const MENU=["MODO HISTORIA","COMBATE LIBRE","CONFIGURAR CONTROLES","LABORATORIO · CREADORES Y MEJORAS","🎃 EVENTO HALLOWEEN · 30 MAPAS","🌊 MODO OLEADAS · SUPERVIVENCIA"];
+const MODES=["MODO HISTORIA","COMBATE LIBRE"];
 const CATS=["Supers","Legendarios","Mechas","Tierra Hueca","Mutaciones","Jefes"];
 
 // ---------- DORATS + kaijus clásicos poco habituales ----------
@@ -4479,7 +4479,7 @@ for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e
   [0,"INICIANDO MOTOR DEL JUEGO…"],
   [1600,"CARGANDO INTERFAZ Y MODOS…"],
   [3200,"PREPARANDO RECURSOS VISUALES…"],
-  [4800,"VERIFICANDO SISTEMAS Y ONLINE…"],
+  [4800,"VERIFICANDO SISTEMAS DEL JUEGO…"],
   [6400,"PREPARANDO LOS ÚLTIMOS RECURSOS…"],
   [7400,"FINALIZANDO CARGA…"]
  ];
@@ -4513,7 +4513,6 @@ for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e
  const modes=[
   "MODO HISTORIA",
   "COMBATE LIBRE",
-  "VERSUS · 2 JUGADORES",
   "CONFIGURAR CONTROLES",
   "LABORATORIO · CREADORES Y MEJORAS",
   "🎃 EVENTO HALLOWEEN · 30 MAPAS",
@@ -4676,6 +4675,29 @@ for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e
  if(window.visualViewport){visualViewport.addEventListener("resize",schedule,{passive:true});visualViewport.addEventListener("scroll",schedule,{passive:true})}
  if(coarse&&coarse.addEventListener)coarse.addEventListener("change",schedule);
  document.addEventListener("DOMContentLoaded",applyGAS,{once:true});
+})();
+</script>
+
+
+<style id="gda-offline-only">
+/* GDA OFFLINE: ocultar por completo las interfaces de red/multijugador. */
+#g68-online-overlay,#g68-online-launch,#gnet,#gnet-launch,[data-mode="online"],[data-online] {display:none!important}
+</style>
+<script id="gda-offline-only-guard">
+(function(){
+ "use strict";
+ window.__GDA_OFFLINE_ONLY__=true;
+ window.__gdaOnlineActive=false;
+ function removeOnlineEntry(){
+  const list=document.getElementById("mlist");
+  if(!list)return;
+  [...list.querySelectorAll("li")].forEach(item=>{
+   if(/VERSUS|ONLINE|MULTIJUGADOR|PARTIDAS ONLINE/i.test(item.textContent||""))item.remove();
+  });
+ }
+ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",removeOnlineEntry,{once:true});
+ else removeOnlineEntry();
+ window.addEventListener("load",removeOnlineEntry,{once:true});
 })();
 </script>
 
