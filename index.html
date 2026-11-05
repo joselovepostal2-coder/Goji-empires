@@ -3070,7 +3070,7 @@ function fighter(f,o,dt){const st=f.st,S=G.sm;
  }
  else{const sp=st.spd*(f.boost>0?1.5:1);
   if(i.dir){f.face=i.dir;f.vx+=(i.dir*sp-f.vx)*Math.min(1,(f.ground?12:5)*dt)}else f.vx*=Math.max(0,1-(f.ground?14:1.5)*dt);
-  if(i.jump){if(f.ground){const pumpkinJump=String(f.r?.n||f.A?.n||ROSTER[f.idx]?.n||"").toUpperCase()===GDA_PUMPKIN_BOSS_NAME;f.vy=st.jmp*(pumpkinJump?1.732:1);f.ground=0;if(pumpkinJump)f.jumps=0}else if(String(f.r?.n||f.A?.n||ROSTER[f.idx]?.n||"").toUpperCase()!==GDA_PUMPKIN_BOSS_NAME&&f.jumps>0){f.jumps--;f.vy=st.jmp*.92}}
+  if(i.jump){if(f.ground){const pumpkinJump=String(f.r?.n||f.A?.n||ROSTER[f.idx]?.n||"").toUpperCase()===GDA_PUMPKIN_BOSS_NAME;f.vy=st.jmp;f.ground=0;if(pumpkinJump)f.jumps=0}else if(String(f.r?.n||f.A?.n||ROSTER[f.idx]?.n||"").toUpperCase()!==GDA_PUMPKIN_BOSS_NAME&&f.jumps>0){f.jumps--;f.vy=st.jmp*.92}}
   if(i.down){if(f.ground&&f.stand&&!f.stand.solid)f.drop=.25;else if(!f.ground&&f.vy<8)f.vy=-85}
   const mechaComboUser=/MECHAGODZILLA|MECHA-GODZILLA|MECHA GODZILLA/.test(String(f.r?.n||f.A?.n||"").toUpperCase());
   f.mechaComboLock=Math.max(0,(f.mechaComboLock||0)-dt);
@@ -3271,7 +3271,7 @@ function smashTick(dt){const S=G.sm;dt=Math.min(dt,.033);
  for(const f of S.F){if(f.waveEnemy)continue;const c=Math.max(0,120-f.pct*.6);
   $("shP"+f.id).textContent=Math.round(f.pct)+"%";$("shP"+f.id).style.color=`hsl(${c},90%,62%)`;const bar=$("shB"+f.id);bar.style.width=Math.min(100,f.pct/1.5)+"%";bar.style.background=`hsl(${c},90%,50%)`;
   if(f.ls!==f.stocks){f.ls=f.stocks;$("shS"+f.id).innerHTML=`<img src="${artURL(f.idx)}" alt="">`.repeat(Math.max(0,f.stocks))}
-  $("shU"+f.id).style.width=(Math.max(0,Math.min(200,f.meter))/2)+"%";$("shU"+f.id).parentNode.classList.toggle("rdy",f.meter>=200);if(f.id===1&&!f.ai)TU.classList.toggle("rdy",f.meter>=200)}
+  $("shU"+f.id).style.width=(Math.max(0,Math.min(200,f.meter))/2)+"%";const pumpkinReady=String(f.r?.n||"").toUpperCase()===GDA_PUMPKIN_BOSS_NAME?120:200;$("shU"+f.id).parentNode.classList.toggle("rdy",f.meter>=pumpkinReady);if(f.id===1&&!f.ai)TU.classList.toggle("rdy",f.meter>=pumpkinReady)}
  const t=Math.max(0,Math.ceil(S.time));$("shT").textContent=`0${t/60|0}:${String(t%60).padStart(2,"0")}`;const p1=S.F.find(f=>f.id===1&&!f.ai);if(p1&&$("shStage")){const ag=p1.aggressiveUntil>performance.now()/1000;$("shStage").textContent=ag?`MODO AGRESIVO · ${Math.ceil(p1.aggressiveUntil-performance.now()/1000)} s · Y: DESACTIVAR`:"MODO NORMAL · Y: AGRESIVO";$("shStage").style.color=ag?"#ff684a":"#8fd7ff";}
  for(const k in JP)JP[k]=0}
 
