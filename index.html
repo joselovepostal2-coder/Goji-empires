@@ -4210,42 +4210,7 @@ body.gda-in-combat #gda068-launch,body.gda-in-combat #g68-evo-launch,body.gda-in
 <div id="gda-variation-note"><button type="button" id="gda-variation-close">Cerrar</button><strong>VARIACIONES DE KAIJUS</strong><br>Godzilla: Beso de la Muerte · Aliento rojo con humo.<br>Anguirus: Rodada espinosa · Caparazón defensivo.<br>Burning Godzilla: CLIC IZQ. rayo rojo · CLIC DER. 7 pulsos nucleares; tras la transformación queda en forma esquelética y causa 25 % menos daño.<br><small>Las habilidades disponibles dependen de los ataques que soporte el motor de combate.</small></div>
 <script id="gda-variation-note-script">document.getElementById('gda-variation-close')?.addEventListener('click',()=>document.getElementById('gda-variation-note')?.remove());</script>
 
-<script>
-/* ===== GDA ONLINE (0.89) · SOLO CLIENTE: ver avisos en pantalla ===== */
-(function(){
-const $=id=>document.getElementById(id),LS='gda_net_url';
-const EV={create:null,join:null};   // nombres de eventos del servidor: NO verificados, no se usan hasta confirmarlos
-let sock=null,st='off';
-function log(t){const l=$('gnetLog');l.textContent+=new Date().toLocaleTimeString()+'  '+t+'\n';l.scrollTop=l.scrollHeight}
-function room(){const on=st==='on',ok=on&&EV.create&&EV.join;$('gnetCreate').disabled=$('gnetJoin').disabled=$('gnetCode').disabled=!ok;$('gnetSend').disabled=!on;
- $('gnetRoomMsg').textContent=ok?'':'Crear/Unirse desactivado: los eventos del servidor aún no están verificados. El multijugador NO está implementado, solo la conexión.'}
-function setSt(s,m){st=s;const p=$('gnetPill');p.textContent={off:'DESCONECTADO',conn:'CONECTANDO…',on:'CONECTADO',err:'ERROR'}[s];p.className='gnet-pill '+s;$('gnetMsg').textContent=m||'';
- $('gnetGo').textContent=(s==='on'||s==='conn')?'DESCONECTAR':'CONECTAR';log('[estado] '+p.textContent+(m?' · '+m:''));room()}
-function lib(ok,bad){if(window.io)return ok();const sc=document.createElement('script');sc.src='https://cdn.socket.io/4.7.5/socket.io.min.js';
- sc.onload=()=>window.io?ok():bad('El cliente cargó pero no expone io');sc.onerror=()=>bad('No se pudo descargar Socket.IO Client (sin internet o CDN bloqueada)');document.head.appendChild(sc)}
-function connect(){const url=$('gnetUrl').value.trim();
- if(!/^https?:\/\/[^\s/]+/i.test(url)){setSt('err','Escribe la URL pública exacta del servidor (empieza por https://).');return}
- try{localStorage.setItem(LS,url)}catch(e){}
- setSt('conn','Cargando cliente Socket.IO…');
- lib(()=>{setSt('conn','Conectando a '+url+' …');
-  try{sock=io(url,{transports:['websocket','polling'],timeout:30000,reconnectionAttempts:4})}catch(e){setSt('err','No se pudo iniciar la conexión: '+e.message);return}
-  sock.on('connect',()=>setSt('on','Conectado · id '+sock.id+' · '+sock.io.engine.transport.name));
-  sock.on('disconnect',r=>setSt('off','Desconectado: '+r));
-  sock.on('connect_error',e=>setSt('err','Error de conexión: '+((e&&e.message)||e)));
-  sock.io.on('reconnect_attempt',n=>setSt('conn','Reintentando… ('+n+'/4)'));
-  sock.io.on('reconnect_failed',()=>setSt('err','No se pudo reconectar con el servidor.'));
-  if(sock.onAny)sock.onAny((ev,...a)=>log('← '+ev+' '+JSON.stringify(a).slice(0,300)));
-  if(sock.onAnyOutgoing)sock.onAnyOutgoing((ev,...a)=>log('→ '+ev+' '+JSON.stringify(a).slice(0,300)));
- },m=>setSt('err',m))}
-function open(){$('gnet').style.display='block';try{$('gnetUrl').value=localStorage.getItem(LS)||'https://goji-empires.onrender.com'}catch(e){$('gnetUrl').value='https://goji-empires.onrender.com'}room()}
-function close(){$('gnet').style.display='none'}
-document.body.insertAdjacentHTML('beforeend','<style>#gnet{position:fixed;inset:0;z-index:100003;display:none;overflow:auto;background:#050916f7;color:#eaf3ff;padding:18px;font:600 16px Rajdhani,system-ui}#gnet .gc{max-width:760px;margin:10px auto;background:#0d1530;border:1px solid #2a4a8a;border-radius:16px;padding:16px}#gnet h1{font:900 clamp(20px,4vw,30px) Orbitron,system-ui;margin:0 0 6px}#gnet input,#gnet button{font:inherit;border-radius:10px;border:1px solid #2a4a8a;background:#101a3a;color:#fff;padding:10px 12px}#gnet input{width:100%;box-sizing:border-box}#gnet button{cursor:pointer;font-weight:800}#gnet button:disabled{opacity:.45;cursor:not-allowed}#gnet .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}.gnet-pill{display:inline-block;padding:4px 12px;border-radius:99px;font:800 12px Orbitron,system-ui;border:1px solid}.gnet-pill.off{color:#9fb0d6;border-color:#9fb0d6}.gnet-pill.conn{color:#ffd24a;border-color:#ffd24a}.gnet-pill.on{color:#5dffa0;border-color:#5dffa0}.gnet-pill.err{color:#ff7a7a;border-color:#ff7a7a}#gnetLog{height:150px;overflow:auto;background:#060b1d;border:1px solid #1d2f5c;border-radius:10px;padding:8px;font:12px/1.35 monospace;white-space:pre-wrap;color:#9fe6ff}#gnet .warn{color:#ffd24a;font-size:14px;margin-top:8px}</style><div id="gnet" role="dialog" aria-modal="true" aria-label="GDA Online"> <div class="gc"><div class="row" style="margin:0;justify-content:space-between"><h1>🌐 GDA ONLINE</h1><button id="gnetX" type="button">✕ CERRAR</button></div>  <div>Estado: <span id="gnetPill" class="gnet-pill off">DESCONECTADO</span></div><div id="gnetMsg" style="margin-top:6px;color:#9fb0d6;font-size:14px;min-height:20px"></div></div> <div class="gc"><b>1 · Servidor</b>  <input id="gnetUrl" type="url" placeholder="URL pública exacta del servidor (https://…onrender.com)" autocomplete="off" spellcheck="false">  <div class="row"><button id="gnetGo" type="button">CONECTAR</button></div>  <div class="warn">Render gratuito puede tardar ~1 min en despertar la primera vez. No se inventa ninguna URL: pega la tuya.</div></div> <div class="gc"><b>2 · Partida</b>  <div class="row"><button id="gnetCreate" type="button" disabled>CREAR PARTIDA</button><input id="gnetCode" placeholder="Código de sala" style="max-width:200px" maxlength="12" disabled><button id="gnetJoin" type="button" disabled>UNIRSE</button></div>  <div id="gnetRoomMsg" class="warn"></div></div> <div class="gc"><b>3 · Registro de eventos</b> <span style="color:#9fb0d6;font-size:13px">(muestra lo que el servidor realmente emite)</span>  <div id="gnetLog"></div>  <div class="row"><input id="gnetEv" placeholder="evento de prueba" style="max-width:200px"><input id="gnetPl" placeholder=\'datos JSON (opcional)\' style="flex:1"><button id="gnetSend" type="button" disabled>ENVIAR</button></div></div></div>');
-$('gnetBtn').onclick=open;$('gnetX').onclick=close;
-$('gnetGo').onclick=()=>{if(st==='on'||st==='conn'){if(sock){sock.disconnect()}setSt('off','Desconectado manualmente.')}else connect()};
-$('gnetSend').onclick=()=>{const ev=$('gnetEv').value.trim();if(!sock||!ev)return;let pl;const t=$('gnetPl').value.trim();try{pl=t?JSON.parse(t):undefined}catch(e){log('JSON inválido');return}pl===undefined?sock.emit(ev):sock.emit(ev,pl)};
-for(const t of ['keydown','keyup','keypress'])$('gnet').addEventListener(t,e=>{e.stopPropagation();if(t==='keydown'&&e.key==='Escape')close()});
-})();
-</script>
+<!-- Panel y cargador de Socket.IO retirados: GDA funciona offline. -->
 <!-- Socket.IO eliminado: GDA funciona en modo offline. -->
 <script>
   // GAS/compatibilidad: en alojamientos estáticos puede no existir Socket.IO.
