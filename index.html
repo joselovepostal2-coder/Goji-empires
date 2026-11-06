@@ -1316,7 +1316,10 @@ ARTS.push({k:"bi",S:36,m:[82,25],pal:["#ded6bd","#77715f","#b8f4ff"],v:2,sw:.7,f
  ARTS.forEach((A,i)=>{if(i<10)return;let plan=A.k;const R=ROSTER[i],name=R.n,r0=mul(hsh(name))();
   if(NAMEPLAN[name])plan=NAMEPLAN[name];else if(R.gen&&R.cat!=="Mechas"&&r0<.45)plan=["bi","ape","qd","wg","ins","bl","sp","ar"][(r0*1000|0)%8];
   let seed=hsh(name+A.pal.join(""));let t;do{t=mkTraits(plan,seed++)}while(used.has(sigOf(t)));used.add(sigOf(t));
-  A.k=plan;A.tr=t;A.pat=t.pat;A.m=mouthOf(t);A.fly=plan==="wg"?1:0;A.v=0})})();
+  A.k=plan;A.tr=t;
+  // King Kong debe tener hocico de simio, nunca el perfil picudo de algunas cabezas aleatorias.
+  if(/KING KONG|^KONG$|KONG CON HACHA/i.test(name)){A.k="ape";t.plan="ape";t.head=0;t.jaw=1;t.horn=0;}
+  A.pat=t.pat;A.m=mouthOf(t);A.fly=plan==="wg"?1:0;A.v=0})})();
 let _st;function shadowTex(){if(!_st){const c=document.createElement("canvas");c.width=c.height=64;const x=c.getContext("2d"),g=x.createRadialGradient(32,32,2,32,32,32);
  g.addColorStop(0,"rgba(0,0,0,.8)");g.addColorStop(.6,"rgba(0,0,0,.5)");g.addColorStop(1,"rgba(0,0,0,0)");x.fillStyle=g;x.fillRect(0,0,64,64);_st=new THREE.CanvasTexture(c)}return _st}
 
@@ -2023,7 +2026,7 @@ function gdaFormatTime(ms){
 }
 // ---------- Campaña cronológica: capítulos con escenarios exclusivos ----------
 const STORY_CHAPTERS=[
- {title:"01 · Godzilla",film:"Godzilla",year:"1954",era:"SHOWA · 1954",hero:"GODZILLA",enemy:"ANGUIRUS",map:"TOKYO 1954",layout:"STORY1",desc:"La película que inició la era de los kaiju."},
+ {title:"01 · Godzilla",film:"Godzilla",year:"1954",era:"SHOWA · 1954",hero:"GODZILLA",enemy:"FUERZAS MILITARES",map:"TOKYO 1954 · INVASIÓN MILITAR",layout:"STORY1",desc:"Godzilla irrumpe en Tokio y se enfrenta a la respuesta militar: helicópteros, aviones y defensas humanas. Anguirus no aparece en este capítulo."},
  {title:"02 · Godzilla Raids Again",film:"Godzilla Raids Again",year:"1955",era:"SHOWA · 1955",hero:"GODZILLA",enemy:"ANGUIRUS",map:"OSAKA 1955",layout:"STORY2",desc:"Godzilla se enfrenta por primera vez a Anguirus."},
  {title:"03 · King Kong vs. Godzilla",film:"King Kong vs. Godzilla",year:"1962",era:"SHOWA · 1962",hero:"GODZILLA",enemy:"KONG",map:"MONTE FUJI",layout:"STORY3",desc:"Dos titanes chocan en Japón."},
  {title:"04 · Mothra vs. Godzilla",film:"Mothra vs. Godzilla",year:"1964",era:"SHOWA · 1964",hero:"GODZILLA",enemy:"MOTHRA",map:"SHIZUOKA",layout:"STORY4",desc:"Mothra protege sus huevos frente a Godzilla."},
@@ -3356,7 +3359,19 @@ function bgLoop(t){if(!bgOn){bgRun=false;return}requestAnimationFrame(bgLoop);
  SKY.forEach((L,l)=>{x.fillStyle=["#2d2559","#1f1b43","#130f2c"][l];const P=26*70,off=t/1000*[6,12,22][l];
   L.forEach(b=>{const bx=((b.x-off)%P+P)%P-70,bh=b.h*(.8+l*.35)*h/380;x.fillRect(bx*k,h-bh,b.w*k,bh);
    if(l===2){x.fillStyle="rgba(255,214,120,.55)";for(let yy=h-bh+6;yy<h-4;yy+=9)x.fillRect((bx+8)*k,yy,3*k,3);x.fillStyle="#130f2c"}})});
- x.fillStyle="rgba(255,150,60,.85)";EMB.forEach(e=>{const yy=((e.y-t*.00004*e.s)%1+1)%1;x.fillRect(((e.x+Math.sin(t*.0008+e.y*9)*.01)%1)*w,yy*h,e.r,e.r)})}
+ x.fillStyle="rgba(255,150,60,.85)";EMB.forEach(e=>{const yy=((e.y-t*.00004*e.s)%1+1)%1;x.fillRect(((e.x+Math.sin(t*.0008+e.y*9)*.01)%1)*w,yy*h,e.r,e.r)});
+ // Silueta pixel-art de Godzilla rugiendo detrás del menú.
+ x.save();x.globalAlpha=.42;const gx=w*.77,gy=h*.78,sc=Math.min(w/900,h/520);
+ x.translate(gx,gy);x.scale(sc,sc);x.fillStyle="#050914";
+ x.fillRect(-150,-12,300,150);x.fillRect(-92,-105,120,110);x.fillRect(-66,-164,78,72);
+ x.fillRect(-30,-192,82,38);x.fillRect(30,-176,36,20);x.fillRect(38,-160,30,12);
+ x.fillRect(-100,-75,30,62);x.fillRect(5,-78,36,70);x.fillRect(-122,-12,46,40);x.fillRect(42,-12,42,40);
+ // Placas dorsales dentadas y cola larga.
+ for(let j=0;j<7;j++){const px=-82+j*23;x.fillRect(px,-112-j%2*7,15,25+j%2*8);x.fillRect(px+4,-128-j%2*7,8,17)}
+ x.fillRect(105,-2,90,18);x.fillRect(165,-12,45,15);
+ x.fillStyle="#ff6b65";x.fillRect(24,-177,8,5);x.fillRect(47,-177,8,5);
+ x.fillStyle="#9feaff";x.globalAlpha=.12+Math.sin(t*.004)*.05;x.fillRect(68,-175,95,7);x.restore();
+ }
 function heroNext(){const i=ORDER[(Math.random()*ORDER.length)|0],h=$("hero");h.classList.add("fade");
  setTimeout(()=>{h.src=artURL(i);h.style.setProperty("--c",ROSTER[i].css);$("heroN").textContent=ROSTER[i].n+" · "+ROSTER[i].cat;$("heroN").style.color=ROSTER[i].css;h.classList.remove("fade")},260)}
 
